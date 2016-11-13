@@ -1,9 +1,24 @@
+#-*- coding:utf-8 -*-
 #!/usr/bin/python
-# -*- coding:utf-8 -*-
-'''Result analysis for automatic speech recognition
-@Date:2016-4-9
-@Author:zhang zewang
+
+''' This file is designed to plot the cost curve, maybe deprecated.
+author:
+
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
+      #        ###            #        ###           ###        I#        #:     
+      #      ###              #      I##;             ##;       ##       ##      
+            ###                     ###               !##      ####      #       
+           ###                     ###                 ###    ## ###    #'       
+         !##;                    `##%                   ##;  ##   ###  ##        
+        ###                     ###                     $## `#     ##  #         
+       ###        #            ###        #              ####      ####;         
+     `###        -#           ###        `#               ###       ###          
+     ##############          ##############               `#         #     
+     
+date:2016-11-09
 '''
+
+
 import os
 import matplotlib
 import matplotlib.pyplot as plt
