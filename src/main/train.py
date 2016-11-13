@@ -44,10 +44,10 @@ class Trainer(object):
     
     def __init__(self):
 	parser = argparse.ArgumentParser()
-        parser.add_argument('--mfcc_dir', type=str, default='/home/pony/github/data/mfcc/0/',
+        parser.add_argument('--mfcc_dir', type=str, default='/home/pony/github/data/timit/train/mfcc/',
                        help='data directory containing mfcc numpy files, usually end with .npy')
 
-        parser.add_argument('--label_dir', type=str, default='/home/pony/github/data/label/0/',
+        parser.add_argument('--label_dir', type=str, default='/home/pony/github/data/timit/train/label/',
                        help='data directory containing label numpy files, usually end with .npy')
 
         parser.add_argument('--model', type=str, default='blstm',
@@ -69,25 +69,25 @@ class Trainer(object):
         parser.add_argument('--num_epoch', type=int, default=200000,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=1,
+        parser.add_argument('--batch_size', type=int, default=32,
                        help='set the number of training samples in a mini-batch')
 
         parser.add_argument('--num_feature', type=int, default=39,
                        help='set the dimension of feature, ie: 39 mfccs, you can set 39 ')
 
-        parser.add_argument('--num_hidden', type=int, default=256,
+        parser.add_argument('--num_hidden', type=int, default=128,
                        help='set the number of neurons in hidden layer')
 
-        parser.add_argument('--num_class', type=int, default=28,
-                       help='set the number of labels in the output layer')
+        parser.add_argument('--num_class', type=int, default=62,
+                       help='set the number of labels in the output layer, if timit phonemes, it is 62; if timit characters, it is 28; if libri characters, it is 28')
 
-        parser.add_argument('--save_dir', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/',
+        parser.add_argument('--save_dir', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/',
                        help='set the directory to save the model, containing checkpoint file and parameter file')
 
-        parser.add_argument('--restore_from', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/',
+        parser.add_argument('--restore_from', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/',
                        help='set the directory of check_point path')
 
-        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/model.ckpt-0',
+        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-0',
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
@@ -127,21 +127,20 @@ class Trainer(object):
                         l, er, lmt = sess.run([model.loss, model.errorRate, model.logitsMaxTest], feed_dict=feedDict)
 		    else:
                         _, l, er, lmt = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest], feed_dict=feedDict)
-                   
-	    	    print(output_to_sequence(lmt))
+	    	    print(output_to_sequence(lmt,type='phoneme'))
                     if (batch % 1) == 0:
                 	print('Minibatch', batch, '/', batchOrigI, 'loss:', l)
                 	print('Minibatch', batch, '/', batchOrigI, 'error rate:', er)
             	    batchErrors[batch] = er*len(batchSeqLengths)
 		    
 		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%1000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
-		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
+		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt'+str(epoch))
                         save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
                         print('Model has been saved in:'+str(save_path))
 	        end = time.time()
 		print('Epoch '+str(epoch+1)+' needs time:'+str(end-start)+' s')	
 		if args.save==True and (epoch+1)%1==0:
-		    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
+		    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt'+str(epoch))
                     save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
                     print('Model has been saved in file')
                 epochErrorRate = batchErrors.sum() / totalN
