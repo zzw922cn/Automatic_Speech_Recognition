@@ -1,7 +1,15 @@
 # Automatic-Speech-Recognition
-Character-level end-to-end automatic speech recognition in Tensorflow.
-
+Character-level end-to-end automatic speech recognition in TensorFlow.
 ==============================
+## Content
+Automatic Speech Recognition implemented in TensorFlow contains followings:
+* Data Pre-processing
+* Acoustic Modeling(RNN,LSTM,BRNN,BLSTM,etc.)
+* CTC Decoding
+* Evaluation  
+* Saving or Restoring Model
+* Mini-batch Training
+* Training with GPU or CPU with TensorFlow
 
 ## Usage
 <pre>
