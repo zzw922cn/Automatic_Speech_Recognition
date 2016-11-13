@@ -1,5 +1,5 @@
 # Automatic-Speech-Recognition
-Build End-to-end automatic speech recognition from scratch in Tensorflow.
+Character-level end-to-end automatic speech recognition in Tensorflow.
 
 ===========================
 ## Usage
