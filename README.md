@@ -1,7 +1,7 @@
 # Automatic-Speech-Recognition
 Character-level end-to-end automatic speech recognition in Tensorflow.
 
-===========================
+==============================
 ## Usage
 <pre>
 python train.py
