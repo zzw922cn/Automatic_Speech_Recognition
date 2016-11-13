@@ -2,7 +2,6 @@
 Character-level end-to-end automatic speech recognition in Tensorflow.
 
 ==============================
-==============================
 
 ## Usage
 <pre>
@@ -22,7 +21,6 @@ python train.py
 	--model_checkpoint_path '/src/save/'
 </pre>
 You can also set the arguments above in /src/main/train.py file.
-==============================
 
 ## Implementation Details
 
@@ -31,6 +29,8 @@ Automatic Speech Recognition is to transcribe a raw audio file into character se
 
 In folder data/mfcc, each file is a feature matrix with size timeLength*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
 
+If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [data_pre_ch_for_libri.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/data_pre_ch_for_libri.py).
+
 ### Acoustic Model
 
 ### CTC Decoding
@@ -38,3 +38,4 @@ In folder data/mfcc, each file is a feature matrix with size timeLength*39 of on
 ### Evaluation
 
 ## Future work
+
