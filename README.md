@@ -1,5 +1,5 @@
-# Automatic-Speech-Recognition
-Character-level end-to-end automatic speech recognition in TensorFlow.
+# Automatic-Speech-Recognitio
+End-to-end character-level automatic speech recognition system implemented in TensorFlow.
 
 ## Content
 Automatic Speech Recognition implemented in TensorFlow contains followings:
