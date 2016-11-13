@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt0-0"
+all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt0-0"

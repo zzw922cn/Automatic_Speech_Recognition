@@ -89,12 +89,12 @@ def output_to_sequence(lmt,mode='phoneme'):
 def logging(logfile,epoch,errorRate,delta_time,mode='train'):
     ''' log the cost and error rate and time while training or testing
     '''
-    if mode == 'train' and mode!='test':
+    if mode != 'train' and mode!='test':
 	raise TypeError('mode should be train or test.')
-    with open(self.logfile, "a") as myfile:
+    with open(logfile, "a") as myfile:
 	myfile.write(str(time.strftime('%X %x %Z'))+'\n')
-    	myfile.write("Epoch:"+str(epoch+1)+mode+" error rate:"+str(errorRate)+'\n')
-    	myfile.write("Epoch:"+str(epoch+1)+mode+" time:"+str(delta_time)+' s\n')
+    	myfile.write("Epoch:"+str(epoch+1)+' '+mode+" error rate:"+str(errorRate)+'\n')
+    	myfile.write("Epoch:"+str(epoch+1)+' '+mode+" time:"+str(delta_time)+' s\n')
 
 def list_to_sparse_tensor(targetList):
     ''' turn 2-D List to SparseTensor
