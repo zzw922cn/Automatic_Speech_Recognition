@@ -66,3 +66,4 @@ for subdir, dirs, files in os.walk(rootdir):
 		count+=1
 		print 'file index:',count
 
+

@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import argparse
 import time
+import datetime
 import os
 from six.moves import cPickle
 from functools import wraps
@@ -87,4 +88,5 @@ class Model(object):
     	    self.initial_op = tf.initialize_all_variables()
 	    print('Build Saver')
 	    self.saver = tf.train.Saver(tf.all_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
-	    #self.saver = tf.train.Saver()
+	    self.logfile = args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
+	    print('logging file:'+self.logfile)

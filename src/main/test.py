@@ -1,8 +1,5 @@
 '''
-Experiment of a single-layer bidirectional recurrent neural network trained with
-connectionist temporal classification to predict character sequences from 39 x nFrames
-arrays of Mel-Frequency Cepstral Coefficients.  
-
+This is a test file.
 author:
 
       iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    

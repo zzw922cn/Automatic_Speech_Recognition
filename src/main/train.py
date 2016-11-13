@@ -33,29 +33,39 @@ from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.python.ops import rnn_cell
 from tensorflow.python.ops.rnn import bidirectional_rnn
 
+from model import Model
+
 from utils import load_batched_data
 from utils import describe
-from model import Model
 from utils import getAttrs
 from utils import output_to_sequence
 from utils import list_dirs
+from utils import logging
 
 class Trainer(object):
     
     def __init__(self):
 	parser = argparse.ArgumentParser()
-        parser.add_argument('--mfcc_dir', type=str, default='/home/pony/github/data/timit/train/mfcc/',
+        parser.add_argument('--train_mfcc_dir', type=str, default='/home/pony/github/data/timit/train/mfcc/',
                        help='data directory containing mfcc numpy files, usually end with .npy')
 
-        parser.add_argument('--label_dir', type=str, default='/home/pony/github/data/timit/train/label/',
+        parser.add_argument('--train_label_dir', type=str, default='/home/pony/github/data/timit/train/label/',
                        help='data directory containing label numpy files, usually end with .npy')
 
-        parser.add_argument('--model', type=str, default='blstm',
-                       help='set the model of ASR, ie: blstm')
+        parser.add_argument('--test_mfcc_dir', type=str, default='/home/pony/github/data/timit/test/mfcc/',
+                       help='data directory containing mfcc numpy files, usually end with .npy')
+
+        parser.add_argument('--test_label_dir', type=str, default='/home/pony/github/data/timit/test/label/',
+                       help='data directory containing label numpy files, usually end with .npy')
+
+	parser.add_argument('--log_dir', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/log/timit/',
+                       help='directory to log events while training')
+
+        parser.add_argument('--model', type=str, default='brnn',
+                       help='set the model of ASR, ie: brnn')
 
 	parser.add_argument('--keep', type=bool, default=False,
                        help='train the model based on model saved')
-
 
 	parser.add_argument('--save', type=bool, default=True,
                        help='to save the model in the disk')
@@ -94,12 +104,17 @@ class Trainer(object):
 	self.start(self.args)
 
     @describe
-    def load_data(self,args):
-        return load_batched_data(args.mfcc_dir,args.label_dir,args.batch_size)
+    def load_data(self,args,mode='train'):
+  	if mode == 'train':	
+            return load_batched_data(args.train_mfcc_dir,args.train_label_dir,args.batch_size)
+  	elif mode == 'test':	
+            return load_batched_data(args.test_mfcc_dir,args.test_label_dir,args.batch_size)
+	else:
+	    raise TypeError('mode should be train or test.')
 
     def start(self,args):
 	# load data
-        batchedData, maxTimeSteps, totalN = self.load_data(args)
+        batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train')
 
 	# build graph
 	model = Model(args,maxTimeSteps)
@@ -135,16 +150,21 @@ class Trainer(object):
 		    
 		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%1000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
 		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt'+str(epoch))
+			with open(os.path.join(args.save_dir, 'checkpoint')))
+			with open(myfile.write(str(time.strftime('%X %x %Z'))+'\n'))
                         save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
                         print('Model has been saved in:'+str(save_path))
 	        end = time.time()
-		print('Epoch '+str(epoch+1)+' needs time:'+str(end-start)+' s')	
+		delta_time = end-start
+		print('Epoch '+str(epoch+1)+' needs time:'+str(delta_time)+' s')	
+
 		if args.save==True and (epoch+1)%1==0:
 		    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt'+str(epoch))
                     save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
                     print('Model has been saved in file')
-                epochErrorRate = batchErrors.sum() / totalN
-                print('Epoch', epoch+1, 'error rate:', epochErrorRate)
+                epochER = batchErrors.sum() / totalN
+                print('Epoch', epoch+1, 'error rate:', epochER)
+		logging(model.logfile,epoch,epochER,delta_time,mode='train')
 
 if __name__ == '__main__':
     t=Trainer()

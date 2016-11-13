@@ -17,44 +17,50 @@ author:
      
 date:2016-11-09
 '''
-
-import numpy as np
-import tensorflow as tf
 import time
 from functools import wraps
 import os
 from glob import glob
+import numpy as np
+import tensorflow as tf
 
 
 
 def describe(func):
-	@wraps(func)
-	def wrapper(*args,**kwargs):
-	    print(func.__name__+'...')
-	    start = time.time()
-	    result = func(*args,**kwargs)
-	    end = time.time()
-	    print(str(func.__name__+' in '+ str(end-start)+' s'))
-	    return result
-	return wrapper
+    ''' wrap function,to add some descriptions for function and its running time
+    '''
+    @wraps(func)
+    def wrapper(*args,**kwargs):
+        print(func.__name__+'...')
+        start = time.time()
+        result = func(*args,**kwargs)
+        end = time.time()
+        print(str(func.__name__+' in '+ str(end-start)+' s'))
+        return result
+    return wrapper
 
 def getAttrs(object,name):
-	assert type(name)==list, 'name must be a list'
-        value = []
-        for n in name:
-            value.append(getattr(object,n,'None'))
-        return value
+    ''' get attributes for object
+    '''
+    assert type(name)==list, 'name must be a list'
+    value = []
+    for n in name:
+        value.append(getattr(object,n,'None'))
+    return value
 
 def setAttrs(object,attrsName,attrsValue):
-	''' register attributes for this class '''
-	assert type(attrsName)==list, 'attrsName must be a list'
-	assert type(attrsValue)==list, 'attrsValue must be a list'
-        for name,value in zip(attrsName,attrsValue):
-            object.__dict__[name]=value
+    ''' register attributes for this class '''
+    assert type(attrsName)==list, 'attrsName must be a list'
+    assert type(attrsValue)==list, 'attrsValue must be a list'
+    for name,value in zip(attrsName,attrsValue):
+        object.__dict__[name]=value
 
-def output_to_sequence(lmt,type='phoneme'):
+@describe
+def output_to_sequence(lmt,mode='phoneme'):
+    ''' convert the output into sequences of characters or phonemes
+    '''
     indexes = np.unique(lmt) 
-    if type=='phoneme':
+    if mode=='phoneme':
 	phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
 	sequence = []
         for ind in indexes:
@@ -65,7 +71,7 @@ def output_to_sequence(lmt,type='phoneme'):
         sequence = ' '.join(sequence)
         return sequence
 	
-    elif type=='character':
+    elif mode=='character':
         sequence = []
         for ind in indexes:
             if ind==0:
@@ -77,23 +83,34 @@ def output_to_sequence(lmt,type='phoneme'):
         sequence = ''.join(sequence)
         return sequence
     else:
-	raise TypeError('type should be phoneme or character')
+	raise TypeError('mode should be phoneme or character')
+
+@describe
+def logging(logfile,epoch,errorRate,delta_time,mode='train'):
+    ''' log the cost and error rate and time while training or testing
+    '''
+    if mode == 'train' and mode!='test':
+	raise TypeError('mode should be train or test.')
+    with open(self.logfile, "a") as myfile:
+	myfile.write(str(time.strftime('%X %x %Z'))+'\n')
+    	myfile.write("Epoch:"+str(epoch+1)+mode+" error rate:"+str(errorRate)+'\n')
+    	myfile.write("Epoch:"+str(epoch+1)+mode+" time:"+str(delta_time)+' s\n')
 
 def list_to_sparse_tensor(targetList):
-    ''' 将二维List变成SparseTensor，为了适应Edit distance API
+    ''' turn 2-D List to SparseTensor
     '''
 
-    indices = [] #索引
-    vals = [] #变量 
+    indices = [] #index
+    vals = [] #value 
     for tI, target in enumerate(targetList):
         for seqI, val in enumerate(target):
             indices.append([tI, seqI])
             vals.append(val)
-    shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #形状
+    shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
     return (np.array(indices), np.array(vals), np.array(shape))
 
 def get_edit_distance(hyp_arr,truth_arr):
-    ''' 得到两个列表的编辑距离
+    ''' calculate edit distance 
     '''
     graph = tf.Graph()
     with graph.as_default():
@@ -152,7 +169,7 @@ def data_lists_to_batches(inputList, targetList, batchSize):
 
 def load_batched_data(specPath, targetPath, batchSize):
     import os
-    '''returns 3-element tuple: batched data (list), max # of time steps (int), and
+    '''returns 3-element tuple: batched data (list), maxTimeLength (int), and
        total number of samples (int)'''
     return data_lists_to_batches([np.load(os.path.join(specPath, fn)) for fn in os.listdir(specPath)],
                                  [np.load(os.path.join(targetPath, fn)) for fn in os.listdir(targetPath)],
