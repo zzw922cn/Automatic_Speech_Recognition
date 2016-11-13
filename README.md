@@ -37,7 +37,7 @@ Automatic Speech Recognition is to transcribe a raw audio file into character se
 
 In folder data/mfcc, each file is a feature matrix with size timeLength*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
 
-If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [data_pre_ch_for_libri.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/data_pre_ch_for_libri.py).
+If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/preprocess.py).
 
 ### Acoustic Model
 TODO
