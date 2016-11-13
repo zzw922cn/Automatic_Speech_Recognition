@@ -83,8 +83,7 @@ class Model(object):
 
     	    self.logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [self.seqLengths[0], 1])
     	    predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, self.seqLengths)[0][0])
-    	    self.errorRate = tf.reduce_sum(tf.edit_distance(predictions, self.targetY, normalize=False)) / \
-                					tf.to_float(tf.size(self.targetY.values))
+    	    self.errorRate = tf.reduce_sum(tf.edit_distance(predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
     	    self.initial_op = tf.initialize_all_variables()
 	    print('Build Saver')
 	    self.saver = tf.train.Saver(tf.all_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
