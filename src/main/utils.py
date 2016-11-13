@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/python
 
-''' This file is designed to provide some common tools
+''' This library provides some common functions
 author:
 
       iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
@@ -24,6 +24,8 @@ import time
 from functools import wraps
 import os
 from glob import glob
+
+
 
 def describe(func):
 	@wraps(func)
@@ -50,18 +52,32 @@ def setAttrs(object,attrsName,attrsValue):
         for name,value in zip(attrsName,attrsValue):
             object.__dict__[name]=value
 
-def output_to_sequence(lmt):
-    output = np.unique(lmt) 
-    sequence = []
-    for o in output:
-        if o==0:
-            sequence.append(' ')
-        elif o==27:
-	    pass
-        else:
-            sequence.append(chr(o+96))
-    sequence = ''.join(sequence)
-    return sequence
+def output_to_sequence(lmt,type='phoneme'):
+    indexes = np.unique(lmt) 
+    if type=='phoneme':
+	phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
+	sequence = []
+        for ind in indexes:
+            if ind==len(phn):
+                pass
+            else:
+                sequence.append(phn[ind])
+        sequence = ' '.join(sequence)
+        return sequence
+	
+    elif type=='character':
+        sequence = []
+        for ind in indexes:
+            if ind==0:
+                sequence.append(' ')
+            elif ind==27:
+	        pass
+            else:
+                sequence.append(chr(ind+96))
+        sequence = ''.join(sequence)
+        return sequence
+    else:
+	raise TypeError('type should be phoneme or character')
 
 def list_to_sparse_tensor(targetList):
     ''' 将二维List变成SparseTensor，为了适应Edit distance API
