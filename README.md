@@ -10,6 +10,8 @@ Automatic Speech Recognition implemented in TensorFlow contains followings:
 * Saving or Restoring Model
 * Mini-batch Training
 * Training with GPU or CPU with TensorFlow
+* Keeping logging of epoch time and error rate in disk
+* Support TIMIT and Libri
 
 ## Usage
 <pre>
