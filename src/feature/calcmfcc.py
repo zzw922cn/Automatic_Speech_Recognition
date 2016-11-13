@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/python
 
-''' 
+''' calculate mfcc feature vectors.
 author:
 
       iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
