@@ -40,10 +40,14 @@ In folder data/mfcc, each file is a feature matrix with size timeLength*39 of on
 If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [data_pre_ch_for_libri.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/data_pre_ch_for_libri.py).
 
 ### Acoustic Model
+TODO
 
 ### CTC Decoding
+TODO
 
 ### Evaluation
+TODO
 
 ## Future work
+TODO
 
