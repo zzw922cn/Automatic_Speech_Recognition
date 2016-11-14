@@ -70,8 +70,8 @@ class Trainer(object):
 	parser.add_argument('--save', type=bool, default=True,
                        help='to save the model in the disk')
 
-	parser.add_argument('--evaluation', type=bool, default=True,
-                       help='train the model based on model saved')
+	parser.add_argument('--evaluation', type=bool, default=False,
+                       help='test the model based on trained parameters, but at present, we can"t test during training.')
 
         parser.add_argument('--learning_rate', type=float, default=0.001,
                        help='set the step size of each iteration')
@@ -97,7 +97,7 @@ class Trainer(object):
         parser.add_argument('--restore_from', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/',
                        help='set the directory of check_point path')
 
-        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt0-0',
+        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-173',
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
@@ -115,7 +115,6 @@ class Trainer(object):
     def start(self,args):
 	# load data
         batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train')
-        test_batchedData, test_maxTimeSteps, test_totalN = self.load_data(args,mode='test')
 
 	model = Model(args,maxTimeSteps)
 
@@ -148,7 +147,7 @@ class Trainer(object):
             	    batchErrors[batch] = er*len(batchSeqLengths)
 		    
 		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%1000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
-		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt'+str(epoch))
+		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                         save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
                         print('Model has been saved in:'+str(save_path))
 	        end = time.time()
@@ -156,7 +155,7 @@ class Trainer(object):
 		print('Epoch '+str(epoch+1)+' needs time:'+str(delta_time)+' s')	
 
 		if args.save==True and (epoch+1)%1==0:
-		    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt'+str(epoch))
+		    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
                     print('Model has been saved in file')
                 epochER = batchErrors.sum() / totalN
@@ -165,14 +164,15 @@ class Trainer(object):
 		
 		## evaluation
 		if args.evaluation == True:
+                    test_batchedData, test_maxTimeSteps, test_totalN = self.load_data(args,mode='test')
 		    start = time.time()
 		    test_model = Model(args,test_maxTimeSteps)
 
         	    with tf.Session(graph=test_model.graph) as test_sess:
     	                print('Initializing')
     	                test_sess.run(test_model.initial_op)
-                    	test_model.saver.restore(test_sess, checkpoint_path)
-    		    	print('test model restored from:'+checkpoint_path) 
+                    	test_model.saver.restore(test_sess, checkpoint_path+'-'+str(epoch))
+    		    	print('test model restored from:'+checkpoint_path+'-'+str(epoch)) 
         	    print('Epoch', epoch+1, '...')
         	    test_batchErrors = np.zeros(len(test_batchedData))
         	    test_batchRandIxs = np.random.permutation(len(test_batchedData)) 

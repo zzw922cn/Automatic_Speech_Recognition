@@ -1,2 +1,6 @@
-model_checkpoint_path: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt0-0"
-all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt0-0"
+model_checkpoint_path: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-12"
+all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-8"
+all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-9"
+all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-10"
+all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-11"
+all_model_checkpoint_paths: "/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-12"
