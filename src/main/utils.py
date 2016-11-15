@@ -59,29 +59,39 @@ def setAttrs(object,attrsName,attrsValue):
 def output_to_sequence(lmt,mode='phoneme'):
     ''' convert the output into sequences of characters or phonemes
     '''
-    indexes = np.unique(lmt) 
+    sequences = []
+    start = 0
+    sequences.append([])
+    for i in range(len(lmt[0])):
+	if lmt[0][i][0] == start:
+	    sequences[start].append(lmt[1][i])
+	else:
+	    start = start + 1
+            sequences.append([])
+
+    indexes = sequences[0] #here, we only print the first sequence of batch
     if mode=='phoneme':
 	phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
-	sequence = []
+	seq = []
         for ind in indexes:
             if ind==len(phn):
                 pass
             else:
-                sequence.append(phn[ind])
-        sequence = ' '.join(sequence)
-        return sequence
+                seq.append(phn[ind])
+        seq = ' '.join(seq)
+        return seq
 	
     elif mode=='character':
-        sequence = []
+        seq = []
         for ind in indexes:
             if ind==0:
-                sequence.append(' ')
+                seq.append(' ')
             elif ind==27:
 	        pass
             else:
-                sequence.append(chr(ind+96))
-        sequence = ''.join(sequence)
-        return sequence
+                seq.append(chr(ind+96))
+        seq = ''.join(seq)
+        return seq
     else:
 	raise TypeError('mode should be phoneme or character')
 

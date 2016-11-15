@@ -68,18 +68,21 @@ class Model(object):
        	                                                stddev=np.sqrt(2.0 / args.num_hidden)),name='weightsClasses')
             biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
 
-            forwardH1 = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
-            backwardH1 = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
+            forwardH1 = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.relu)
+            backwardH1 = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.relu)
 
 	    # test for dynamic rnn
-	    '''
             testRNNcell = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
   	    cell_out = tf.nn.rnn_cell.OutputProjectionWrapper(testRNNcell,args.num_class)
 	    drnn, _ = tf.nn.dynamic_rnn(cell_out, self.inputX, dtype=tf.float32, scope = 'testRNN')
 	    drnn_shape = tf.shape(drnn)
-    	    dr_loss = tf.reduce_mean(ctc.ctc_loss(drnn, self.targetY, self.seqLengths))
-	    '''
+    	    self.loss = tf.reduce_mean(ctc.ctc_loss(drnn, self.targetY, self.seqLengths))
+    	    self.optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(self.loss)
+    	    self.logitsMaxTest = tf.slice(tf.argmax(drnn, 2), [0, 0], [self.seqLengths[0], 1])
+    	    self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(drnn, self.seqLengths)[0][0])
+    	    self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
 
+	    '''
             fbH1, _, _ = bidirectional_rnn(forwardH1, backwardH1, self.inputList, dtype=tf.float32,scope='BDRNN_H1')
     	    fbH1rs = [tf.reshape(t, [args.batch_size, 2, args.num_hidden]) for t in fbH1]
     	    outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbH1rs]
@@ -93,10 +96,9 @@ class Model(object):
     	    self.logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [self.seqLengths[0], 1])
     	    predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, self.seqLengths)[0][0])
     	    self.errorRate = tf.reduce_sum(tf.edit_distance(predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
+	    '''
     	    self.initial_op = tf.initialize_all_variables()
-	    print('Build Saver')
 	    self.saver = tf.train.Saver(tf.all_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
 	    self.logfile = args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
-	    print('logging file:'+self.logfile)
 	    self.var_op = tf.all_variables()
 	    self.var_trainable_op = tf.trainable_variables()
