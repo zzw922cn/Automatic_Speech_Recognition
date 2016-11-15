@@ -4,7 +4,15 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 ## Content
 Automatic Speech Recognition implemented in TensorFlow contains followings:
 * Data Pre-processing
-* Acoustic Modeling(RNN,LSTM,BRNN,BLSTM,etc.)
+* Acoustic Modeling
+  * RNN
+  * BRNN
+  * LSTM
+  * BLSTM
+  * GRU
+  * BGRU
+  * Deep CNN
+  * etc.
 * CTC Decoding
 * Evaluation  
 * Saving or Restoring Model
