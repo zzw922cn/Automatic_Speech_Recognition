@@ -68,10 +68,19 @@ class Model(object):
        	                                                stddev=np.sqrt(2.0 / args.num_hidden)),name='weightsClasses')
             biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
 
-            forwardH1 = rnn_cell.BasicRNNCell(args.num_hidden)
-            backwardH1 = rnn_cell.BasicRNNCell(args.num_hidden)
-            fbH1, _, _ = bidirectional_rnn(forwardH1, backwardH1, self.inputList, dtype=tf.float32,
-                                       			scope='BDRNN_H1')
+            forwardH1 = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
+            backwardH1 = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
+
+	    # test for dynamic rnn
+	    '''
+            testRNNcell = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
+  	    cell_out = tf.nn.rnn_cell.OutputProjectionWrapper(testRNNcell,args.num_class)
+	    drnn, _ = tf.nn.dynamic_rnn(cell_out, self.inputX, dtype=tf.float32, scope = 'testRNN')
+	    drnn_shape = tf.shape(drnn)
+    	    dr_loss = tf.reduce_mean(ctc.ctc_loss(drnn, self.targetY, self.seqLengths))
+	    '''
+
+            fbH1, _, _ = bidirectional_rnn(forwardH1, backwardH1, self.inputList, dtype=tf.float32,scope='BDRNN_H1')
     	    fbH1rs = [tf.reshape(t, [args.batch_size, 2, args.num_hidden]) for t in fbH1]
     	    outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbH1rs]
 
@@ -89,3 +98,5 @@ class Model(object):
 	    self.saver = tf.train.Saver(tf.all_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
 	    self.logfile = args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
 	    print('logging file:'+self.logfile)
+	    self.var_op = tf.all_variables()
+	    self.var_trainable_op = tf.trainable_variables()

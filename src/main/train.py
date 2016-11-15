@@ -41,6 +41,7 @@ from utils import getAttrs
 from utils import output_to_sequence
 from utils import list_dirs
 from utils import logging
+from utils import count_params
 
 class Trainer(object):
     
@@ -64,7 +65,7 @@ class Trainer(object):
         parser.add_argument('--model', type=str, default='brnn',
                        help='set the model of ASR, ie: brnn')
 
-	parser.add_argument('--keep', type=bool, default=True,
+	parser.add_argument('--keep', type=bool, default=False,
                        help='train the model based on model saved')
 
 	parser.add_argument('--save', type=bool, default=True,
@@ -117,7 +118,7 @@ class Trainer(object):
         batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train')
 
 	model = Model(args,maxTimeSteps)
-
+	num_params = count_params(model,mode='trainable')
         with tf.Session(graph=model.graph) as sess:
     	    print('Initializing')
     	    sess.run(model.initial_op)
