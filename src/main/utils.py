@@ -96,6 +96,19 @@ def logging(logfile,epoch,errorRate,delta_time,mode='train'):
     	myfile.write("Epoch:"+str(epoch+1)+' '+mode+" error rate:"+str(errorRate)+'\n')
     	myfile.write("Epoch:"+str(epoch+1)+' '+mode+" time:"+str(delta_time)+' s\n')
 
+@describe
+def count_params(model,mode='trainable'):
+    ''' count all parameters of a tensorflow graph
+    '''
+    if mode == 'all':
+        num = np.sum([np.product([xi.value for xi in x.get_shape()]) for x in model.var_op])
+    elif mode == 'trainable':
+        num = np.sum([np.product([xi.value for xi in x.get_shape()]) for x in model.var_trainable_op])
+    else:
+	raise TypeError('mode should be all or trainable.')
+    print('number of '+mode+' parameters: '+str(num))
+    return num
+
 def list_to_sparse_tensor(targetList):
     ''' turn 2-D List to SparseTensor
     '''
@@ -182,6 +195,7 @@ def list_dirs(mfcc_dir,label_dir):
     for mfcc,label in zip(mfcc_dirs,label_dirs):
 	yield (mfcc,label)
 
+# test code
 if __name__=='__main__':
     for (mfcc,label) in list_dirs('/home/pony/github/data/label/*/','/home/pony/github/data/mfcc/*/'):
 	print mfcc
