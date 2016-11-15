@@ -102,7 +102,6 @@ class Trainer(object):
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
-	self.start(self.args)
 
     @describe
     def load_data(self,args,mode='train'):
@@ -113,8 +112,9 @@ class Trainer(object):
 	else:
 	    raise TypeError('mode should be train or test.')
 
-    def start(self,args):
+    def train(self):
 	# load data
+	args = self.args
         batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train')
 
 	model = Model(args,maxTimeSteps)
@@ -140,8 +140,9 @@ class Trainer(object):
                     batchTargetIxs, batchTargetVals, batchTargetShape = batchTargetSparse
                     feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs, model.targetVals: batchTargetVals,model.targetShape: batchTargetShape, model.seqLengths: batchSeqLengths}
 
-                    _, l, er, lmt = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest], feed_dict=feedDict)
-	    	    print(output_to_sequence(lmt,mode='phoneme'))
+                    _, l, er, lmt, pre = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions], feed_dict=feedDict)
+	    	    #print(output_to_sequence(lmt,mode='phoneme'))
+	    	    print(output_to_sequence(pre,mode='phoneme'))
                     if (batch % 1) == 0:
                 	print('Minibatch', batch, '/', batchOrigI, 'loss:', l)
                 	print('Minibatch', batch, '/', batchOrigI, 'error rate:', er)
@@ -192,7 +193,11 @@ class Trainer(object):
                     test_epochER = test_batchErrors.sum() / test_totalN
                     print('Epoch', epoch+1, 'error rate:', test_epochER)
 		    logging(model.logfile,epoch,test_epochER,test_delta_time,mode='test')
+	
+	def test(self):
+	    pass
 		    
 
 if __name__ == '__main__':
-    t=Trainer()
+    tr = Trainer()
+    tr.train()
