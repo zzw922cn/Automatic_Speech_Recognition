@@ -69,6 +69,7 @@ def output_to_sequence(lmt,mode='phoneme'):
 	    start = start + 1
             sequences.append([])
 
+    #here, we only print the first sequence of batch
     indexes = sequences[0] #here, we only print the first sequence of batch
     if mode=='phoneme':
 	phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
@@ -152,14 +153,12 @@ def data_lists_to_batches(inputList, targetList, batchSize):
     ''' padding the input list to a same dimension, integrate all data into batchInputs
     '''
     assert len(inputList) == len(targetList)
-    # dimensions of inputList:batch*39*time_length 
+    # dimensions of inputList:batch*39*time-length
     nFeatures = inputList[0].shape[0]
     maxLength = 0
     for inp in inputList:
-
 	# find the max time_length
         maxLength = max(maxLength, inp.shape[1])
-
     # randIxs is the shuffled index from range(0,len(inputList)) 
     randIxs = np.random.permutation(len(inputList))
     start, end = (0, batchSize)
@@ -168,24 +167,20 @@ def data_lists_to_batches(inputList, targetList, batchSize):
     while end <= len(inputList):
 	# batchSeqLengths store the time-length of each sample in a mini-batch
         batchSeqLengths = np.zeros(batchSize)
-
-        for batchI, origI in enumerate(randIxs[start:end]):
+  	# randIxs is the shuffled index of input list
+	for batchI, origI in enumerate(randIxs[start:end]):
             batchSeqLengths[batchI] = inputList[origI].shape[-1]
 
         batchInputs = np.zeros((maxLength, batchSize, nFeatures))
-
         batchTargetList = []
-
         for batchI, origI in enumerate(randIxs[start:end]):
 	    # padSecs is the length of padding  
             padSecs = maxLength - inputList[origI].shape[1]
 	    # numpy.pad pad the inputList[origI] with zeos at the tail
-            batchInputs[:,batchI,:] = np.pad(inputList[origI].T, ((0,padSecs),(0,0)),
-                                             'constant', constant_values=0)
+            batchInputs[:,batchI,:] = np.pad(inputList[origI].T, ((0,padSecs),(0,0)), 'constant', constant_values=0)
 	    # target label
             batchTargetList.append(targetList[origI])
-        dataBatches.append((batchInputs, list_to_sparse_tensor(batchTargetList),
-                          batchSeqLengths))
+        dataBatches.append((batchInputs, list_to_sparse_tensor(batchTargetList), batchSeqLengths))
         start += batchSize
         end += batchSize
     return (dataBatches, maxLength)

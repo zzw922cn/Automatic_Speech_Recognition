@@ -62,8 +62,11 @@ class Trainer(object):
 	parser.add_argument('--log_dir', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/log/timit/',
                        help='directory to log events while training')
 
-        parser.add_argument('--model', type=str, default='brnn',
+        parser.add_argument('--model', type=str, default='RNN',
                        help='set the model of ASR, ie: brnn')
+
+        parser.add_argument('--num_layer', type=int, default=2,
+                       help='set the number of hidden layer')
 
 	parser.add_argument('--keep', type=bool, default=False,
                        help='train the model based on model saved')
