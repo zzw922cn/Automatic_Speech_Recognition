@@ -68,6 +68,12 @@ class Trainer(object):
         parser.add_argument('--num_layer', type=int, default=2,
                        help='set the number of hidden layer')
 
+        parser.add_argument('--activation', default=tf.nn.elu,
+                       help='set the activation function of each layer')
+
+        parser.add_argument('--optimizer', type=type, default=tf.train.AdamOptimizer,
+                       help='set the optimizer to train the model')
+	
 	parser.add_argument('--keep', type=bool, default=False,
                        help='train the model based on model saved')
 
@@ -101,7 +107,7 @@ class Trainer(object):
         parser.add_argument('--restore_from', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/',
                        help='set the directory of check_point path')
 
-        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-173',
+        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/save/timit/model.ckpt-55',
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
@@ -122,6 +128,9 @@ class Trainer(object):
 
 	model = Model(args,maxTimeSteps)
 	num_params = count_params(model,mode='trainable')
+	all_num_params = count_params(model,mode='all')
+	model.config['trainable params'] = num_params
+	model.config['all params'] = all_num_params
         with tf.Session(graph=model.graph) as sess:
     	    print('Initializing')
     	    sess.run(model.initial_op)
@@ -144,8 +153,8 @@ class Trainer(object):
                     feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs, model.targetVals: batchTargetVals,model.targetShape: batchTargetShape, model.seqLengths: batchSeqLengths}
 
                     _, l, er, lmt, pre = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions], feed_dict=feedDict)
-	    	    #print(output_to_sequence(lmt,mode='phoneme'))
 	    	    print(output_to_sequence(pre,mode='phoneme'))
+
                     if (batch % 1) == 0:
                 	print('Minibatch', batch, '/', batchOrigI, 'loss:', l)
                 	print('Minibatch', batch, '/', batchOrigI, 'error rate:', er)
@@ -165,7 +174,8 @@ class Trainer(object):
                     print('Model has been saved in file')
                 epochER = batchErrors.sum() / totalN
                 print('Epoch', epoch+1, 'error rate:', epochER)
-		logging(model.logfile,epoch,epochER,delta_time,mode='train')
+	        logging(model,epoch,epochER,delta_time,mode='config')
+		logging(model,epoch,epochER,delta_time,mode='train')
 		
 		## evaluation
 		if args.evaluation == True:
@@ -195,7 +205,7 @@ class Trainer(object):
 		    test_delta_time = end-start
                     test_epochER = test_batchErrors.sum() / test_totalN
                     print('Epoch', epoch+1, 'error rate:', test_epochER)
-		    logging(model.logfile,epoch,test_epochER,test_delta_time,mode='test')
+		    logging(model,epoch,test_epochER,test_delta_time,mode='test')
 	
 	def test(self):
 	    pass

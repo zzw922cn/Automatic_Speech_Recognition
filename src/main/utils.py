@@ -97,15 +97,20 @@ def output_to_sequence(lmt,mode='phoneme'):
 	raise TypeError('mode should be phoneme or character')
 
 @describe
-def logging(logfile,epoch,errorRate,delta_time,mode='train'):
+def logging(model,epoch,errorRate,delta_time,mode='train'):
     ''' log the cost and error rate and time while training or testing
     '''
-    if mode != 'train' and mode!='test':
-	raise TypeError('mode should be train or test.')
-    with open(logfile, "a") as myfile:
-	myfile.write(str(time.strftime('%X %x %Z'))+'\n')
-    	myfile.write("Epoch:"+str(epoch+1)+' '+mode+" error rate:"+str(errorRate)+'\n')
-    	myfile.write("Epoch:"+str(epoch+1)+' '+mode+" time:"+str(delta_time)+' s\n')
+    if mode != 'train' and mode!='test' and mode!='config':
+	raise TypeError('mode should be train or test or config.')
+    logfile = model.logfile
+    if mode == 'config':
+	with open(logfile, "a") as myfile:
+            myfile.write(str(model.config)+'\n')
+    else:
+        with open(logfile, "a") as myfile:
+	    myfile.write(str(time.strftime('%X %x %Z'))+'\n')
+    	    myfile.write("Epoch:"+str(epoch+1)+' '+mode+" error rate:"+str(errorRate)+'\n')
+    	    myfile.write("Epoch:"+str(epoch+1)+' '+mode+" time:"+str(delta_time)+' s\n')
 
 @describe
 def count_params(model,mode='trainable'):
