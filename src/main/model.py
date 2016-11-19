@@ -60,12 +60,23 @@ class Model(object):
             self.seqLengths = tf.placeholder(tf.int32, shape=(args.batch_size))
 
 	    if args.model == 'RNN':
-                rnncell = rnn_cell.BasicRNNCell(args.num_hidden,activation=tf.nn.elu)
+		self.config = { 'name':args.model,
+				'num_layer':args.num_layer,
+				'num_hidden':args.num_hidden,
+				'num_class':args.num_class,
+				'activation':args.activation,
+				'optimizer':args.optimizer,
+				'learning rate':args.learning_rate
+		}
+		print(time.time())
+                rnncell = rnn_cell.BasicRNNCell(args.num_hidden,activation=args.activation)
+		print(time.time())
 	        rnncells = rnn_cell.MultiRNNCell([rnncell]*args.num_layer)
   	        cell_out = tf.nn.rnn_cell.OutputProjectionWrapper(rnncells,args.num_class)
+		print(time.time())
 	        drnn, _ = tf.nn.dynamic_rnn(cell_out, self.inputX, dtype=tf.float32, scope = 'RNN')
     	        self.loss = tf.reduce_mean(ctc.ctc_loss(drnn, self.targetY, self.seqLengths))
-    	        self.optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(self.loss)
+    	        self.optimizer = args.optimizer(args.learning_rate).minimize(self.loss)
     	        self.logitsMaxTest = tf.slice(tf.argmax(drnn, 2), [0, 0], [self.seqLengths[0], 1])
     	        self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(drnn, self.seqLengths)[0][0])
     	        self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
@@ -92,6 +103,14 @@ class Model(object):
 		
 	        '''
 	    elif args.model == 'BiRNN':
+		self.config = { 'name':args.model,
+				'num_layer':args.num_layer,
+				'num_hidden':args.num_hidden,
+				'num_class':args.num_class,
+				'activation':args.activation,
+				'optimizer':args.optimizer,
+				'learning rate':args.learning_rate
+		}
     	        weightsOutH1 = tf.Variable(tf.truncated_normal([2, args.num_hidden],name='weightsOutH1'))
     	        biasesOutH1 = tf.Variable(tf.zeros([args.num_hidden]),name='biasesOutH1')
     	        weightsClasses = tf.Variable(tf.truncated_normal([args.num_hidden, args.num_class],name='weightsClasses'))
@@ -109,6 +128,40 @@ class Model(object):
 
     	        self.logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [self.seqLengths[0], 1])
     	        self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, self.seqLengths)[0][0])
+    	        self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
+
+	    elif args.model == 'CNN':
+		self.config = { 'name':args.model,
+				'num_layer':args.num_layer,
+				'num_hidden':args.num_hidden,
+				'num_class':args.num_class,
+				'activation':args.activation,
+				'optimizer':args.optimizer,
+				'learning rate':args.learning_rate
+		}
+		filter1 = tf.Variable(tf.truncated_normal([3,3,1,128],dtype=tf.float32,name='filter1'))
+		filter2 = tf.Variable(tf.truncated_normal([3,3,128,16],dtype=tf.float32,name='filter2'))
+
+		conv_input = tf.reshape(self.inputX,[args.batch_size,maxTimeSteps,args.num_feature,1])
+		conv1 = tf.nn.conv2d(conv_input,filter1,strides=[1,1,1,1],padding='SAME')
+		conv1 = tf.nn.conv2d(conv1,filter2,strides=[1,1,1,1],padding='SAME')
+		shape1 = conv1.get_shape().as_list()
+		print(shape1)
+		conv_output1 = tf.reshape(conv1,[shape1[1]*shape1[0],-1]) #seq,batch,feature
+		conv_output1_list = tf.split(0,maxTimeSteps,conv_output1)
+
+    	        weightsClasses = tf.Variable(tf.truncated_normal([shape1[2]*shape1[3], args.num_class],name='weightsClasses'))
+                biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
+
+	  		
+		
+    	        logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in conv_output1_list]
+    	        conv_output = tf.pack(logits)
+
+    	        self.loss = tf.reduce_mean(ctc.ctc_loss(conv_output, self.targetY, self.seqLengths))
+    	        self.optimizer = args.optimizer(args.learning_rate).minimize(self.loss)
+    	        self.logitsMaxTest = tf.slice(tf.argmax(conv_output, 2), [0, 0], [self.seqLengths[0], 1])
+    	        self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(conv_output, self.seqLengths)[0][0])
     	        self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
 
     	    self.initial_op = tf.initialize_all_variables()
