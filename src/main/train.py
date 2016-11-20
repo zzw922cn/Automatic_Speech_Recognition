@@ -42,6 +42,7 @@ from utils import output_to_sequence
 from utils import list_dirs
 from utils import logging
 from utils import count_params
+from utils import target2phoneme
 
 class Trainer(object):
     
@@ -62,10 +63,10 @@ class Trainer(object):
 	parser.add_argument('--log_dir', type=str, default='/home/pony/github/ASR_libri/libri/cha-level/log/timit/',
                        help='directory to log events while training')
 
-        parser.add_argument('--model', type=str, default='RNN',
+        parser.add_argument('--model', type=str, default='Res-RNN',
                        help='set the model of ASR, ie: brnn')
 
-        parser.add_argument('--num_layer', type=int, default=2,
+        parser.add_argument('--num_layer', type=int, default=4,
                        help='set the number of hidden layer')
 
         parser.add_argument('--activation', default=tf.nn.elu,
@@ -89,7 +90,7 @@ class Trainer(object):
         parser.add_argument('--num_epoch', type=int, default=200000,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=32,
+        parser.add_argument('--batch_size', type=int, default=1,
                        help='set the number of training samples in a mini-batch')
 
         parser.add_argument('--num_feature', type=int, default=39,
@@ -153,6 +154,7 @@ class Trainer(object):
                     feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs, model.targetVals: batchTargetVals,model.targetShape: batchTargetShape, model.seqLengths: batchSeqLengths}
 
                     _, l, er, lmt, pre = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions], feed_dict=feedDict)
+		    print(target2phoneme(batchTargetVals))
 	    	    print(output_to_sequence(pre,mode='phoneme'))
 
                     if (batch % 1) == 0:
