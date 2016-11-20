@@ -55,7 +55,6 @@ def setAttrs(object,attrsName,attrsValue):
     for name,value in zip(attrsName,attrsValue):
         object.__dict__[name]=value
 
-@describe
 def output_to_sequence(lmt,mode='phoneme'):
     ''' convert the output into sequences of characters or phonemes
     '''
@@ -95,6 +94,17 @@ def output_to_sequence(lmt,mode='phoneme'):
         return seq
     else:
 	raise TypeError('mode should be phoneme or character')
+
+def target2phoneme(target):
+    phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
+    seq = []
+    for t in target:
+	if t==len(phn):
+	    pass
+	else:
+	    seq.append(phn[t])
+    seq = ' '.join(seq)
+    return seq
 
 @describe
 def logging(model,epoch,errorRate,delta_time,mode='train'):
