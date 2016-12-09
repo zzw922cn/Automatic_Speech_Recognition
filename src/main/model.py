@@ -1,4 +1,5 @@
 #-*- coding:utf-8 -*-
+#!/usr/bin/python
 ''' model for automatic speech recognition implemented in Tensorflow
 author:
 
@@ -14,6 +15,13 @@ author:
      ##############          ##############               `#         #     
      
 date:2016-11-07
+
+Models for automatic speech recognition is as follows:
+	RNN	--
+	BiRNN	--
+	CNN	--
+	Res-CNN	--
+	
 '''
 from __future__ import absolute_import
 from __future__ import division
@@ -102,7 +110,9 @@ class Model(object):
 	        block2 = rnn_cell.MultiRNNCell([rnncell5,rnncell6,rnncell7])
 
 	        node1 = rnn_cell.MultiRNNCell([rnncell1,block1])
-	        node1_sum = rnn_cell.MultiRNNCell([rnncell1,node1])
+	        #node1_sum = rnn_cell.MultiRNNCell([rnncell1,node1])
+		#node1_sum = node1
+		node1_sum = rnncell1 + node1
 	        node2 = rnn_cell.MultiRNNCell([node1_sum,block2])
 	        node2_sum = rnn_cell.MultiRNNCell([node1_sum,node2])
 

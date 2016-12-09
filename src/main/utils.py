@@ -16,6 +16,24 @@ author:
      ##############          ##############               `#         #     
      
 date:2016-11-09
+
+common function list:
+
+	describe(func)
+	getAttrs(object,name)
+	setAttrs(object,attrsName,attrsValue)
+	output_to_sequence(lmt,mode='phoneme')
+	target2phoneme(target)
+	logging(model,errorRate,epoch=0,delta_time=0,mode='train')
+	count_params(model,mode='trainable')
+	list_to_sparse_tensor(targetList)
+	get_edit_distance(hyp_arr,truth_arr)
+	data_lists_to_batches(inputList, targetList, batchSize)
+	load_batched_data(specPath, targetPath, batchSize)
+	list_dirs(mfcc_dir,label_dir)
+	build_weight(shape,name=None,func='truncated_normal')
+	build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1')
+	build_conv_layer(inpt,filter_shape,stride,name=None)	
 '''
 import time
 from functools import wraps
@@ -107,7 +125,7 @@ def target2phoneme(target):
     return seq
 
 @describe
-def logging(model,epoch,errorRate,delta_time,mode='train'):
+def logging(model,errorRate,epoch=0,delta_time=0,mode='train'):
     ''' log the cost and error rate and time while training or testing
     '''
     if mode != 'train' and mode!='test' and mode!='config':
@@ -116,11 +134,17 @@ def logging(model,epoch,errorRate,delta_time,mode='train'):
     if mode == 'config':
 	with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
-    else:
+    elif mode == 'train':
         with open(logfile, "a") as myfile:
 	    myfile.write(str(time.strftime('%X %x %Z'))+'\n')
-    	    myfile.write("Epoch:"+str(epoch+1)+' '+mode+" error rate:"+str(errorRate)+'\n')
-    	    myfile.write("Epoch:"+str(epoch+1)+' '+mode+" time:"+str(delta_time)+' s\n')
+    	    myfile.write("Epoch:"+str(epoch+1)+' '+"train error rate:"+str(errorRate)+'\n')
+    	    myfile.write("Epoch:"+str(epoch+1)+' '+"train time:"+str(delta_time)+' s\n')
+    elif mode == 'test':
+        logfile = logfile+'_TEST'
+        with open(logfile, "a") as myfile:
+            myfile.write(str(model.config)+'\n')
+	    myfile.write(str(time.strftime('%X %x %Z'))+'\n')
+    	    myfile.write("test error rate:"+str(errorRate)+'\n')
 
 @describe
 def count_params(model,mode='trainable'):
@@ -214,6 +238,44 @@ def list_dirs(mfcc_dir,label_dir):
     label_dirs = glob(label_dir)
     for mfcc,label in zip(mfcc_dirs,label_dirs):
 	yield (mfcc,label)
+
+def build_weight(shape,name=None,func='truncated_normal'):
+    if type(shape) is not list:
+	raise TypeError('shape must be a list')
+    if func == 'truncated_normal':
+	return tf.Variable(tf.truncated_normal(shape,stddev=0.1,dtype=tf.float32,name = name))
+
+def build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1'):
+    fc_w = build_weight(shape,name=name_scope+'_w')
+    fc_b = build_weight([shape[1]],name=name_scope+'_b')
+    if kernel == 'relu':
+	fc_h = tf.nn.relu(tf.matmul(inpt,fc_w) + fc_b)
+    elif kernel == 'elu':
+	fc_h = tf.nn.elu(tf.matmul(inpt,fc_w) + fc_b)
+    elif kernel == 'linear':
+	fc_h = tf.matmul(inpt,fc_w) + fc_b
+    return fc_h
+
+def build_conv_layer(inpt,filter_shape,stride,name=None):
+    # BN->ReLU->conv
+    # 1.batch normalization
+    in_channels = filter_shape[2]
+    mean, var = tf.nn.moments(inpt, axes=[0,1,2])
+    beta = tf.Variable(tf.zeros([in_channels]), name="beta")
+    gamma = build_weight([in_channels], name="gamma")
+    batch_norm = tf.nn.batch_normalization(
+    				inpt, 
+				mean, var, 
+				beta, gamma, 
+				0.001,
+				name=name+'_bn')
+    # 2.relu
+    activated = tf.nn.relu(batch_norm)
+    # 3.convolution
+    filter_ = build_weight(filter_shape,name=name+'_filter')
+    output = tf.nn.conv2d(activated, filter=filter_, strides=[1, stride, stride, 1], padding='SAME')
+    output = tf.nn.dropout(output,keep_prob=0.6)
+    return output
 
 # test code
 if __name__=='__main__':
