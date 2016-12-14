@@ -64,16 +64,16 @@ class Trainer(object):
 	parser.add_argument('--log_dir', type=str, default='/home/pony/github/Automatic-Speech-Recognition/log/timit/',
                        help='directory to log events while training')
 
-	parser.add_argument('--model', default='BiRNN',
-		       help='model for ASR')
+	parser.add_argument('--model', default='ResNet',
+		       help='model for ASR:BiRNN,ResNet,...')
 
 	parser.add_argument('--rnncell', default='rnn',
 		       help='rnn cell, 3 choices:rnn,lstm,gru')
 
-        parser.add_argument('--num_layer', type=int, default=2,
+        parser.add_argument('--num_layer', type=int, default=1,
                        help='set the number of hidden layer or bidirectional layer')
 
-        parser.add_argument('--activation', default=tf.nn.elu,
+        parser.add_argument('--activation', default=tf.nn.relu,
                        help='set the activation function of each layer')
 
         parser.add_argument('--optimizer', type=type, default=tf.train.AdamOptimizer,
@@ -91,13 +91,13 @@ class Trainer(object):
 	parser.add_argument('--evaluation', type=bool, default=False,
                        help='test the model based on trained parameters, but at present, we can"t test during training.')
 
-        parser.add_argument('--learning_rate', type=float, default=0.0001,
+        parser.add_argument('--learning_rate', type=float, default=0.01,
                        help='set the step size of each iteration')
 
         parser.add_argument('--num_epoch', type=int, default=200000,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=64,
+        parser.add_argument('--batch_size', type=int, default=32,
                        help='set the number of training samples in a mini-batch')
 
         parser.add_argument('--test_batch_size', type=int, default=1,
@@ -106,7 +106,7 @@ class Trainer(object):
         parser.add_argument('--num_feature', type=int, default=39,
                        help='set the dimension of feature, ie: 39 mfccs, you can set 39 ')
 
-        parser.add_argument('--num_hidden', type=int, default=128,
+        parser.add_argument('--num_hidden', type=int, default=32,
                        help='set the number of neurons in hidden layer')
 
         parser.add_argument('--num_class', type=int, default=62,
@@ -169,7 +169,7 @@ class Trainer(object):
                     feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs, model.targetVals: batchTargetVals,model.targetShape: batchTargetShape, model.seqLengths: batchSeqLengths}
 
                     _, l, er, lmt, pre = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions], feed_dict=feedDict)
-	    	    print(output_to_sequence(pre,mode='phoneme'))
+	    	    #print(output_to_sequence(pre,mode='phoneme'))
 
                     if (batch % 1) == 0:
                 	print('Minibatch', batch, '/', batchOrigI, 'loss:', l)
@@ -178,7 +178,7 @@ class Trainer(object):
 		    
 		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%5000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
 		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
-                        save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
+                        model.saver.save(sess,checkpoint_path,global_step=epoch)
                         print('Model has been saved in:'+str(save_path))
 	        end = time.time()
 		delta_time = end-start
@@ -186,7 +186,7 @@ class Trainer(object):
 
 		if args.save==True and (epoch+1)%1==0:
 		    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
-                    save_path = model.saver.save(sess,checkpoint_path,global_step=epoch)
+                    model.saver.save(sess,checkpoint_path,global_step=epoch)
                     print('Model has been saved in file')
                 epochER = batchErrors.sum() / totalN
                 print('Epoch', epoch+1, 'train error rate:', epochER)

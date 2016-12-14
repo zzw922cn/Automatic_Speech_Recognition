@@ -1,0 +1,12 @@
+{'optimizer': <class 'tensorflow.python.training.adam.AdamOptimizer'>, 'name': 'residual network', 'learning rate': 0.01, 'trainable params': 1948274, 'num_layer': 10, 'num_class': 62, 'all params': 5844824.0, 'num_featuremap': 16}
+13:08:10 12/14/16 CST
+Epoch:1 train error rate:0.95813536386
+Epoch:1 train time:145.198076963 s
+{'optimizer': <class 'tensorflow.python.training.adam.AdamOptimizer'>, 'name': 'residual network', 'learning rate': 0.01, 'trainable params': 1948274, 'num_layer': 10, 'num_class': 62, 'all params': 5844824.0, 'num_featuremap': 16}
+13:11:07 12/14/16 CST
+Epoch:2 train error rate:0.849993554545
+Epoch:2 train time:140.668783903 s
+{'optimizer': <class 'tensorflow.python.training.adam.AdamOptimizer'>, 'name': 'residual network', 'learning rate': 0.01, 'trainable params': 1948274, 'num_layer': 10, 'num_class': 62, 'all params': 5844824.0, 'num_featuremap': 16}
+13:13:59 12/14/16 CST
+Epoch:3 train error rate:0.851595846089
+Epoch:3 train time:136.583483934 s
