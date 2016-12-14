@@ -42,18 +42,15 @@ from utils import build_weight
 from utils import build_forward_layer
 from utils import build_conv_layer
 
-def build_multi_brnn(args,maxTimeSteps,inputList,cell_fn=rnn_cell.BasicRNNCell):
-    # list of batchsize length, each is [seqlength*hidden]
+def build_multi_brnn(args,maxTimeSteps,inputList,cell_fn,seqLengths):
     hid_input = inputList
     for i in range(args.num_layer):
 	scope = 'BRNN_'+str(i+1)
-        forwardH = cell_fn(args.num_hidden,activation=args.activation)
 
-        # backward layer
-        backwardH = cell_fn(args.num_hidden,activation=args.activation)
-
-        # bi-directional layer
-        fbH, f_state, b_state = bidirectional_rnn(forwardH,backwardH,hid_input,dtype=tf.float32,scope=scope)
+        forward_cell = cell_fn(args.num_hidden,activation=args.activation)
+        backward_cell = cell_fn(args.num_hidden,activation=args.activation)
+        fbH, f_state, b_state = bidirectional_rnn(forward_cell,backward_cell,
+					hid_input,dtype=tf.float32,sequence_length=seqLengths,scope=scope)
 
 	fbHrs = [tf.reshape(t, [args.batch_size, 2, args.num_hidden]) for t in fbH]
 	if i != args.num_layer-1:
@@ -63,10 +60,8 @@ def build_multi_brnn(args,maxTimeSteps,inputList,cell_fn=rnn_cell.BasicRNNCell):
             # output size is seqlength*batchsize*hidden
 	    output = tf.reduce_sum(output,2)
 
-	    print(output.get_shape().as_list())
 	    # outputXrs is of size [seqlenth*batchsize,num_hidden]
     	    outputXrs = tf.reshape(output, [-1, args.num_hidden])
-
     	    hid_input = tf.split(0, maxTimeSteps, outputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
 
     return fbHrs
@@ -110,7 +105,7 @@ class BiRNN(object):
 			    'learning rate':args.learning_rate
 	    }	    
 
-	    fbHrs = build_multi_brnn(self.args,maxTimeSteps,self.inputList,self.cell_fn)
+	    fbHrs = build_multi_brnn(self.args,maxTimeSteps,self.inputList,self.cell_fn,self.seqLengths)
 	    with tf.name_scope('fc-layer'):
                 with tf.variable_scope('fc'):
 		    weightsOutH1 = tf.Variable(tf.truncated_normal([2, args.num_hidden],name='weightsOutH1'))
@@ -121,7 +116,8 @@ class BiRNN(object):
     	            logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
     	    logits3d = tf.pack(logits)
     	    self.loss = tf.reduce_mean(ctc.ctc_loss(logits3d, self.targetY, self.seqLengths))
-	    self.var_op = tf.all_variables()
+	    #self.var_op = tf.all_variables()
+	    self.var_op = tf.global_variables()
 	    self.var_trainable_op = tf.trainable_variables()
 
 	    if args.grad_clip == -1:
@@ -135,6 +131,7 @@ class BiRNN(object):
     	    self.logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [self.seqLengths[0], 1])
     	    self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, self.seqLengths)[0][0])
     	    self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
-	    self.initial_op = tf.initialize_all_variables()
-	    self.saver = tf.train.Saver(tf.all_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
+	    #self.initial_op = tf.initialize_all_variables()
+	    self.initial_op = tf.global_variables_initializer()
+	    self.saver = tf.train.Saver(tf.global_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
 	    self.logfile = args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')

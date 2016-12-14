@@ -30,10 +30,14 @@ import numpy as np
 import glob
 import sys
 
-mfcc_dir = '/home/pony//github/data/timit/test/mfcc/'
-label_dir = '/home/pony//github/data/timit/test/label/'
 
-rootdir = '/home/pony/ASR/datasets/TIMIT/TEST/'
+## keywords can be set to either of 'train' and 'test'
+keywords = 'test'
+
+mfcc_dir = '/home/pony/github/data/timit/'+keywords+'/mfcc/'
+label_dir = '/home/pony/github/data/timit/'+keywords+'/label/'
+
+rootdir = '/home/pony/ASR/datasets/TIMIT/'+keywords
 
 count = 0
 ## original phonemes
