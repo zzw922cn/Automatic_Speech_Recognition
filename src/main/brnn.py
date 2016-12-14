@@ -48,10 +48,13 @@ def build_multi_brnn(args,maxTimeSteps,inputList,cell_fn=rnn_cell.BasicRNNCell):
     for i in range(args.num_layer):
 	scope = 'BRNN_'+str(i+1)
         forwardH = cell_fn(args.num_hidden,activation=args.activation)
+
         # backward layer
         backwardH = cell_fn(args.num_hidden,activation=args.activation)
+
         # bi-directional layer
         fbH, f_state, b_state = bidirectional_rnn(forwardH,backwardH,hid_input,dtype=tf.float32,scope=scope)
+
 	fbHrs = [tf.reshape(t, [args.batch_size, 2, args.num_hidden]) for t in fbH]
 	if i != args.num_layer-1:
             # output size is seqlength*batchsize*2*hidden
