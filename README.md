@@ -43,11 +43,30 @@ Instead of configuration in command line, you can also set the arguments above i
 ## Implementation Details
 
 ### Data preprocessing
+The original TIMIT database contains 6300 utterances, but we find the 'SA' audio files occurs many times, it will lead bad bias for our speech recognition system. Therefore, we removed the all 'SA' files from the original dataset and attain the new TIMIT dataset, which contains only 5040 utterances including 3696 standard training set and 1344 test set.
+
 Automatic Speech Recognition is to transcribe a raw audio file into character sequences. Data preprocessing is to convert a raw audio file into feature vectors of several frames. Here, we first split each audio file by a 20ms hamming window with no overlap, and then calculate the 12 mel frequency ceptral coefficients appended by a energy variable for each frame. Based on this vector of length 13, we calculate the delta coefficients and delta-delta coefficients, totally 39 coefficients for each frame. Therefore, each audio file is splited to several frames by hamming window, and each frame is extracted to a feature vector of length 39.
 
 In folder data/mfcc, each file is a feature matrix with size timeLength*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
 
 If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/preprocess.py).
+
+Since the original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training and evaluation, but when scoring, we mappd the 61 phonemes into 39 phonemes for better performance. The mapping details are as follows:
+| original phoneme(s) | mapped into phoneme |
+| :------------------  | :-------------------: |
+| ux | uw |
+| axr | er |
+| em | m |
+| nx,n  | en |
+| eng | ng |
+| hv | hh |
+| cl,bcl,dcl,gcl,epi,h#,kcl,pau,pcl,tcl,vcl | sil |
+| l | el |
+| zh | sh |
+| aa | ao |
+| ix | ih |
+| ax | ah | 
+ 
 
 ### Acoustic Model
 TODO
