@@ -33,17 +33,17 @@ from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.python.ops import rnn_cell
 from tensorflow.python.ops.rnn import bidirectional_rnn
 
-from utils import load_batched_data
-from utils import describe
-from utils import getAttrs
-from utils import output_to_sequence
-from utils import list_dirs
-from utils import logging
-from utils import count_params
-from utils import target2phoneme
+from utils.utils import load_batched_data
+from utils.utils import describe
+from utils.utils import getAttrs
+from utils.utils import output_to_sequence
+from utils.utils import list_dirs
+from utils.utils import logging
+from utils.utils import count_params
+from utils.utils import target2phoneme
 
-from resnet import ResNet
-from brnn import BiRNN
+from models.resnet import ResNet
+from models.brnn import BiRNN
 
 class Trainer(object):
     
