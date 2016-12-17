@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #!/usr/bin/python
 
 ''' This file is designed to train the models of ASR
@@ -20,6 +20,9 @@ date:2016-11-09
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+import sys
+sys.dont_write_bytecode = True
 
 import argparse
 import time
@@ -61,7 +64,7 @@ class Trainer(object):
         parser.add_argument('--test_label_dir', type=str, default='/home/pony/github/data/timit/test/label/',
                        help='data directory containing label numpy files, usually end with .npy')
 
-	parser.add_argument('--log_dir', type=str, default='/home/pony/github/Automatic-Speech-Recognition/log/timit/',
+	parser.add_argument('--log_dir', type=str, default='/home/pony/github/Automatic_Speech_Recognition/log/timit/',
                        help='directory to log events while training')
 
 	parser.add_argument('--model', default='ResNet',
@@ -82,7 +85,7 @@ class Trainer(object):
         parser.add_argument('--grad_clip', default=-1,
                        help='set gradient clipping when backpropagating errors')
 
-	parser.add_argument('--keep', type=bool, default=False,
+	parser.add_argument('--keep', type=bool, default=True,
                        help='train the model based on model saved')
 
 	parser.add_argument('--save', type=bool, default=True,
@@ -97,7 +100,7 @@ class Trainer(object):
         parser.add_argument('--num_epoch', type=int, default=200000,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=32,
+        parser.add_argument('--batch_size', type=int, default=16,
                        help='set the number of training samples in a mini-batch')
 
         parser.add_argument('--test_batch_size', type=int, default=1,
@@ -112,13 +115,13 @@ class Trainer(object):
         parser.add_argument('--num_class', type=int, default=62,
                        help='set the number of labels in the output layer, if timit phonemes, it is 62; if timit characters, it is 28; if libri characters, it is 28')
 
-        parser.add_argument('--save_dir', type=str, default='/home/pony/github/Automatic-Speech-Recognition/save/timit/',
+        parser.add_argument('--save_dir', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/',
                        help='set the directory to save the model, containing checkpoint file and parameter file')
 
-        parser.add_argument('--restore_from', type=str, default='/home/pony/github/Automatic-Speech-Recognition/save/timit/',
+        parser.add_argument('--restore_from', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/',
                        help='set the directory of check_point path')
 
-        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/Automatic-Speech-Recognition/save/timit/model.ckpt-55',
+        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-55',
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
@@ -149,7 +152,6 @@ class Trainer(object):
         with tf.Session(graph=model.graph) as sess:
 	    if args.keep == True:
 		ckpt = tf.train.get_checkpoint_state(args.restore_from)
-		model_checkpoint_path = args.model_checkpoint_path
                 if ckpt and ckpt.model_checkpoint_path:
                     model.saver.restore(sess, ckpt.model_checkpoint_path)
     		    print('Model restored from:'+args.restore_from) 
@@ -172,8 +174,8 @@ class Trainer(object):
 	    	    #print(output_to_sequence(pre,mode='phoneme'))
 
                     if (batch % 1) == 0:
-                	print('Minibatch', batch, '/', batchOrigI, 'loss:', l)
-                	print('Minibatch', batch, '/', batchOrigI, 'error rate:', er)
+                	print('Epoch', epoch+1, 'Minibatch', batch, 'loss:', l)
+                	print('Epoch', epoch+1, 'Minibatch', batch, 'error rate:', er)
             	    batchErrors[batch] = er*len(batchSeqLengths)
 		    
 		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%5000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
@@ -204,7 +206,6 @@ class Trainer(object):
 	model.config['all params'] = all_num_params
         with tf.Session(graph=model.graph) as sess:
 	    ckpt = tf.train.get_checkpoint_state(args.restore_from)
-	    model_checkpoint_path = args.model_checkpoint_path
             if ckpt and ckpt.model_checkpoint_path:
                 model.saver.restore(sess, ckpt.model_checkpoint_path)
     	        print('Model restored from:'+args.restore_from) 
