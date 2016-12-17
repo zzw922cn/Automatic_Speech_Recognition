@@ -35,12 +35,12 @@ from tensorflow.python.ops import rnn_cell
 from tensorflow.python.ops.rnn import bidirectional_rnn
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
-from utils import load_batched_data
-from utils import describe
-from utils import setAttrs
-from utils import build_weight
-from utils import build_forward_layer
-from utils import build_conv_layer
+from src.utils.utils import load_batched_data
+from src.utils.utils import describe
+from src.utils.utils import setAttrs
+from src.utils.utils import build_weight
+from src.utils.utils import build_forward_layer
+from src.utils.utils import build_conv_layer
 
 def build_multi_brnn(args,maxTimeSteps,inputList,cell_fn,seqLengths):
     hid_input = inputList

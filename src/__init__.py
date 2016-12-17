@@ -17,4 +17,5 @@ author:
 date:2016-11-07
 '''
 
-__all__ = ['utils','models','feature']
+import sys
+sys.path.append('../')
