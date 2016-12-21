@@ -43,21 +43,6 @@ import numpy as np
 import tensorflow as tf
 
 
-phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h',
-       'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl',
-       'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng',
-       'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#',
-       'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k',
-       'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow',
-       'oy', 'p', 'pau', 'pcl', 'q', 'r', 's',
-       'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux',
-       'v', 'w', 'y', 'z', 'zh']
-
-mapping = {'ux':'uw','axr':'er','em':'m','nx':'en','n':'en',
-              'eng':'ng','hv':'hh','cl':'sil','bcl':'sil','dcl':'sil',
-              'gcl':'sil','epi':'sil','h#':'sil','kcl':'sil','pau':'sil',
-              'pcl':'sil','tcl':'sil','vcl':'sil','l':'el','zh':'sh',
-              'aa':'ao','ix':'ih','ax':'ah'}
 
 def describe(func):
     ''' wrap function,to add some descriptions for function and its running time
@@ -130,11 +115,6 @@ def output_to_sequence(lmt,mode='phoneme'):
 
 def target2phoneme(target):
     phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
-    mapping = {'ux':'uw','axr':'er','em':'m','nx':'en','n':'en',
-              'eng':'ng','hv':'hh','cl':'sil','bcl':'sil','dcl':'sil',
-              'gcl':'sil','epi':'sil','h#':'sil','kcl':'sil','pau':'sil',
-              'pcl':'sil','tcl':'sil','vcl':'sil','l':'el','zh':'sh',
-              'aa':'ao','ix':'ih','ax':'ah'}
     seq = []
     for t in target:
 	if t==len(phn):
@@ -178,17 +158,6 @@ def count_params(model,mode='trainable'):
 	raise TypeError('mode should be all or trainable.')
     print('number of '+mode+' parameters: '+str(num))
     return num
-
-def group_phoneme(orig_phn,mapping):
-    group_phn = []
-    for val in orig_phn:
-        group_phn.append(val)
-    group_phn.append('sil')
-    for key in mapping.keys():
-        if key in orig_phn:
-            group_phn.remove(key)
-    group_phn.sort()
-    return group_phn
 
 def list_to_sparse_tensor(targetList):
     ''' turn 2-D List to SparseTensor
