@@ -2,7 +2,7 @@
 End-to-end automatic speech recognition system implemented in TensorFlow.
 
 ## Content
-Automatic Speech Recognition implemented in TensorFlow contains followings:
+This is a powerful library for automatic speech recognition, it is implemented in TensorFlow and support training with CPU/GPU. This library contains followings models you can choose to train your own model:
 * Data Pre-processing
 * Acoustic Modeling
   * RNN
@@ -11,7 +11,9 @@ Automatic Speech Recognition implemented in TensorFlow contains followings:
   * BLSTM
   * GRU
   * BGRU
-  * Deep CNN
+  * Dynamic RNN
+  * Deep Residual Network
+  * Seq2Seq with attention decoder
   * etc.
 * CTC Decoding
 * Evaluation  
@@ -19,7 +21,6 @@ Automatic Speech Recognition implemented in TensorFlow contains followings:
 * Mini-batch Training
 * Training with GPU or CPU with TensorFlow
 * Keeping logging of epoch time and error rate in disk
-* Support TIMIT and Libri
 
 ## Usage
 <pre>
