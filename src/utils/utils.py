@@ -41,6 +41,7 @@ import os
 from glob import glob
 import numpy as np
 import tensorflow as tf
+import math
 
 
 phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h',
@@ -104,7 +105,6 @@ def output_to_sequence(lmt,mode='phoneme'):
     #here, we only print the first sequence of batch
     indexes = sequences[0] #here, we only print the first sequence of batch
     if mode=='phoneme':
-	phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
 	seq = []
         for ind in indexes:
             if ind==len(phn):
@@ -129,12 +129,6 @@ def output_to_sequence(lmt,mode='phoneme'):
 	raise TypeError('mode should be phoneme or character')
 
 def target2phoneme(target):
-    phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
-    mapping = {'ux':'uw','axr':'er','em':'m','nx':'en','n':'en',
-              'eng':'ng','hv':'hh','cl':'sil','bcl':'sil','dcl':'sil',
-              'gcl':'sil','epi':'sil','h#':'sil','kcl':'sil','pau':'sil',
-              'pcl':'sil','tcl':'sil','vcl':'sil','l':'el','zh':'sh',
-              'aa':'ao','ix':'ih','ax':'ah'}
     seq = []
     for t in target:
 	if t==len(phn):
@@ -190,34 +184,43 @@ def group_phoneme(orig_phn,mapping):
     group_phn.sort()
     return group_phn
 
-def list_to_sparse_tensor(targetList):
+def list_to_sparse_tensor(targetList,mode='train'):
     ''' turn 2-D List to SparseTensor
     '''
-
     indices = [] #index
-    vals = [] #value 
+    vals = [] #value
+    group_phn = group_phoneme(phn,mapping)
     for tI, target in enumerate(targetList):
         for seqI, val in enumerate(target):
-            indices.append([tI, seqI])
-            vals.append(val)
+            if(mode == 'train'):
+                indices.append([tI, seqI])
+                vals.append(val)
+            elif(mode == 'test'):
+                if val<len(phn) and (phn[val] in mapping.keys()):
+                    val = group_phn.index(mapping[phn[val]])
+                indices.append([tI, seqI])
+                vals.append(val)
+            else:
+                raise ValueError("Invalid mode.",mode)
     shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
     return (np.array(indices), np.array(vals), np.array(shape))
 
-def get_edit_distance(hyp_arr,truth_arr):
+def get_edit_distance(hyp_arr,truth_arr, normalize=False, mode='train'):
     ''' calculate edit distance 
     '''
     graph = tf.Graph()
     with graph.as_default():
         truth = tf.sparse_placeholder(tf.int32)
         hyp = tf.sparse_placeholder(tf.int32)
-        editDist = tf.edit_distance(hyp, truth, normalize=True)
+        editDist = tf.reduce_sum(tf.edit_distance(hyp, truth, normalize=True))
 
     with tf.Session(graph=graph) as session:
-        truthTest = list_to_sparse_tensor(truth_arr)
-        hypTest = list_to_sparse_tensor(hyp_arr)
+        truthTest = list_to_sparse_tensor(truth_arr, mode)
+        hypTest = list_to_sparse_tensor(hyp_arr, mode)
         feedDict = {truth: truthTest, hyp: hypTest}
         dist = session.run(editDist, feed_dict=feedDict)
     return dist
+
 
 def data_lists_to_batches(inputList, targetList, batchSize):
     ''' padding the input list to a same dimension, integrate all data into batchInputs
@@ -270,11 +273,50 @@ def list_dirs(mfcc_dir,label_dir):
     for mfcc,label in zip(mfcc_dirs,label_dirs):
 	yield (mfcc,label)
 
+'''
 def build_weight(shape,name=None,func='truncated_normal'):
     if type(shape) is not list:
 	raise TypeError('shape must be a list')
     if func == 'truncated_normal':
 	return tf.Variable(tf.truncated_normal(shape,stddev=0.1,dtype=tf.float32,name = name))
+
+'''
+
+def build_weight(shape, name, func='he_normal', range=None):
+    """ Initializes weight.
+    supply following initialization:
+	xavier initialization
+	random normalization
+	uniform
+    We also add the L2 loss to weight for training.
+    """
+    if type(shape) is not list:
+	raise TypeError('shape must be a list')
+
+    initializer = tf.constant_initializer()
+    if func == 'xavier':
+        fan_in, fan_out = _get_dims(shape)
+        range = math.sqrt(6.0 / (fan_in + fan_out))
+        initializer = tf.random_uniform_initializer(-range, range)
+
+    elif func == 'he_normal':
+        fan_in, _ = _get_dims(shape)
+        std = math.sqrt(2.0 / fan_in)
+        initializer = tf.random_normal_initializer(stddev=std)
+
+    elif func == 'normal':
+        initializer = tf.random_normal_initializer(stddev=0.1)
+
+    elif func == 'uniform':
+        if range is None:
+            raise ValueError("range must be specified if you use uniform initialization")
+        initializer = tf.random_uniform_initializer(-range, range)
+
+    with tf.variable_scope(name or "weight_var"):
+        var = tf.get_variable(name, shape, initializer=initializer)
+    tf.add_to_collection('l2', tf.nn.l2_loss(var))  
+    return var
+
 
 def build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1'):
     fc_w = build_weight(shape,name=name_scope+'_w')
@@ -288,28 +330,67 @@ def build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1'):
     return fc_h
 
 def build_conv_layer(inpt,filter_shape,stride,name=None):
+    ''' build a convolutional layer with batch normalization
+    '''
     # BN->ReLU->conv
     # 1.batch normalization
     in_channels = filter_shape[2]
     mean, var = tf.nn.moments(inpt, axes=[0,1,2])
-    beta = tf.Variable(tf.zeros([in_channels]), name="beta")
-    gamma = build_weight([in_channels], name="gamma")
-    batch_norm = tf.nn.batch_normalization(
+    with tf.variable_scope(name or "conv_layer"):
+        beta = tf.Variable(tf.zeros([in_channels]), name="beta")
+        gamma = build_weight([in_channels], name="gamma")
+    batch_normed = tf.nn.batch_normalization(
     				inpt, 
 				mean, var, 
 				beta, gamma, 
 				0.001,
 				name=name+'_bn')
     # 2.relu
-    activated = tf.nn.relu(batch_norm)
+    activated = tf.nn.relu(batch_normed)
     # 3.convolution
     filter_ = build_weight(filter_shape,name=name+'_filter')
     output = tf.nn.conv2d(activated, filter=filter_, strides=[1, stride, stride, 1], padding='SAME')
     output = tf.nn.dropout(output,keep_prob=0.6)
     return output
 
+def batch_norm(x, is_training=True):
+    """ Batch normalization.
+    """
+    with tf.variable_scope('BatchNorm'):
+        inputs_shape = x.get_shape()
+        axis = list(range(len(inputs_shape) - 1))
+        param_shape = inputs_shape[-1:]
+
+        beta = tf.get_variable('beta', param_shape, initializer=tf.constant_initializer(0.))
+        gamma = tf.get_variable('gamma', param_shape, initializer=tf.constant_initializer(1.))
+        batch_mean, batch_var = tf.nn.moments(x, axis)
+        ema = tf.train.ExponentialMovingAverage(decay=0.5)
+
+        def mean_var_with_update():
+            ema_apply_op = ema.apply([batch_mean, batch_var])
+            with tf.control_dependencies([ema_apply_op]):
+                return tf.identity(batch_mean), tf.identity(batch_var)
+
+        mean, var = tf.cond(is_training,
+                            mean_var_with_update,
+                            lambda: (ema.average(batch_mean), ema.average(batch_var)))
+        normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
+    return normed
+
+def _get_dims(shape):
+    ''' get shape for initialization
+    '''
+    fan_in = shape[0] if len(shape) == 2 else np.prod(shape[:-1])
+    fan_out = shape[1] if len(shape) == 2 else shape[-1]
+    return fan_in, fan_out
+
+def dropout(x, keep_prob, is_training):
+    """ Apply dropout layer.
+    NOTE: is_training is a tensorflow bool tensor.
+    """
+    return tf.cond(is_training, lambda: tf.nn.dropout(x, keep_prob), lambda: x)
+
+
 # test code
 if __name__=='__main__':
-    for (mfcc,label) in list_dirs('/home/pony/github/data/label/*/','/home/pony/github/data/mfcc/*/'):
-	print mfcc
-	print label
+    print len(phn)
