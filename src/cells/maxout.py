@@ -17,6 +17,8 @@ Jiaqi Liu &
      ##############          ##############               `#         #     
      
 date:2016-12-16
+
+maxout cnn layer can be called only if you define the filter first.
 '''
 
 from __future__ import absolute_import

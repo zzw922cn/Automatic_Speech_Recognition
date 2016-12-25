@@ -44,6 +44,7 @@ from utils.utils import list_dirs
 from utils.utils import logging
 from utils.utils import count_params
 from utils.utils import target2phoneme
+from utils.utils import get_edit_distance
 
 from models.resnet import ResNet
 from models.brnn import BiRNN
@@ -85,22 +86,22 @@ class Trainer(object):
         parser.add_argument('--grad_clip', default=-1,
                        help='set gradient clipping when backpropagating errors')
 
-	parser.add_argument('--keep', type=bool, default=True,
+	parser.add_argument('--keep', type=bool, default=False,
                        help='train the model based on model saved')
 
 	parser.add_argument('--save', type=bool, default=True,
                        help='to save the model in the disk')
 
-	parser.add_argument('--evaluation', type=bool, default=False,
+	parser.add_argument('--evaluation', type=bool, default=True,
                        help='test the model based on trained parameters, but at present, we can"t test during training.')
 
-        parser.add_argument('--learning_rate', type=float, default=0.01,
+        parser.add_argument('--learning_rate', type=float, default=0.0001,
                        help='set the step size of each iteration')
 
         parser.add_argument('--num_epoch', type=int, default=200000,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=16,
+        parser.add_argument('--batch_size', type=int, default=32,
                        help='set the number of training samples in a mini-batch')
 
         parser.add_argument('--test_batch_size', type=int, default=1,
@@ -118,9 +119,6 @@ class Trainer(object):
         parser.add_argument('--save_dir', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/',
                        help='set the directory to save the model, containing checkpoint file and parameter file')
 
-        parser.add_argument('--restore_from', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/',
-                       help='set the directory of check_point path')
-
         parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-55',
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
@@ -131,6 +129,7 @@ class Trainer(object):
   	if mode == 'train':	
             return load_batched_data(args.train_mfcc_dir,args.train_label_dir,args.batch_size)
   	elif mode == 'test':	
+	    args.batch_size = args.test_batch_size
             return load_batched_data(args.test_mfcc_dir,args.test_label_dir,args.test_batch_size)
 	else:
 	    raise TypeError('mode should be train or test.')
@@ -151,10 +150,10 @@ class Trainer(object):
 	print(model.config)
         with tf.Session(graph=model.graph) as sess:
 	    if args.keep == True:
-		ckpt = tf.train.get_checkpoint_state(args.restore_from)
+		ckpt = tf.train.get_checkpoint_state(args.save_dir)
                 if ckpt and ckpt.model_checkpoint_path:
                     model.saver.restore(sess, ckpt.model_checkpoint_path)
-    		    print('Model restored from:'+args.restore_from) 
+    		    print('Model restored from:'+args.save_dir) 
 	    else:
     	        print('Initializing')
     	        sess.run(model.initial_op)
@@ -199,16 +198,20 @@ class Trainer(object):
 	# load data
 	args = self.args
         batchedData, maxTimeSteps, totalN = self.load_data(args,mode='test')
-	model = resModel(args,maxTimeSteps)
+	if args.model == 'ResNet':
+	    model = ResNet(args,maxTimeSteps)
+	elif args.model == 'BiRNN':
+	    model = BiRNN(args,maxTimeSteps)
+
 	num_params = count_params(model,mode='trainable')
 	all_num_params = count_params(model,mode='all')
 	model.config['trainable params'] = num_params
 	model.config['all params'] = all_num_params
         with tf.Session(graph=model.graph) as sess:
-	    ckpt = tf.train.get_checkpoint_state(args.restore_from)
+	    ckpt = tf.train.get_checkpoint_state(args.save_dir)
             if ckpt and ckpt.model_checkpoint_path:
                 model.saver.restore(sess, ckpt.model_checkpoint_path)
-    	        print('Model restored from:'+args.restore_from) 
+    	        print('Model restored from:'+args.save_dir) 
             batchErrors = np.zeros(len(batchedData))
             batchRandIxs = np.random.permutation(len(batchedData)) 
             for batch, batchOrigI in enumerate(batchRandIxs):
@@ -220,12 +223,17 @@ class Trainer(object):
 			    model.targetShape: batchTargetShape,
 			    model.seqLengths: batchSeqLengths}
 
-                l, er, lmt, pre = sess.run([model.loss, model.errorRate,
+                l, er, lmt, pre, y = sess.run([model.loss, model.errorRate,
 					    model.logitsMaxTest,
-					    model.predictions],
+					    model.predictions,
+					    model.targetY],
 				            feed_dict=feedDict)
+
+
+		er = get_edit_distance([pre.values],[y.values],mode='test')
 	    	print(output_to_sequence(pre,mode='phoneme'))
-                print('Minibatch', batch, 'test loss:', l)
+
+                #print('Minibatch', batch, 'test loss:', l)
                 print('Minibatch', batch, 'test error rate:', er)
             	batchErrors[batch] = er*len(batchSeqLengths)
             epochER = batchErrors.sum() / totalN
