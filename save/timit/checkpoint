@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-0"
-all_model_checkpoint_paths: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-0"
