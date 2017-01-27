@@ -205,14 +205,14 @@ def list_to_sparse_tensor(targetList,mode='train'):
     shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
     return (np.array(indices), np.array(vals), np.array(shape))
 
-def get_edit_distance(hyp_arr,truth_arr, normalize=False, mode='train'):
+def get_edit_distance(hyp_arr,truth_arr, normalize=True, mode='train'):
     ''' calculate edit distance 
     '''
     graph = tf.Graph()
     with graph.as_default():
         truth = tf.sparse_placeholder(tf.int32)
         hyp = tf.sparse_placeholder(tf.int32)
-        editDist = tf.reduce_sum(tf.edit_distance(hyp, truth, normalize=True))
+        editDist = tf.reduce_sum(tf.edit_distance(hyp, truth, normalize=normalize))
 
     with tf.Session(graph=graph) as session:
         truthTest = list_to_sparse_tensor(truth_arr, mode)

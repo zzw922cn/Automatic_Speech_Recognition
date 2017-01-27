@@ -1,0 +1,4 @@
+{'trainable params': 51006, 'rnncell': <class 'tensorflow.python.ops.rnn_cell.BasicRNNCell'>, 'num_layer': 1, 'num_class': 62, 'name': 'DBiRNN', 'num_hidden': 128, 'optimizer': <class 'tensorflow.python.training.adam.AdamOptimizer'>, 'activation': <function relu at 0x7fc4764e1398>, 'learning rate': 0.001, 'all params': 51006}
+22:35:56 01/25/17 CST
+Epoch:1 train error rate:1.45357616381
+Epoch:1 train time:124.839108944 s

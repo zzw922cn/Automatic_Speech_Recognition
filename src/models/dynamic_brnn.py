@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
-''' bidirectional rnn model for automatic speech recognition implemented in Tensorflow
+''' dynamic bidirectional rnn model for automatic speech recognition implemented in Tensorflow
 author:
 
       iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
@@ -32,7 +32,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.python.ops import rnn_cell
-from tensorflow.python.ops.rnn import bidirectional_rnn
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from src.utils.utils import load_batched_data
@@ -42,40 +41,44 @@ from src.utils.utils import build_weight
 from src.utils.utils import build_forward_layer
 from src.utils.utils import build_conv_layer
 
-def build_multi_brnn(args, 
+def build_multi_dynamic_brnn(args, 
 		     maxTimeSteps,
-		     inputList,
+		     inputX,
 		     cell_fn,
-		     seqLengths):
+		     seqLengths,
+		     time_major=True):
 
-    hid_input = inputList
+    hid_input = inputX
     for i in range(args.num_layer):
-	scope = 'BRNN_'+str(i+1)
-
+	scope = 'DBRNN_'+str(i+1)
         forward_cell = cell_fn(args.num_hidden,activation=args.activation)
         backward_cell = cell_fn(args.num_hidden,activation=args.activation)
-        fbH, f_state, b_state = bidirectional_rnn(forward_cell,backward_cell,
-					hid_input,dtype=tf.float32,
-					sequence_length=seqLengths,scope=scope)
+	# tensor of shape: [max_time, batch_size, input_size]
+        outputs, output_states = bidirectional_dynamic_rnn(forward_cell,backward_cell,
+					inputs = hid_input, 
+				        dtype = tf.float32,
+					sequence_length = seqLengths,
+					time_major = True,
+					scope=scope)
+	# forward output, backward ouput
+	# tensor of shape: [max_time, batch_size, input_size]
+	output_fw, output_bw = outputs
+	# forward states, backward states
+	output_state_fw, output_state_bw = output_states
+	output_fb = tf.concat(2, [output_fw, output_bw])
+	shape = output_fb.get_shape().as_list()
+	output_fb = tf.reshape(output_fb,[shape[0],shape[1],2,int(shape[2]/2)])
+	hidden = tf.reduce_sum(output_fb,2)
 
-	fbHrs = [tf.reshape(t, [args.batch_size, 2, args.num_hidden]) for t in fbH]
 	if i != args.num_layer-1:
-            # output size is seqlength*batchsize*2*hidden
-            output = tf.convert_to_tensor(fbHrs, dtype=tf.float32)
-
-            # output size is seqlength*batchsize*hidden
-	    output = tf.reduce_sum(output,2)
-	    print(output.get_shape().as_list())
-
-	    # outputXrs is of size [seqlenth*batchsize,num_hidden]
-    	    outputXrs = tf.reshape(output, [-1, args.num_hidden])
-    	    hid_input = tf.split(0, maxTimeSteps, outputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
-
+    	    hid_input = hidden
+	else:
+	    outputXrs = tf.reshape(hidden, [-1, args.num_hidden])
+	    output_list = tf.split(0, maxTimeSteps, outputXrs)
+	    fbHrs = [tf.reshape(t, [args.batch_size, args.num_hidden]) for t in output_list]
     return fbHrs
     
-
-
-class BiRNN(object):
+class DBiRNN(object):
     def __init__(self,args,maxTimeSteps):
 	self.args = args
 	self.maxTimeSteps = maxTimeSteps
@@ -94,7 +97,6 @@ class BiRNN(object):
 	self.graph = tf.Graph()
 	with self.graph.as_default():
     	    self.inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, args.batch_size, args.num_feature)) #[maxL,32,39]
-	    #self.inputXX = tf.reshape(self.inputX,shape=(args.batch_size,maxTimeSteps,args.num_feature))
     	    inputXrs = tf.reshape(self.inputX, [-1, args.num_feature])
     	    self.inputList = tf.split(0, maxTimeSteps, inputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
             self.targetIxs = tf.placeholder(tf.int64)
@@ -112,15 +114,12 @@ class BiRNN(object):
 			    'learning rate':args.learning_rate
 	    }	    
 
-	    fbHrs = build_multi_brnn(self.args,maxTimeSteps,self.inputList,self.cell_fn,self.seqLengths)
+	    fbHrs = build_multi_dynamic_brnn(self.args,maxTimeSteps,self.inputX,self.cell_fn,self.seqLengths)
 	    with tf.name_scope('fc-layer'):
                 with tf.variable_scope('fc'):
-		    weightsOutH1 = tf.Variable(tf.truncated_normal([2, args.num_hidden],name='weightsOutH1'))
-    	            biasesOutH1 = tf.Variable(tf.zeros([args.num_hidden]),name='biasesOutH1')
     	            weightsClasses = tf.Variable(tf.truncated_normal([args.num_hidden, args.num_class],name='weightsClasses'))
                     biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
-    	            outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbHrs]
-    	            logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
+    	            logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in fbHrs]
     	    logits3d = tf.pack(logits)
     	    self.loss = tf.reduce_mean(ctc.ctc_loss(logits3d, self.targetY, self.seqLengths))
 	    #self.var_op = tf.all_variables()
