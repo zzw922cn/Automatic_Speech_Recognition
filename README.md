@@ -16,7 +16,7 @@ This is a powerful library for automatic speech recognition, it is implemented i
   * Seq2Seq with attention decoder
   * etc.
 * CTC Decoding
-* Evaluation  
+* Evaluation(Mapping some similar phonemes)  
 * Saving or Restoring Model
 * Mini-batch Training
 * Training with GPU or CPU with TensorFlow
