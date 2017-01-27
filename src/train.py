@@ -48,6 +48,7 @@ from utils.utils import get_edit_distance
 
 from models.resnet import ResNet
 from models.brnn import BiRNN
+from models.dynamic_brnn import DBiRNN
 
 class Trainer(object):
     
@@ -68,22 +69,22 @@ class Trainer(object):
 	parser.add_argument('--log_dir', type=str, default='/home/pony/github/Automatic_Speech_Recognition/log/timit/',
                        help='directory to log events while training')
 
-	parser.add_argument('--model', default='ResNet',
-		       help='model for ASR:BiRNN,ResNet,...')
+	parser.add_argument('--model', default='DBiRNN',
+		       help='model for ASR:BiRNN,DBiRNN,ResNet,...')
 
-	parser.add_argument('--rnncell', default='rnn',
+	parser.add_argument('--rnncell', default='gru',
 		       help='rnn cell, 3 choices:rnn,lstm,gru')
 
-        parser.add_argument('--num_layer', type=int, default=1,
+        parser.add_argument('--num_layer', type=int, default=2,
                        help='set the number of hidden layer or bidirectional layer')
 
-        parser.add_argument('--activation', default=tf.nn.relu,
+        parser.add_argument('--activation', default=tf.nn.elu,
                        help='set the activation function of each layer')
 
         parser.add_argument('--optimizer', type=type, default=tf.train.AdamOptimizer,
                        help='set the optimizer to train the model,eg:AdamOptimizer,GradientDescentOptimizer')
 	
-        parser.add_argument('--grad_clip', default=-1,
+        parser.add_argument('--grad_clip', default=5,
                        help='set gradient clipping when backpropagating errors')
 
 	parser.add_argument('--keep', type=bool, default=False,
@@ -92,16 +93,16 @@ class Trainer(object):
 	parser.add_argument('--save', type=bool, default=True,
                        help='to save the model in the disk')
 
-	parser.add_argument('--evaluation', type=bool, default=True,
+	parser.add_argument('--evaluation', type=bool, default=False,
                        help='test the model based on trained parameters, but at present, we can"t test during training.')
 
-        parser.add_argument('--learning_rate', type=float, default=0.0001,
+        parser.add_argument('--learning_rate', type=float, default=0.001,
                        help='set the step size of each iteration')
 
         parser.add_argument('--num_epoch', type=int, default=200000,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=32,
+        parser.add_argument('--batch_size', type=int, default=64,
                        help='set the number of training samples in a mini-batch')
 
         parser.add_argument('--test_batch_size', type=int, default=1,
@@ -110,7 +111,7 @@ class Trainer(object):
         parser.add_argument('--num_feature', type=int, default=39,
                        help='set the dimension of feature, ie: 39 mfccs, you can set 39 ')
 
-        parser.add_argument('--num_hidden', type=int, default=32,
+        parser.add_argument('--num_hidden', type=int, default=128,
                        help='set the number of neurons in hidden layer')
 
         parser.add_argument('--num_class', type=int, default=62,
@@ -139,16 +140,27 @@ class Trainer(object):
 	args = self.args
         batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train')
 
+	# put the maxTimeSteps into network,
+	# but it's not efficient, can we make
+	# the dynamic network?
 	if args.model == 'ResNet':
 	    model = ResNet(args,maxTimeSteps)
-	if args.model == 'BiRNN':
+	elif args.model == 'BiRNN':
 	    model = BiRNN(args,maxTimeSteps)
+	elif args.model == 'DBiRNN':
+	    model = DBiRNN(args,maxTimeSteps)
+	else:
+	    pass
+
+	# count the num of params
 	num_params = count_params(model,mode='trainable')
 	all_num_params = count_params(model,mode='all')
 	model.config['trainable params'] = num_params
 	model.config['all params'] = all_num_params
 	print(model.config)
+
         with tf.Session(graph=model.graph) as sess:
+	    # restore from stored model
 	    if args.keep == True:
 		ckpt = tf.train.get_checkpoint_state(args.save_dir)
                 if ckpt and ckpt.model_checkpoint_path:
@@ -169,10 +181,13 @@ class Trainer(object):
                     batchTargetIxs, batchTargetVals, batchTargetShape = batchTargetSparse
                     feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs, model.targetVals: batchTargetVals,model.targetShape: batchTargetShape, model.seqLengths: batchSeqLengths}
 
-                    _, l, er, lmt, pre = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions], feed_dict=feedDict)
-	    	    #print(output_to_sequence(pre,mode='phoneme'))
+                    _, l, er, lmt, pre, y = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions, model.targetY], feed_dict=feedDict)
 
-                    if (batch % 1) == 0:
+		    er = get_edit_distance([pre.values],[y.values],mode='train')
+
+		    batch_interval = 2 if len(batchRandIxs)<10 else len(batchRandIxs)/10
+                    #if (batch % (len(batchRandIxs)/10)) == 0:
+                    if (batch % batch_interval) == 0:
                 	print('Epoch', epoch+1, 'Minibatch', batch, 'loss:', l)
                 	print('Epoch', epoch+1, 'Minibatch', batch, 'error rate:', er)
             	    batchErrors[batch] = er*len(batchSeqLengths)
@@ -202,6 +217,8 @@ class Trainer(object):
 	    model = ResNet(args,maxTimeSteps)
 	elif args.model == 'BiRNN':
 	    model = BiRNN(args,maxTimeSteps)
+	elif args.model == 'DBiRNN':
+	    model = DBiRNN(args,maxTimeSteps)
 
 	num_params = count_params(model,mode='trainable')
 	all_num_params = count_params(model,mode='all')
@@ -232,8 +249,6 @@ class Trainer(object):
 
 		er = get_edit_distance([pre.values],[y.values],mode='test')
 	    	print(output_to_sequence(pre,mode='phoneme'))
-
-                #print('Minibatch', batch, 'test loss:', l)
                 print('Minibatch', batch, 'test error rate:', er)
             	batchErrors[batch] = er*len(batchSeqLengths)
             epochER = batchErrors.sum() / totalN

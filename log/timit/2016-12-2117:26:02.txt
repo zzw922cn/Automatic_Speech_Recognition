@@ -1,4 +1,0 @@
-{'optimizer': <class 'tensorflow.python.training.adam.AdamOptimizer'>, 'name': 'residual network', 'learning rate': 0.0001, 'trainable params': 1948274, 'num_layer': 10, 'num_class': 62, 'all params': 5844824.0, 'num_featuremap': 16}
-17:33:01 12/21/16 CST
-Epoch:1 train error rate:7.07961271129
-Epoch:1 train time:302.39050889 s

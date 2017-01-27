@@ -133,7 +133,7 @@ class ResNet(object):
     	    self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(conv_output, self.seqLengths)[0][0])
     	    self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
 	    self.initial_op = tf.global_variables_initializer()
-	    self.saver = tf.train.Saver(tf.global_variables(),max_to_keep=5,keep_checkpoint_every_n_hours=1)
+	    self.saver = tf.train.Saver(tf.global_variables(),max_to_keep=2,keep_checkpoint_every_n_hours=1)
 	    self.logfile = args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
 	    self.var_op = tf.global_variables()
 	    self.var_trainable_op = tf.trainable_variables()
