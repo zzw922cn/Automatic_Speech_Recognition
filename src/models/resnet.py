@@ -30,9 +30,10 @@ from functools import wraps
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
-from tensorflow.python.ops import rnn_cell
-from tensorflow.python.ops.rnn import bidirectional_rnn
+from tensorflow.contrib.rnn.python.ops import rnn_cell
+#from tensorflow.python.ops.rnn import bidirectional_rnn
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
+bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 
 from src.utils.utils import load_batched_data
 from src.utils.utils import describe
@@ -89,11 +90,12 @@ def build_resnet(inpt,maxTimeSteps,depth,width,num_class):
 	print(global_pool.get_shape().as_list())
 	shape = global_pool.get_shape().as_list()
 	res_output = tf.reshape(global_pool,[shape[0]*shape[1],-1]) #seq*batch,feature
-	res_output_list = tf.split(0,maxTimeSteps,res_output)
+	#res_output_list = tf.split(0,maxTimeSteps,res_output)
+	res_output_list = tf.split(res_output, maxTimeSteps, 0)
     	logits = [build_forward_layer(t, [shape[2],num_class], 
 		kernel='linear', name_scope='out_proj_'+str(idx)) 
 		for idx,t in enumerate(res_output_list)]
-    	conv_output = tf.pack(logits)
+    	conv_output = tf.stack(logits)
     return conv_output
 
 class ResNet(object):
@@ -108,7 +110,7 @@ class ResNet(object):
 	with self.graph.as_default():
     	    self.inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, args.batch_size, args.num_feature)) #[maxL,32,39]
     	    inputXrs = tf.reshape(self.inputX, [-1, args.num_feature])
-    	    self.inputList = tf.split(0, maxTimeSteps, inputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
+    	    self.inputList = tf.split(inputXrs, maxTimeSteps, 0) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
 
             self.targetIxs = tf.placeholder(tf.int64)
     	    self.targetVals = tf.placeholder(tf.int32)
@@ -116,7 +118,7 @@ class ResNet(object):
     	    self.targetY = tf.SparseTensor(self.targetIxs, self.targetVals, self.targetShape)
             self.seqLengths = tf.placeholder(tf.int32, shape=(args.batch_size))
 	    depth = 10
-	    width = 16
+	    width = 8
 	    self.config = { 'name':'residual network',
 			    'num_layer':depth,
 			    'num_featuremap':width,
@@ -127,7 +129,7 @@ class ResNet(object):
 
 	    inpt = tf.reshape(self.inputX,[args.batch_size,maxTimeSteps,args.num_feature,1])
             conv_output = build_resnet(inpt,maxTimeSteps,depth,width,args.num_class)
-    	    self.loss = tf.reduce_mean(ctc.ctc_loss(conv_output, self.targetY, self.seqLengths))
+    	    self.loss = tf.reduce_mean(ctc.ctc_loss(self.targetY, conv_output, self.seqLengths))
     	    self.optimizer = args.optimizer(args.learning_rate).minimize(self.loss)
     	    self.logitsMaxTest = tf.slice(tf.argmax(conv_output, 2), [0, 0], [self.seqLengths[0], 1])
     	    self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(conv_output, self.seqLengths)[0][0])

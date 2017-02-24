@@ -1,6 +1,0 @@
-model_checkpoint_path: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-14"
-all_model_checkpoint_paths: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-10"
-all_model_checkpoint_paths: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-11"
-all_model_checkpoint_paths: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-12"
-all_model_checkpoint_paths: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-13"
-all_model_checkpoint_paths: "/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-14"

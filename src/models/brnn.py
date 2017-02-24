@@ -31,8 +31,8 @@ from functools import wraps
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
-from tensorflow.python.ops import rnn_cell
-from tensorflow.python.ops.rnn import bidirectional_rnn
+from tensorflow.contrib.rnn.python.ops import rnn_cell
+bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from src.utils.utils import load_batched_data
@@ -69,7 +69,7 @@ def build_multi_brnn(args,
 
 	    # outputXrs is of size [seqlenth*batchsize,num_hidden]
     	    outputXrs = tf.reshape(output, [-1, args.num_hidden])
-    	    hid_input = tf.split(0, maxTimeSteps, outputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
+    	    hid_input = tf.split(outputXrs, maxTimeSteps, 0) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
 
     return fbHrs
     
@@ -82,7 +82,7 @@ class BiRNN(object):
 	if args.rnncell == 'rnn':
             self.cell_fn = rnn_cell.BasicRNNCell
         elif args.rnncell == 'gru':
-            self.cell_fn = rnn_cell.GRUCell
+            self.cell_fn = tf.contrib.rnn.GRUCell
         elif args.rnncell == 'lstm':
             self.cell_fn = rnn_cell.BasicLSTMCell
         else:
@@ -96,7 +96,7 @@ class BiRNN(object):
     	    self.inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, args.batch_size, args.num_feature)) #[maxL,32,39]
 	    #self.inputXX = tf.reshape(self.inputX,shape=(args.batch_size,maxTimeSteps,args.num_feature))
     	    inputXrs = tf.reshape(self.inputX, [-1, args.num_feature])
-    	    self.inputList = tf.split(0, maxTimeSteps, inputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
+    	    self.inputList = tf.split(inputXrs, maxTimeSteps, 0) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
             self.targetIxs = tf.placeholder(tf.int64)
     	    self.targetVals = tf.placeholder(tf.int32)
     	    self.targetShape = tf.placeholder(tf.int64)
@@ -119,10 +119,10 @@ class BiRNN(object):
     	            biasesOutH1 = tf.Variable(tf.zeros([args.num_hidden]),name='biasesOutH1')
     	            weightsClasses = tf.Variable(tf.truncated_normal([args.num_hidden, args.num_class],name='weightsClasses'))
                     biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
-    	            outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbHrs]
+    	            outH1 = [tf.reduce_sum(tf.multiply(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbHrs]
     	            logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
-    	    logits3d = tf.pack(logits)
-    	    self.loss = tf.reduce_mean(ctc.ctc_loss(logits3d, self.targetY, self.seqLengths))
+    	    logits3d = tf.stack(logits)
+    	    self.loss = tf.reduce_mean(ctc.ctc_loss(self.targetY, logits3d, self.seqLengths))
 	    #self.var_op = tf.all_variables()
 	    self.var_op = tf.global_variables()
 	    self.var_trainable_op = tf.trainable_variables()
