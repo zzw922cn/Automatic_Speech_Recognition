@@ -31,7 +31,7 @@ from functools import wraps
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
-from tensorflow.python.ops import rnn_cell
+from tensorflow.contrib.rnn.python.ops import rnn_cell
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from src.utils.utils import load_batched_data
@@ -40,6 +40,7 @@ from src.utils.utils import setAttrs
 from src.utils.utils import build_weight
 from src.utils.utils import build_forward_layer
 from src.utils.utils import build_conv_layer
+from src.utils.utils import list_to_sparse_tensor
 
 def build_multi_dynamic_brnn(args, 
 		     maxTimeSteps,
@@ -65,7 +66,8 @@ def build_multi_dynamic_brnn(args,
 	output_fw, output_bw = outputs
 	# forward states, backward states
 	output_state_fw, output_state_bw = output_states
-	output_fb = tf.concat(2, [output_fw, output_bw])
+	#output_fb = tf.concat(2, [output_fw, output_bw])
+	output_fb = tf.concat([output_fw, output_bw], 2)
 	shape = output_fb.get_shape().as_list()
 	output_fb = tf.reshape(output_fb,[shape[0],shape[1],2,int(shape[2]/2)])
 	hidden = tf.reduce_sum(output_fb,2)
@@ -74,7 +76,8 @@ def build_multi_dynamic_brnn(args,
     	    hid_input = hidden
 	else:
 	    outputXrs = tf.reshape(hidden, [-1, args.num_hidden])
-	    output_list = tf.split(0, maxTimeSteps, outputXrs)
+	    #output_list = tf.split(0, maxTimeSteps, outputXrs)
+	    output_list = tf.split(outputXrs, maxTimeSteps, 0)
 	    fbHrs = [tf.reshape(t, [args.batch_size, args.num_hidden]) for t in output_list]
     return fbHrs
     
@@ -85,7 +88,7 @@ class DBiRNN(object):
 	if args.rnncell == 'rnn':
             self.cell_fn = rnn_cell.BasicRNNCell
         elif args.rnncell == 'gru':
-            self.cell_fn = rnn_cell.GRUCell
+	    self.cell_fn = tf.contrib.rnn.GRUCell
         elif args.rnncell == 'lstm':
             self.cell_fn = rnn_cell.BasicLSTMCell
         else:
@@ -98,7 +101,8 @@ class DBiRNN(object):
 	with self.graph.as_default():
     	    self.inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, args.batch_size, args.num_feature)) #[maxL,32,39]
     	    inputXrs = tf.reshape(self.inputX, [-1, args.num_feature])
-    	    self.inputList = tf.split(0, maxTimeSteps, inputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
+    	    #self.inputList = tf.split(0, maxTimeSteps, inputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
+    	    self.inputList = tf.split(inputXrs, maxTimeSteps, 0) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
             self.targetIxs = tf.placeholder(tf.int64)
     	    self.targetVals = tf.placeholder(tf.int32)
     	    self.targetShape = tf.placeholder(tf.int64)
@@ -120,8 +124,9 @@ class DBiRNN(object):
     	            weightsClasses = tf.Variable(tf.truncated_normal([args.num_hidden, args.num_class],name='weightsClasses'))
                     biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
     	            logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in fbHrs]
-    	    logits3d = tf.pack(logits)
-    	    self.loss = tf.reduce_mean(ctc.ctc_loss(logits3d, self.targetY, self.seqLengths))
+    	    #logits3d = tf.pack(logits)
+    	    logits3d = tf.stack(logits)
+    	    self.loss = tf.reduce_mean(ctc.ctc_loss(self.targetY, logits3d, self.seqLengths))
 	    #self.var_op = tf.all_variables()
 	    self.var_op = tf.global_variables()
 	    self.var_trainable_op = tf.trainable_variables()

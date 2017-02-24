@@ -33,9 +33,11 @@ from functools import wraps
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
-from tensorflow.python.ops import rnn_cell
-from tensorflow.python.ops.rnn import bidirectional_rnn
+from tensorflow.contrib.rnn.python.ops import rnn_cell
+#from tensorflow.python.ops.rnn import bidirectional_rnn
+#from tensorflow.contrib.rnn import bidirectional_rnn
 
+bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 from utils.utils import load_batched_data
 from utils.utils import describe
 from utils.utils import getAttrs
@@ -66,11 +68,11 @@ class Trainer(object):
         parser.add_argument('--test_label_dir', type=str, default='/home/pony/github/data/timit/test/label/',
                        help='data directory containing label numpy files, usually end with .npy')
 
-	parser.add_argument('--log_dir', type=str, default='/home/pony/github/Automatic_Speech_Recognition/log/timit/',
+	parser.add_argument('--log_dir', type=str, default='/home/pony/github/data/ASR/log/',
                        help='directory to log events while training')
 
-	parser.add_argument('--model', default='DBiRNN',
-		       help='model for ASR:BiRNN,DBiRNN,ResNet,...')
+	parser.add_argument('--model', default='ResNet',
+		       help='model for ASR:DBiRNN,BiRNN,ResNet,...')
 
 	parser.add_argument('--rnncell', default='gru',
 		       help='rnn cell, 3 choices:rnn,lstm,gru')
@@ -117,10 +119,10 @@ class Trainer(object):
         parser.add_argument('--num_class', type=int, default=62,
                        help='set the number of labels in the output layer, if timit phonemes, it is 62; if timit characters, it is 28; if libri characters, it is 28')
 
-        parser.add_argument('--save_dir', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/',
+        parser.add_argument('--save_dir', type=str, default='/home/pony/github/data/ASR/save/',
                        help='set the directory to save the model, containing checkpoint file and parameter file')
 
-        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/Automatic_Speech_Recognition/save/timit/model.ckpt-55',
+        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/data/ASR/save/',
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()

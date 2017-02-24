@@ -1,6 +1,9 @@
 # Automatic-Speech-Recognition
 End-to-end automatic speech recognition system implemented in TensorFlow.
 
+## Update
+Automatic Speech Recognition has been updated to support TensorFlow r1.0! --2017.2.24
+
 ## Content
 This is a powerful library for automatic speech recognition, it is implemented in TensorFlow and support training with CPU/GPU. This library contains followings models you can choose to train your own model:
 * Data Pre-processing
