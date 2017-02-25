@@ -1,8 +1,9 @@
 # Automatic-Speech-Recognition
 End-to-end automatic speech recognition system implemented in TensorFlow.
 
-## Update
-Automatic Speech Recognition has been updated to support TensorFlow r1.0! --2017.2.24
+## Recent Updates
+- [×] Support TensorFlow r1.0! --2017.2.24
+<d>2017-02-24</d> Support TensorFlow r1.0
 
 ## Content
 This is a powerful library for automatic speech recognition, it is implemented in TensorFlow and support training with CPU/GPU. This library contains followings models you can choose to train your own model:
@@ -73,15 +74,16 @@ Since the original TIMIT dataset contains 61 phonemes, we use 61 phonemes for tr
 | ax | ah | 
  
 
-### Acoustic Model
-TODO
+### Core Features
++ dynamic RNN(GRU, LSTM)
++ Residual Network(Deep CNN)
++ CTC Decoding
++ TIMIT Phoneme Edit Distance(PER)
 
-### CTC Decoding
-TODO
+### Future Work
+- [ ] Add Attention Mechanism
+- [ ] Add more efficient dynamic computation graph without padding
+- [ ] List experimental results 
+- [ ] Implement more ASR models following newest investigations 
 
-### Evaluation
-TODO
-
-## Future work
-TODO
 
