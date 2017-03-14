@@ -29,7 +29,7 @@ common function list:
 	list_to_sparse_tensor(targetList)
 	get_edit_distance(hyp_arr,truth_arr)
 	data_lists_to_batches(inputList, targetList, batchSize)
-	load_batched_data(specPath, targetPath, batchSize)
+	load_batched_data(mfccPath, labelPath, batchSize)
 	list_dirs(mfcc_dir,label_dir)
 	build_weight(shape,name=None,func='truncated_normal')
 	build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1')
@@ -139,12 +139,12 @@ def target2phoneme(target):
     return seq
 
 @describe
-def logging(model,errorRate,epoch=0,delta_time=0,mode='train'):
+def logging(model,logfile,errorRate,epoch=0,delta_time=0,mode='train'):
     ''' log the cost and error rate and time while training or testing
     '''
     if mode != 'train' and mode!='test' and mode!='config':
 	raise TypeError('mode should be train or test or config.')
-    logfile = model.logfile
+    logfile = logfile
     if mode == 'config':
 	with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
@@ -184,11 +184,19 @@ def group_phoneme(orig_phn,mapping):
     group_phn.sort()
     return group_phn
 
-def list_to_sparse_tensor(targetList,mode='train'):
+def list_to_sparse_tensor(targetList,mode='train', type='phn'):
     ''' turn 2-D List to SparseTensor
     '''
     indices = [] #index
     vals = [] #value
+    if type=='cha':
+	for tI, target in enumerate(targetList):
+            for seqI, val in enumerate(target):
+		indices.append([tI, seqI])
+		vals.append(val)
+	shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
+        return (np.array(indices), np.array(vals), np.array(shape))
+
     group_phn = group_phoneme(phn,mapping)
     for tI, target in enumerate(targetList):
         for seqI, val in enumerate(target):
@@ -205,7 +213,7 @@ def list_to_sparse_tensor(targetList,mode='train'):
     shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
     return (np.array(indices), np.array(vals), np.array(shape))
 
-def get_edit_distance(hyp_arr,truth_arr, normalize=True, mode='train'):
+def get_edit_distance(hyp_arr,truth_arr, normalize=True, mode='train', type='phn'):
     ''' calculate edit distance 
     '''
     graph = tf.Graph()
@@ -215,8 +223,8 @@ def get_edit_distance(hyp_arr,truth_arr, normalize=True, mode='train'):
         editDist = tf.reduce_sum(tf.edit_distance(hyp, truth, normalize=normalize))
 
     with tf.Session(graph=graph) as session:
-        truthTest = list_to_sparse_tensor(truth_arr, mode)
-        hypTest = list_to_sparse_tensor(hyp_arr, mode)
+        truthTest = list_to_sparse_tensor(truth_arr, mode, type)
+        hypTest = list_to_sparse_tensor(hyp_arr, mode, type)
         feedDict = {truth: truthTest, hyp: hypTest}
         dist = session.run(editDist, feed_dict=feedDict)
     return dist
@@ -258,14 +266,13 @@ def data_lists_to_batches(inputList, targetList, batchSize):
         end += batchSize
     return (dataBatches, maxLength)
 
-def load_batched_data(specPath, targetPath, batchSize):
-    import os
+def load_batched_data(mfccPath, labelPath, batchSize):
     '''returns 3-element tuple: batched data (list), maxTimeLength (int), and
        total number of samples (int)'''
-    return data_lists_to_batches([np.load(os.path.join(specPath, fn)) for fn in os.listdir(specPath)],
-                                 [np.load(os.path.join(targetPath, fn)) for fn in os.listdir(targetPath)],
+    return data_lists_to_batches([np.load(os.path.join(mfccPath, fn)) for fn in os.listdir(mfccPath)],
+                                 [np.load(os.path.join(labelPath, fn)) for fn in os.listdir(labelPath)],
                                  batchSize) + \
-            (len(os.listdir(specPath)),)
+            (len(os.listdir(mfccPath)),)
 
 def list_dirs(mfcc_dir,label_dir):
     mfcc_dirs = glob(mfcc_dir)
@@ -385,10 +392,9 @@ def _get_dims(shape):
     return fan_in, fan_out
 
 def dropout(x, keep_prob, is_training):
-    """ Apply dropout layer.
-    NOTE: is_training is a tensorflow bool tensor.
+    """ Apply dropout to a tensor
     """
-    return tf.cond(is_training, lambda: tf.nn.dropout(x, keep_prob), lambda: x)
+    return tf.contrib.layers.dropout(x, keep_prob=keep_prob, is_training=is_training)
 
 
 # test code

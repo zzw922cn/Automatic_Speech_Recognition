@@ -31,15 +31,22 @@ import cPickle
 import glob
 import sys
 
-rootdir = '/home/pony/ASR/datasets/LibriSpeech/train-other-500/'
-
 
 count = 0
-subset = 0
-labels=[]
+#subset = 0
+#labels=[]
 
-label_dir = '/home/pony/github/ASR_libri/libri/cha-level/mfcc_and_label/label/'
-mfcc_dir = '/home/pony/github/ASR_libri/libri/cha-level/mfcc_and_label/mfcc/'
+keywords = ['dev-clean', 'dev-other', 'test-clean', 'test-other', 'train-clean-100', 'train-clean-360', 'train-other-500']
+
+keyword = keywords[6]
+label_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/label/'
+mfcc_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/mfcc/'
+if not os.path.exists(label_dir):
+    os.makedirs(label_dir)
+if not os.path.exists(mfcc_dir):
+    os.makedirs(mfcc_dir)
+
+rootdir = '/media/pony/Seagate Expansion Drive/学习/语音识别/ASR数据库/LibriSpeech/'+keyword
 
 if True:
     for subdir, dirs, files in os.walk(rootdir):
@@ -50,7 +57,7 @@ if True:
 	        if f.endswith('.wav'):
 		    print fullFilename
 	            (rate,sig)= wav.read(fullFilename)
-                    mfcc = calcMFCC_delta_delta(sig,rate,win_length=0.020,win_step=0.020)
+                    mfcc = calcMFCC_delta_delta(sig,rate,win_length=0.020,win_step=0.010)
 		    # transpose mfcc to array of (39,time_length)
 		    mfcc = np.transpose(mfcc)
 		    print mfcc.shape
@@ -63,9 +70,12 @@ if True:
     	    	        characters = f.readline().strip()
 	            print characters
     	            targets = []
+		    ## totally 28 real characters
     	            for c in characters:
 			if c == ' ':
 			    targets.append(0)
+			elif c == "'":
+			    targets.append(27)
 			else:
 			    targets.append(ord(c)-96) #从1开始
 		    targets = np.array(targets)
