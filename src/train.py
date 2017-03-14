@@ -26,6 +26,7 @@ sys.dont_write_bytecode = True
 
 import argparse
 import time
+import datetime
 import os
 from six.moves import cPickle
 from functools import wraps
@@ -34,8 +35,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.contrib.rnn.python.ops import rnn_cell
-#from tensorflow.python.ops.rnn import bidirectional_rnn
-#from tensorflow.contrib.rnn import bidirectional_rnn
 
 bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 from utils.utils import load_batched_data
@@ -71,16 +70,19 @@ class Trainer(object):
 	parser.add_argument('--log_dir', type=str, default='/home/pony/github/data/ASR/log/',
                        help='directory to log events while training')
 
-	parser.add_argument('--model', default='ResNet',
+	parser.add_argument('--model', default='DBiRNN',
 		       help='model for ASR:DBiRNN,BiRNN,ResNet,...')
 
-	parser.add_argument('--rnncell', default='gru',
+	parser.add_argument('--keep_prob', type=float, default=0.6,
+		       help='set the keep probability of layer for dropout')
+
+	parser.add_argument('--rnncell', type=str, default='gru',
 		       help='rnn cell, 3 choices:rnn,lstm,gru')
 
         parser.add_argument('--num_layer', type=int, default=2,
                        help='set the number of hidden layer or bidirectional layer')
 
-        parser.add_argument('--activation', default=tf.nn.elu,
+        parser.add_argument('--activation', default=tf.nn.relu,
                        help='set the activation function of each layer')
 
         parser.add_argument('--optimizer', type=type, default=tf.train.AdamOptimizer,
@@ -95,19 +97,19 @@ class Trainer(object):
 	parser.add_argument('--save', type=bool, default=True,
                        help='to save the model in the disk')
 
-	parser.add_argument('--evaluation', type=bool, default=False,
+	parser.add_argument('--mode', type=str, default='train',
                        help='test the model based on trained parameters, but at present, we can"t test during training.')
 
-        parser.add_argument('--learning_rate', type=float, default=0.001,
+        parser.add_argument('--learning_rate', type=float, default=0.0005,
                        help='set the step size of each iteration')
 
-        parser.add_argument('--num_epoch', type=int, default=200000,
+        parser.add_argument('--num_epoch', type=int, default=5,
                        help='set the total number of training epochs')
 
-        parser.add_argument('--batch_size', type=int, default=64,
+        parser.add_argument('--batch_size', type=int, default=32,
                        help='set the number of training samples in a mini-batch')
 
-        parser.add_argument('--test_batch_size', type=int, default=1,
+        parser.add_argument('--test_batch_size', type=int, default=512,
                        help='set the number of testing samples in a mini-batch')
 
         parser.add_argument('--num_feature', type=int, default=39,
@@ -126,6 +128,7 @@ class Trainer(object):
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
+	self.logfile = self.args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
 
     @describe
     def load_data(self,args,mode='train'):
@@ -185,19 +188,17 @@ class Trainer(object):
 
                     _, l, er, lmt, pre, y = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions, model.targetY], feed_dict=feedDict)
 
-		    er = get_edit_distance([pre.values],[y.values],mode='train')
+		    er = get_edit_distance([pre.values],[y.values], mode='train')
 
-		    batch_interval = 2 if len(batchRandIxs)<10 else len(batchRandIxs)/10
-                    #if (batch % (len(batchRandIxs)/10)) == 0:
-                    if (batch % batch_interval) == 0:
-                	print('Epoch', epoch+1, 'Minibatch', batch, 'loss:', l)
-                	print('Epoch', epoch+1, 'Minibatch', batch, 'error rate:', er)
+                    
+                    print('Epoch', epoch+1, 'Minibatch', batch+1, 'loss:', l)
+                    print('Epoch', epoch+1, 'Minibatch', batch+1, 'error rate:', er)
             	    batchErrors[batch] = er*len(batchSeqLengths)
 		    
 		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%5000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
 		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                         model.saver.save(sess,checkpoint_path,global_step=epoch)
-                        print('Model has been saved in:'+str(save_path))
+                        print('Model has been saved in file')
 	        end = time.time()
 		delta_time = end-start
 		print('Epoch '+str(epoch+1)+' needs time:'+str(delta_time)+' s')	
@@ -208,8 +209,8 @@ class Trainer(object):
                     print('Model has been saved in file')
                 epochER = batchErrors.sum() / totalN
                 print('Epoch', epoch+1, 'train error rate:', epochER)
-	        logging(model,epochER,epoch,delta_time,mode='config')
-		logging(model,epochER,epoch,delta_time,mode='train')
+	        logging(model,self.logfile,epochER,epoch,delta_time,mode='config')
+		logging(model,self.logfile,epochER,epoch,delta_time,mode='train')
 	
     def test(self):
 	# load data
@@ -251,17 +252,19 @@ class Trainer(object):
 
 		er = get_edit_distance([pre.values],[y.values],mode='test')
 	    	print(output_to_sequence(pre,mode='phoneme'))
-                print('Minibatch', batch, 'test error rate:', er)
+                print('Minibatch', batch+1, 'test error rate:', er)
             	batchErrors[batch] = er*len(batchSeqLengths)
             epochER = batchErrors.sum() / totalN
             print('TIMIT test error rate:', epochER)
-	    logging(model,epochER,mode='test')
+	    logging(model,self.logfile,epochER,mode='test')
 
 if __name__ == '__main__':
     tr = Trainer()
-    if tr.args.evaluation is True:
-	print('test mode')
-	tr.test()
-    else:
+    if tr.args.mode == 'train':
 	print('train mode')
-        tr.train()
+	tr.train()
+    elif tr.args.mode == 'test':
+	print('test mode')
+        tr.test()
+    else:
+	pass

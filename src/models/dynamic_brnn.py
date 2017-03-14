@@ -32,6 +32,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.contrib.rnn.python.ops import rnn_cell
+from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from src.utils.utils import load_batched_data
@@ -41,6 +42,7 @@ from src.utils.utils import build_weight
 from src.utils.utils import build_forward_layer
 from src.utils.utils import build_conv_layer
 from src.utils.utils import list_to_sparse_tensor
+from src.utils.utils import dropout
 
 def build_multi_dynamic_brnn(args, 
 		     maxTimeSteps,
@@ -71,6 +73,7 @@ def build_multi_dynamic_brnn(args,
 	shape = output_fb.get_shape().as_list()
 	output_fb = tf.reshape(output_fb,[shape[0],shape[1],2,int(shape[2]/2)])
 	hidden = tf.reduce_sum(output_fb,2)
+	hidden = dropout(hidden, args.keep_prob, (args.mode=='train'))	
 
 	if i != args.num_layer-1:
     	    hid_input = hidden
@@ -90,7 +93,7 @@ class DBiRNN(object):
         elif args.rnncell == 'gru':
 	    self.cell_fn = tf.contrib.rnn.GRUCell
         elif args.rnncell == 'lstm':
-            self.cell_fn = rnn_cell.BasicLSTMCell
+            self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
         else:
             raise Exception("model type not supported: {}".format(args.model))
 	self.build_graph(args,maxTimeSteps)
@@ -115,7 +118,8 @@ class DBiRNN(object):
 			    'num_class':args.num_class,
 			    'activation':args.activation,
 			    'optimizer':args.optimizer,
-			    'learning rate':args.learning_rate
+			    'learning rate':args.learning_rate,
+			    'keep prob':args.keep_prob
 	    }	    
 
 	    fbHrs = build_multi_dynamic_brnn(self.args,maxTimeSteps,self.inputX,self.cell_fn,self.seqLengths)
@@ -124,10 +128,9 @@ class DBiRNN(object):
     	            weightsClasses = tf.Variable(tf.truncated_normal([args.num_hidden, args.num_class],name='weightsClasses'))
                     biasesClasses = tf.Variable(tf.zeros([args.num_class]),name='biasesClasses')
     	            logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in fbHrs]
-    	    #logits3d = tf.pack(logits)
     	    logits3d = tf.stack(logits)
     	    self.loss = tf.reduce_mean(ctc.ctc_loss(self.targetY, logits3d, self.seqLengths))
-	    #self.var_op = tf.all_variables()
+
 	    self.var_op = tf.global_variables()
 	    self.var_trainable_op = tf.trainable_variables()
 
