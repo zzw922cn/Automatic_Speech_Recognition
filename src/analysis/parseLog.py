@@ -64,6 +64,7 @@ def visualize(trainERs, testERs):
     ax2.grid()
     plt.suptitle('dynamic bidirectional LSTM for Automatic Speech Recognition')
     plt.show()
-rootdir = '/home/pony/github/data/ASR/log/'
-train, test = readlogs(rootdir)
-visualize(train, test)
+if __name__ == '__main__':
+    rootdir = '/home/pony/github/data/ASR/log/'
+    train, test = readlogs(rootdir)
+    visualize(train, test)

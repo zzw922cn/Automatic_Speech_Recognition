@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 #!/usr/bin/python
 
-''' This file is designed to train the models of ASR
+''' Training or testing for Automatic Speech Recognition
 author:
 
       iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
@@ -54,26 +54,54 @@ from models.dynamic_brnn import DBiRNN
 class Trainer(object):
     
     def __init__(self):
+	cat = 1
+
+	libri_data = ['dev', 'train-clean-100', 'train-clean-360', 'train-other-500']
+	lb = 1
+
+	train_mfcc_dir = ['/home/pony/github/data/timit/train/mfcc/',
+			  '/home/pony/github/data/libri/cha-level/'+libri_data[lb]+'/mfcc/']
+
+	train_label_dir = ['/home/pony/github/data/timit/train/label/',
+			  '/home/pony/github/data/libri/cha-level/'+libri_data[lb]+'/label/']
+
+	test_mfcc_dir = ['/home/pony/github/data/timit/test/mfcc/',
+			  '/home/pony/github/data/libri/cha-level/test/mfcc/']
+
+	test_label_dir = ['/home/pony/github/data/timit/test/label/',
+			  '/home/pony/github/data/libri/cha-level/test/label/']
+
+	task = ['timit', 'libri']
+	level = ['phn', 'cha']
+	num_hidden = [128, 256]
+	num_class = [62, 29]
+	save_dir = ['/home/pony/github/data/ASR/save/timit/', '/home/pony/github/data/ASR/save/libri/']
+	log_dir = ['/home/pony/github/data/ASR/log/timit/', '/home/pony/github/data/ASR/log/libri/']
+
 	parser = argparse.ArgumentParser()
-        parser.add_argument('--train_mfcc_dir', type=str, default='/home/pony/github/data/timit/train/mfcc/',
+	parser.add_argument('--task', type=str, default=task[cat], help='two tasks now, timit or libri')
+
+	parser.add_argument('--level', type=str, default=level[cat], help='two levels now, phn or cha')
+
+        parser.add_argument('--train_mfcc_dir', type=str, default=train_mfcc_dir[cat],
                        help='data directory containing mfcc numpy files, usually end with .npy')
 
-        parser.add_argument('--train_label_dir', type=str, default='/home/pony/github/data/timit/train/label/',
+        parser.add_argument('--train_label_dir', type=str, default=train_label_dir[cat],
                        help='data directory containing label numpy files, usually end with .npy')
 
-        parser.add_argument('--test_mfcc_dir', type=str, default='/home/pony/github/data/timit/test/mfcc/',
+        parser.add_argument('--test_mfcc_dir', type=str, default=test_mfcc_dir[cat],
                        help='data directory containing mfcc numpy files, usually end with .npy')
 
-        parser.add_argument('--test_label_dir', type=str, default='/home/pony/github/data/timit/test/label/',
+        parser.add_argument('--test_label_dir', type=str, default=test_label_dir[cat],
                        help='data directory containing label numpy files, usually end with .npy')
 
-	parser.add_argument('--log_dir', type=str, default='/home/pony/github/data/ASR/log/',
+	parser.add_argument('--log_dir', type=str, default=log_dir[cat],
                        help='directory to log events while training')
 
 	parser.add_argument('--model', default='DBiRNN',
 		       help='model for ASR:DBiRNN,BiRNN,ResNet,...')
 
-	parser.add_argument('--keep_prob', type=float, default=0.6,
+	parser.add_argument('--keep_prob', type=float, default=0.99,
 		       help='set the keep probability of layer for dropout')
 
 	parser.add_argument('--rnncell', type=str, default='gru',
@@ -88,7 +116,7 @@ class Trainer(object):
         parser.add_argument('--optimizer', type=type, default=tf.train.AdamOptimizer,
                        help='set the optimizer to train the model,eg:AdamOptimizer,GradientDescentOptimizer')
 	
-        parser.add_argument('--grad_clip', default=5,
+        parser.add_argument('--grad_clip', default=15,
                        help='set gradient clipping when backpropagating errors')
 
 	parser.add_argument('--keep', type=bool, default=False,
@@ -100,54 +128,53 @@ class Trainer(object):
 	parser.add_argument('--mode', type=str, default='train',
                        help='test the model based on trained parameters, but at present, we can"t test during training.')
 
-        parser.add_argument('--learning_rate', type=float, default=0.0005,
+        parser.add_argument('--learning_rate', type=float, default=0.001,
                        help='set the step size of each iteration')
 
-        parser.add_argument('--num_epoch', type=int, default=5,
+        parser.add_argument('--num_epoch', type=int, default=5000,
                        help='set the total number of training epochs')
 
         parser.add_argument('--batch_size', type=int, default=32,
                        help='set the number of training samples in a mini-batch')
 
-        parser.add_argument('--test_batch_size', type=int, default=512,
+        parser.add_argument('--test_batch_size', type=int, default=256,
                        help='set the number of testing samples in a mini-batch')
 
         parser.add_argument('--num_feature', type=int, default=39,
                        help='set the dimension of feature, ie: 39 mfccs, you can set 39 ')
 
-        parser.add_argument('--num_hidden', type=int, default=128,
+        parser.add_argument('--num_hidden', type=int, default=num_hidden[cat],
                        help='set the number of neurons in hidden layer')
 
-        parser.add_argument('--num_class', type=int, default=62,
-                       help='set the number of labels in the output layer, if timit phonemes, it is 62; if timit characters, it is 28; if libri characters, it is 28')
+        parser.add_argument('--num_class', type=int, default=num_class[cat],
+                       help='set the number of labels in the output layer, if timit phonemes, it is 62; if timit characters, it is 29; if libri characters, it is 29')
 
-        parser.add_argument('--save_dir', type=str, default='/home/pony/github/data/ASR/save/',
+        parser.add_argument('--save_dir', type=str, default=save_dir[cat],
                        help='set the directory to save the model, containing checkpoint file and parameter file')
 
-        parser.add_argument('--model_checkpoint_path', type=str, default='/home/pony/github/data/ASR/save/',
+        parser.add_argument('--model_checkpoint_path', type=str, default=save_dir[cat],
                        help='set the directory to restore the model, containing checkpoint file and parameter file')
 
 	self.args = parser.parse_args()
+
 	self.logfile = self.args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
 
     @describe
-    def load_data(self,args,mode='train'):
+    def load_data(self,args,mode,type):
+	
   	if mode == 'train':	
-            return load_batched_data(args.train_mfcc_dir,args.train_label_dir,args.batch_size)
+            return load_batched_data(args.train_mfcc_dir, args.train_label_dir, args.batch_size, mode, type)
   	elif mode == 'test':	
 	    args.batch_size = args.test_batch_size
-            return load_batched_data(args.test_mfcc_dir,args.test_label_dir,args.test_batch_size)
+            return load_batched_data(args.test_mfcc_dir, args.test_label_dir, args.test_batch_size, mode, type)
 	else:
 	    raise TypeError('mode should be train or test.')
 
     def train(self):
 	# load data
 	args = self.args
-        batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train')
+        batchedData, maxTimeSteps, totalN = self.load_data(args,mode='train',type=args.level)
 
-	# put the maxTimeSteps into network,
-	# but it's not efficient, can we make
-	# the dynamic network?
 	if args.model == 'ResNet':
 	    model = ResNet(args,maxTimeSteps)
 	elif args.model == 'BiRNN':
@@ -186,16 +213,42 @@ class Trainer(object):
                     batchTargetIxs, batchTargetVals, batchTargetShape = batchTargetSparse
                     feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs, model.targetVals: batchTargetVals,model.targetShape: batchTargetShape, model.seqLengths: batchSeqLengths}
 
-                    _, l, er, lmt, pre, y = sess.run([model.optimizer, model.loss, model.errorRate, model.logitsMaxTest, model.predictions, model.targetY], feed_dict=feedDict)
+		    if args.level == 'cha':
+                        _, l, pre, y, er = sess.run([ model.optimizer, model.loss, 
+					      model.predictions,
+					      model.targetY,
+					      model.errorRate], 
+					      feed_dict=feedDict)
+            	        batchErrors[batch] = er
+		        print('\ntotal:{},batch:{}/{},epoch:{}/{},loss={:.3f},mean CER={:.3f}\n'.format(
+					totalN,
+					batch+1,
+					len(batchRandIxs),
+					epoch+1,
+					args.num_epoch,
+					l,
+					er/args.batch_size))
 
-		    er = get_edit_distance([pre.values],[y.values], mode='train')
-
+		    elif args.level == 'phn':
+                        _, l, pre, y = sess.run([ model.optimizer, model.loss, 
+					      model.predictions,
+					      model.targetY], 
+					      feed_dict=feedDict)
+		        er = get_edit_distance([pre.values], [y.values], True, 'train', args.level)
+		        print('\ntotal:{},batch:{}/{},epoch:{}/{},loss={:.3f},mean PER={:.3f}\n'.format(
+					totalN,
+					batch+1,
+					len(batchRandIxs),
+					epoch+1,
+					args.num_epoch,
+					l,
+					er/args.batch_size))
+            	        batchErrors[batch] = er*len(batchSeqLengths)
+		    if batch%30==0:
+		        print('Truth:\n'+output_to_sequence(y,type=args.level))
+	    	        print('Output:\n'+output_to_sequence(pre,type=args.level))
                     
-                    print('Epoch', epoch+1, 'Minibatch', batch+1, 'loss:', l)
-                    print('Epoch', epoch+1, 'Minibatch', batch+1, 'error rate:', er)
-            	    batchErrors[batch] = er*len(batchSeqLengths)
-		    
-		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%5000==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
+		    if (args.save==True) and  ((epoch*len(batchRandIxs)+batch+1)%20==0 or (epoch==args.num_epoch-1 and batch==len(batchRandIxs)-1)):
 		        checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                         model.saver.save(sess,checkpoint_path,global_step=epoch)
                         print('Model has been saved in file')
@@ -208,14 +261,14 @@ class Trainer(object):
                     model.saver.save(sess,checkpoint_path,global_step=epoch)
                     print('Model has been saved in file')
                 epochER = batchErrors.sum() / totalN
-                print('Epoch', epoch+1, 'train error rate:', epochER)
+                print('Epoch', epoch+1, 'mean train error rate:', epochER)
 	        logging(model,self.logfile,epochER,epoch,delta_time,mode='config')
 		logging(model,self.logfile,epochER,epoch,delta_time,mode='train')
 	
     def test(self):
 	# load data
 	args = self.args
-        batchedData, maxTimeSteps, totalN = self.load_data(args,mode='test')
+        batchedData, maxTimeSteps, totalN = self.load_data(args, mode='test',type=args.level)
 	if args.model == 'ResNet':
 	    model = ResNet(args,maxTimeSteps)
 	elif args.model == 'BiRNN':
@@ -243,19 +296,23 @@ class Trainer(object):
 			    model.targetShape: batchTargetShape,
 			    model.seqLengths: batchSeqLengths}
 
-                l, er, lmt, pre, y = sess.run([model.loss, model.errorRate,
-					    model.logitsMaxTest,
+                l, pre, y = sess.run([ model.loss,
 					    model.predictions,
 					    model.targetY],
 				            feed_dict=feedDict)
 
 
-		er = get_edit_distance([pre.values],[y.values],mode='test')
-	    	print(output_to_sequence(pre,mode='phoneme'))
+		er = get_edit_distance([pre.values], [y.values], True, 'test', args.level)
+	    	print(output_to_sequence(y,type=args.level))
+	    	print(output_to_sequence(pre,type=args.level))
+		with open(args.task+'_result.txt', 'a') as result:
+		    result.write(output_to_sequence(y,type=args.level)+'\n')
+		    result.write(output_to_sequence(pre,type=args.level)+'\n')
+		    result.write('\n')
                 print('Minibatch', batch+1, 'test error rate:', er)
             	batchErrors[batch] = er*len(batchSeqLengths)
             epochER = batchErrors.sum() / totalN
-            print('TIMIT test error rate:', epochER)
+            print(args.task+' test error rate:', epochER)
 	    logging(model,self.logfile,epochER,mode='test')
 
 if __name__ == '__main__':

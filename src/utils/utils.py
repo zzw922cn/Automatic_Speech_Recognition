@@ -60,6 +60,8 @@ mapping = {'ux':'uw','axr':'er','em':'m','nx':'en','n':'en',
               'pcl':'sil','tcl':'sil','vcl':'sil','l':'el','zh':'sh',
               'aa':'ao','ix':'ih','ax':'ah'}
 
+mapped_phn = ['ae', 'ah', 'ao', 'aw', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'iy', 'jh', 'k', 'm', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 'sil', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z']
+
 def describe(func):
     ''' wrap function,to add some descriptions for function and its running time
     '''
@@ -89,7 +91,7 @@ def setAttrs(object,attrsName,attrsValue):
     for name,value in zip(attrsName,attrsValue):
         object.__dict__[name]=value
 
-def output_to_sequence(lmt,mode='phoneme'):
+def output_to_sequence(lmt,type='phn'):
     ''' convert the output into sequences of characters or phonemes
     '''
     sequences = []
@@ -104,7 +106,7 @@ def output_to_sequence(lmt,mode='phoneme'):
 
     #here, we only print the first sequence of batch
     indexes = sequences[0] #here, we only print the first sequence of batch
-    if mode=='phoneme':
+    if type=='phn':
 	seq = []
         for ind in indexes:
             if ind==len(phn):
@@ -114,13 +116,15 @@ def output_to_sequence(lmt,mode='phoneme'):
         seq = ' '.join(seq)
         return seq
 	
-    elif mode=='character':
+    elif type=='cha':
         seq = []
         for ind in indexes:
             if ind==0:
                 seq.append(' ')
             elif ind==27:
-	        pass
+                seq.append("'")
+            elif ind==28:
+		pass
             else:
                 seq.append(chr(ind+96))
         seq = ''.join(seq)
@@ -184,20 +188,23 @@ def group_phoneme(orig_phn,mapping):
     group_phn.sort()
     return group_phn
 
-def list_to_sparse_tensor(targetList,mode='train', type='phn'):
+def list_to_sparse_tensor(targetList, mode, type):
     ''' turn 2-D List to SparseTensor
     '''
     indices = [] #index
     vals = [] #value
+    assert mode == 'train' or mode == 'test', 'mode must be train or test'
+    assert type == 'phn' or type == 'cha', 'type must be phoneme or character'
     if type=='cha':
 	for tI, target in enumerate(targetList):
             for seqI, val in enumerate(target):
 		indices.append([tI, seqI])
 		vals.append(val)
-	shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
+	shape = [len(targetList), np.asarray(indices).max(axis=0)[1]+1] #shape
         return (np.array(indices), np.array(vals), np.array(shape))
 
     group_phn = group_phoneme(phn,mapping)
+    print group_phn
     for tI, target in enumerate(targetList):
         for seqI, val in enumerate(target):
             if(mode == 'train'):
@@ -213,9 +220,10 @@ def list_to_sparse_tensor(targetList,mode='train', type='phn'):
     shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
     return (np.array(indices), np.array(vals), np.array(shape))
 
-def get_edit_distance(hyp_arr,truth_arr, normalize=True, mode='train', type='phn'):
+def get_edit_distance(hyp_arr,truth_arr, normalize, mode, type):
     ''' calculate edit distance 
     '''
+    
     graph = tf.Graph()
     with graph.as_default():
         truth = tf.sparse_placeholder(tf.int32)
@@ -230,11 +238,11 @@ def get_edit_distance(hyp_arr,truth_arr, normalize=True, mode='train', type='phn
     return dist
 
 
-def data_lists_to_batches(inputList, targetList, batchSize):
+def data_lists_to_batches(inputList, targetList, batchSize, mode, type):
     ''' padding the input list to a same dimension, integrate all data into batchInputs
     '''
     assert len(inputList) == len(targetList)
-    # dimensions of inputList:batch*39*time-length
+    # dimensions of inputList:batch*39*time_length
     nFeatures = inputList[0].shape[0]
     maxLength = 0
     for inp in inputList:
@@ -261,17 +269,17 @@ def data_lists_to_batches(inputList, targetList, batchSize):
             batchInputs[:,batchI,:] = np.pad(inputList[origI].T, ((0,padSecs),(0,0)), 'constant', constant_values=0)
 	    # target label
             batchTargetList.append(targetList[origI])
-        dataBatches.append((batchInputs, list_to_sparse_tensor(batchTargetList), batchSeqLengths))
+        dataBatches.append((batchInputs, list_to_sparse_tensor(batchTargetList, mode, type), batchSeqLengths))
         start += batchSize
         end += batchSize
     return (dataBatches, maxLength)
 
-def load_batched_data(mfccPath, labelPath, batchSize):
+def load_batched_data(mfccPath, labelPath, batchSize, mode, type):
     '''returns 3-element tuple: batched data (list), maxTimeLength (int), and
        total number of samples (int)'''
     return data_lists_to_batches([np.load(os.path.join(mfccPath, fn)) for fn in os.listdir(mfccPath)],
                                  [np.load(os.path.join(labelPath, fn)) for fn in os.listdir(labelPath)],
-                                 batchSize) + \
+                                 batchSize, mode, type) + \
             (len(os.listdir(mfccPath)),)
 
 def list_dirs(mfcc_dir,label_dir):
@@ -280,14 +288,6 @@ def list_dirs(mfcc_dir,label_dir):
     for mfcc,label in zip(mfcc_dirs,label_dirs):
 	yield (mfcc,label)
 
-'''
-def build_weight(shape,name=None,func='truncated_normal'):
-    if type(shape) is not list:
-	raise TypeError('shape must be a list')
-    if func == 'truncated_normal':
-	return tf.Variable(tf.truncated_normal(shape,stddev=0.1,dtype=tf.float32,name = name))
-
-'''
 
 def build_weight(shape, name, func='he_normal', range=None):
     """ Initializes weight.

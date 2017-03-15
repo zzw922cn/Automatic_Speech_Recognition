@@ -30,6 +30,8 @@ import numpy as np
 import cPickle
 import glob
 import sys
+import sklearn
+from sklearn import preprocessing
 
 
 count = 0
@@ -38,7 +40,7 @@ count = 0
 
 keywords = ['dev-clean', 'dev-other', 'test-clean', 'test-other', 'train-clean-100', 'train-clean-360', 'train-other-500']
 
-keyword = keywords[6]
+keyword = keywords[0]
 label_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/label/'
 mfcc_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/mfcc/'
 if not os.path.exists(label_dir):
@@ -58,17 +60,16 @@ if True:
 		    print fullFilename
 	            (rate,sig)= wav.read(fullFilename)
                     mfcc = calcMFCC_delta_delta(sig,rate,win_length=0.020,win_step=0.010)
+		    mfcc = preprocessing.scale(mfcc)
 		    # transpose mfcc to array of (39,time_length)
 		    mfcc = np.transpose(mfcc)
-		    print mfcc.shape
 		    # save mfcc to file
 		    m_f = mfcc_dir + filenameNoSuffix.split('/')[-1] +'.npy'
 		    np.save(m_f,mfcc)
                     
 	            labelFilename = filenameNoSuffix + '.label'
                     with open(labelFilename,'r') as f:
-    	    	        characters = f.readline().strip()
-	            print characters
+    	    	        characters = f.readline().strip().lower()
     	            targets = []
 		    ## totally 28 real characters
     	            for c in characters:
