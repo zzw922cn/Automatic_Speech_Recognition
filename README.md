@@ -1,16 +1,18 @@
 # Automatic-Speech-Recognition
 End-to-end automatic speech recognition system implemented in TensorFlow.
 
-## test Updates
-- [x] **Test 1.0 version has born** (2017-02-26)
-
 ## Recent Updates
 - [x] **Support TensorFlow r1.0** (2017-02-24)
 - [x] **Support dropout for dynamic rnn** (2017-03-11)
 - [x] **Support run in shell file** (2017-03-11)
 - [x] **Support evaluation every several training epoches automatically** (2017-03-11)
+- [x] **Fix bugs for character-level automatic speech recognition** (2017-03-14)
+- [x] **Improve some function apis for reusable** (2017-03-14)
+- [x] **Add scaling for data preprocessing** (2017-03-15)
+- [x] **Add reusable support for LibriSpeech training** (2017-03-15)
 
-## PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
+## Performance
+### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
 ![image](https://github.com/zzw922cn/Automatic_Speech_Recognition/blob/master/PER.png)
 
 ## Content
