@@ -4,7 +4,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 ## Recent Updates
 - [x] **Support TensorFlow r1.0** (2017-02-24)
 - [x] **Support dropout for dynamic rnn** (2017-03-11)
-- [x] **Support run in shell file** (2017-03-11)
+- [x] **Support running in shell file** (2017-03-11)
 - [x] **Support evaluation every several training epoches automatically** (2017-03-11)
 - [x] **Fix bugs for character-level automatic speech recognition** (2017-03-14)
 - [x] **Improve some function apis for reusable** (2017-03-14)
