@@ -38,7 +38,7 @@ count = 0
 #subset = 0
 #labels=[]
 
-keywords = ['dev-clean', 'dev-other', 'test-clean', 'test-other', 'train-clean-100', 'train-clean-360', 'train-other-500']
+keywords = ['myaudio', 'dev-clean', 'dev-other', 'test-clean', 'test-other', 'train-clean-100', 'train-clean-360', 'train-other-500']
 
 keyword = keywords[0]
 label_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/label/'
@@ -49,6 +49,7 @@ if not os.path.exists(mfcc_dir):
     os.makedirs(mfcc_dir)
 
 rootdir = '/media/pony/Seagate Expansion Drive/学习/语音识别/ASR数据库/LibriSpeech/'+keyword
+rootdir = '/home/pony/github/data/'+keyword
 
 if True:
     for subdir, dirs, files in os.walk(rootdir):

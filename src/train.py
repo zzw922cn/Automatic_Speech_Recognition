@@ -54,31 +54,40 @@ from models.dynamic_brnn import DBiRNN
 class Trainer(object):
     
     def __init__(self):
+	parser = argparse.ArgumentParser()
 	cat = 1
+	libri_data = ['timit', 'dev', 'train-clean-100', 'train-other-240', 'train-other-260','train-clean-360']
+	parser.add_argument('--lb', type=int, default=2, help='specify the dataset of libri')
+	parser.add_argument('--keep', type=bool, default=False,
+                       help='train the model based on model saved')
+	parser.add_argument('--mode', type=str, default='train',
+                       help='you can select two modes, "train" or "test"')
+	self.args = parser.parse_args()
+	lb = self.args.lb
+	#lb = 2
 
-	libri_data = ['dev', 'train-clean-100', 'train-clean-360', 'train-other-500']
-	lb = 1
-
-	train_mfcc_dir = ['/home/pony/github/data/timit/train/mfcc/',
+	train_mfcc_dir = ['/home/pony/github/data/timit/cha/train/mfcc/',
 			  '/home/pony/github/data/libri/cha-level/'+libri_data[lb]+'/mfcc/']
 
-	train_label_dir = ['/home/pony/github/data/timit/train/label/',
+	train_label_dir = ['/home/pony/github/data/timit/cha/train/label/',
 			  '/home/pony/github/data/libri/cha-level/'+libri_data[lb]+'/label/']
 
-	test_mfcc_dir = ['/home/pony/github/data/timit/test/mfcc/',
+	test_mfcc_dir = ['/home/pony/github/data/timit/cha/test/mfcc/',
 			  '/home/pony/github/data/libri/cha-level/test/mfcc/']
 
-	test_label_dir = ['/home/pony/github/data/timit/test/label/',
+	test_label_dir = ['/home/pony/github/data/timit/cha/test/label/',
 			  '/home/pony/github/data/libri/cha-level/test/label/']
 
 	task = ['timit', 'libri']
-	level = ['phn', 'cha']
+	level = ['cha', 'cha']
+	timit_config = [['phn',62], ['cha', 29]]
 	num_hidden = [128, 256]
-	num_class = [62, 29]
+
+	#num_class = [62, 29]
+	num_class = [29, 29]
 	save_dir = ['/home/pony/github/data/ASR/save/timit/', '/home/pony/github/data/ASR/save/libri/']
 	log_dir = ['/home/pony/github/data/ASR/log/timit/', '/home/pony/github/data/ASR/log/libri/']
 
-	parser = argparse.ArgumentParser()
 	parser.add_argument('--task', type=str, default=task[cat], help='two tasks now, timit or libri')
 
 	parser.add_argument('--level', type=str, default=level[cat], help='two levels now, phn or cha')
@@ -101,7 +110,7 @@ class Trainer(object):
 	parser.add_argument('--model', default='DBiRNN',
 		       help='model for ASR:DBiRNN,BiRNN,ResNet,...')
 
-	parser.add_argument('--keep_prob', type=float, default=0.99,
+	parser.add_argument('--keep_prob', type=float, default=1,
 		       help='set the keep probability of layer for dropout')
 
 	parser.add_argument('--rnncell', type=str, default='gru',
@@ -110,28 +119,22 @@ class Trainer(object):
         parser.add_argument('--num_layer', type=int, default=2,
                        help='set the number of hidden layer or bidirectional layer')
 
-        parser.add_argument('--activation', default=tf.nn.relu,
+        parser.add_argument('--activation', default=tf.nn.elu,
                        help='set the activation function of each layer')
 
         parser.add_argument('--optimizer', type=type, default=tf.train.AdamOptimizer,
                        help='set the optimizer to train the model,eg:AdamOptimizer,GradientDescentOptimizer')
 	
-        parser.add_argument('--grad_clip', default=15,
+        parser.add_argument('--grad_clip', default=0.8,
                        help='set gradient clipping when backpropagating errors')
-
-	parser.add_argument('--keep', type=bool, default=False,
-                       help='train the model based on model saved')
 
 	parser.add_argument('--save', type=bool, default=True,
                        help='to save the model in the disk')
 
-	parser.add_argument('--mode', type=str, default='train',
-                       help='test the model based on trained parameters, but at present, we can"t test during training.')
-
-        parser.add_argument('--learning_rate', type=float, default=0.001,
+        parser.add_argument('--learning_rate', type=float, default=0.0001,
                        help='set the step size of each iteration')
 
-        parser.add_argument('--num_epoch', type=int, default=5000,
+        parser.add_argument('--num_epoch', type=int, default=1,
                        help='set the total number of training epochs')
 
         parser.add_argument('--batch_size', type=int, default=32,
@@ -244,6 +247,9 @@ class Trainer(object):
 					l,
 					er/args.batch_size))
             	        batchErrors[batch] = er*len(batchSeqLengths)
+		    # NOTE:
+		    if er/args.batch_size == 1.0:
+			break
 		    if batch%30==0:
 		        print('Truth:\n'+output_to_sequence(y,type=args.level))
 	    	        print('Output:\n'+output_to_sequence(pre,type=args.level))
@@ -285,6 +291,7 @@ class Trainer(object):
             if ckpt and ckpt.model_checkpoint_path:
                 model.saver.restore(sess, ckpt.model_checkpoint_path)
     	        print('Model restored from:'+args.save_dir) 
+
             batchErrors = np.zeros(len(batchedData))
             batchRandIxs = np.random.permutation(len(batchedData)) 
             for batch, batchOrigI in enumerate(batchRandIxs):
@@ -296,6 +303,39 @@ class Trainer(object):
 			    model.targetShape: batchTargetShape,
 			    model.seqLengths: batchSeqLengths}
 
+		if args.level == 'cha':
+                    l, pre, y, er = sess.run([model.loss, 
+					      model.predictions,
+					      model.targetY,
+					      model.errorRate], 
+					      feed_dict=feedDict)
+            	    batchErrors[batch] = er
+		    print('\ntotal:{},batch:{}/{},loss={:.3f},mean CER={:.3f}\n'.format(
+					totalN,
+					batch+1,
+					len(batchRandIxs),
+					l,
+					er/args.batch_size))
+
+		elif args.level == 'phn':
+                    l, pre, y = sess.run([model.loss, 
+					      model.predictions,
+					      model.targetY], 
+					      feed_dict=feedDict)
+		    er = get_edit_distance([pre.values], [y.values], True, 'test', args.level)
+		    print('\ntotal:{},batch:{}/{},loss={:.3f},mean PER={:.3f}\n'.format(
+					totalN,
+					batch+1,
+					len(batchRandIxs),
+					l,
+					er/args.batch_size))
+            	    batchErrors[batch] = er*len(batchSeqLengths)
+
+		    
+		print('Truth:\n'+output_to_sequence(y,type=args.level))
+	    	print('Output:\n'+output_to_sequence(pre,type=args.level))
+
+		'''
                 l, pre, y = sess.run([ model.loss,
 					    model.predictions,
 					    model.targetY],
@@ -305,12 +345,11 @@ class Trainer(object):
 		er = get_edit_distance([pre.values], [y.values], True, 'test', args.level)
 	    	print(output_to_sequence(y,type=args.level))
 	    	print(output_to_sequence(pre,type=args.level))
+		'''
 		with open(args.task+'_result.txt', 'a') as result:
 		    result.write(output_to_sequence(y,type=args.level)+'\n')
 		    result.write(output_to_sequence(pre,type=args.level)+'\n')
 		    result.write('\n')
-                print('Minibatch', batch+1, 'test error rate:', er)
-            	batchErrors[batch] = er*len(batchSeqLengths)
             epochER = batchErrors.sum() / totalN
             print(args.task+' test error rate:', epochER)
 	    logging(model,self.logfile,epochER,mode='test')
