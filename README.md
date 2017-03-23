@@ -1,6 +1,5 @@
 # Automatic-Speech-Recognition
 End-to-end automatic speech recognition system implemented in TensorFlow.
-(微信公众号:深度学习每日摘要)
 
 ## Recent Updates
 - [x] **Support TensorFlow r1.0** (2017-02-24)
