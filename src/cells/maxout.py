@@ -46,7 +46,7 @@ def maxout_cnn_layer(inputs, filter, bind_num,strides,
                 filter=filter,
                 strides=strides,
                 padding=padding,
-		name=name)
+                name=name)
     return maxout(conv, bind_num)
 
 def maxout_weights(filter_shape,bind_num):
