@@ -30,12 +30,12 @@ class ConvRNNCell(object):
       tensor of shape '[batch_size x shape[0] x shape[1] x num_features]
       filled with zeros
     """
-    
-    shape = self.shape 
+
+    shape = self.shape
     num_features = self.num_features
 
     # 这里的zero_state包含cell、hidden，因此要乘以2
-    zeros = tf.zeros([batch_size, shape[0], shape[1], num_features * 2]) 
+    zeros = tf.zeros([batch_size, shape[0], shape[1], num_features * 2])
 
     return zeros
 
@@ -59,9 +59,9 @@ class BasicConvLSTMCell(ConvRNNCell):
     """
     if input_size is not None:
       logging.warn("%s: The input_size parameter is deprecated.", self)
-    self.shape = shape 
+    self.shape = shape
     self.filter_size = filter_size
-    self.num_features = num_features 
+    self.num_features = num_features
     self._forget_bias = forget_bias
     self._state_is_tuple = state_is_tuple
     self._activation = activation
@@ -84,7 +84,7 @@ class BasicConvLSTMCell(ConvRNNCell):
         c, h = state
       else:
         c, h = tf.split(3, 2, state)
-      
+
       # 使用隐含状态对输入进行卷积，使用4个特征图，并且使用的是线性激活
       concat = _conv_linear([inputs, h], self.filter_size, self.num_features * 4, True)
 
