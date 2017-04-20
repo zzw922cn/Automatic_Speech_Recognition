@@ -1,9 +1,10 @@
+# -*- coding:utf-8 -*-
 import os
 
 import numpy as np
 import scipy.io.wavfile as wav
 
-from feature.calcmfcc import calcMFCC_delta_delta
+from calcmfcc import calcMFCC_delta_delta
 
 PHN_LOOKUP_TABLE = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx',
                     'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix',
