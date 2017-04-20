@@ -12,6 +12,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add reusable support for LibriSpeech training** (2017-03-15)
 - [x] **Add simple n-gram model for random generation or statistical use** (2017-03-23)
 - [x] **Improve some code for pre-processing and training** (2017-03-23)
+- [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
