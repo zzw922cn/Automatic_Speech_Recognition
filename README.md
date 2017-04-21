@@ -65,7 +65,7 @@ The original TIMIT database contains 6300 utterances, but we find the 'SA' audio
 
 Automatic Speech Recognition is to transcribe a raw audio file into character sequences. Data preprocessing is to convert a raw audio file into feature vectors of several frames. Here, we first split each audio file by a 20ms hamming window with an overlap of 10ms, and then calculate the 12 mel frequency ceptral coefficients appended by an energy variable for each frame. Based on this vector of length 13, we calculate the delta coefficients and delta-delta coefficients, therefore, we attain totally 39 coefficients for each frame. Therefore, each audio file is splited to several frames by hamming window, and each frame is extracted to a feature vector of length 39. If you want to attain the feature vector of different length, you can reset the settings in the file [timit_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
-In folder data/mfcc, each file is a feature matrix with size timeLength*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
+In folder data/mfcc, each file is a feature matrix with size timeLength\*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
 
 If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [timit_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
@@ -99,4 +99,6 @@ Since the original TIMIT dataset contains 61 phonemes, we use 61 phonemes for tr
 - [ ] List experimental results 
 - [ ] Implement more ASR models following newest investigations 
 
+## Contact Me
+For any questions, welcome to send email to :**zzw922cn@gmail.com**. If you use wechat, you can follow me by searching wechat public media id:**deeplearningdigest**, I would push several articles every week to share my deep learning practices with you. Thanks!
 
