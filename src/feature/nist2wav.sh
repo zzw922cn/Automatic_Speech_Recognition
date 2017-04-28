@@ -10,7 +10,7 @@
 
 target_dir=$1
 
-fnames=(`find $target_dir -name "*.wav"`)
+fnames=(`find $target_dir -name "*.wv1"`)
 
 for fname in "${fnames[@]}"
 do
