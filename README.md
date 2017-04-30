@@ -14,6 +14,11 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Improve some code for pre-processing and training** (2017-03-23)
 - [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
 
+## Recommendation
+If you want to replace Tensorflow multi-thread and fifoqueue input pipeline with feed dict, you can refer to my repo![TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes.
+
+If you want to look the history of speech recognition, I have collected the significant papers since 1981 in the ASR field. You can check it in my repo![awesome-speech-recognition-papers](https://github.com/zzw922cn/awesome-speech-recognition-papers), and I will update it every week to add new papers, including speech recognition, speech synthesis and language modelling.
+
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
 ![image](https://github.com/zzw922cn/Automatic_Speech_Recognition/blob/master/PER.png)
@@ -98,6 +103,7 @@ Since the original TIMIT dataset contains 61 phonemes, we use 61 phonemes for tr
 - [ ] Add more efficient dynamic computation graph without padding
 - [ ] List experimental results 
 - [ ] Implement more ASR models following newest investigations 
+- [ ] Provide fast TensorFlow Input Pipeline 
 
 ## Contact Me
 If my code is helpful to you, please give me a **star and fork** to encourage me to keep updating. Thank you.
