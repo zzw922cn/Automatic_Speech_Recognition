@@ -15,9 +15,9 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
 
 ## Recommendation
-If you want to replace Tensorflow multi-thread and fifoqueue input pipeline with feed dict, you can refer to my repo![TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes.
+If you want to replace Tensorflow multi-thread and fifoqueue input pipeline with feed dict, you can refer to my repo[TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes.
 
-If you want to look the history of speech recognition, I have collected the significant papers since 1981 in the ASR field. You can check it in my repo![awesome-speech-recognition-papers](https://github.com/zzw922cn/awesome-speech-recognition-papers), and I will update it every week to add new papers, including speech recognition, speech synthesis and language modelling.
+If you want to look the history of speech recognition, I have collected the significant papers since 1981 in the ASR field. You can check it in my repo[awesome-speech-recognition-papers](https://github.com/zzw922cn/awesome-speech-recognition-papers), and I will update it every week to add new papers, including speech recognition, speech synthesis and language modelling.
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
@@ -68,7 +68,7 @@ Instead of configuration in command line, you can also set the arguments above i
 ### Data preprocessing
 The original TIMIT database contains 6300 utterances, but we find the 'SA' audio files occurs many times, it will lead bad bias for our speech recognition system. Therefore, we removed the all 'SA' files from the original dataset and attain the new TIMIT dataset, which contains only 5040 utterances including 3696 standard training set and 1344 test set.
 
-Automatic Speech Recognition is to transcribe a raw audio file into character sequences. Data preprocessing is to convert a raw audio file into feature vectors of several frames. Here, we first split each audio file by a 20ms hamming window with an overlap of 10ms, and then calculate the 12 mel frequency ceptral coefficients appended by an energy variable for each frame. Based on this vector of length 13, we calculate the delta coefficients and delta-delta coefficients, therefore, we attain totally 39 coefficients for each frame. Therefore, each audio file is splited to several frames by hamming window, and each frame is extracted to a feature vector of length 39. If you want to attain the feature vector of different length, you can reset the settings in the file [timit_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
+Automatic Speech Recognition is to transcribe a raw audio file into character sequences. Data preprocessing is to convert a raw audio file into feature vectors of several frames. Here, we first split each audio file by a 20ms hamming window with an overlap of 10ms, and then calculate the 12 mel frequency ceptral coefficients appended by an energy variable for each frame. Based on this vector of length 13, we calculate the delta coefficients and delta-delta coefficients, therefore, we attain totally 39 coefficients for each frame. Therefore, each audio file is splited to several frames by hamming window, and each frame is extracted to a feature vector of length 39. If you want to attain the feature vector of different length, you can reset the settings in the file [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
 In folder data/mfcc, each file is a feature matrix with size timeLength\*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
 
