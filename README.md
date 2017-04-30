@@ -15,9 +15,11 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
 
 ## Recommendation
-If you want to replace Tensorflow multi-thread and fifoqueue input pipeline with feed dict, you can refer to my repo[TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes.
+If you want to replace Tensorflow multi-thread and fifoqueue input pipeline with feed dict, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes.
 
-If you want to look the history of speech recognition, I have collected the significant papers since 1981 in the ASR field. You can check it in my repo[awesome-speech-recognition-papers](https://github.com/zzw922cn/awesome-speech-recognition-papers), and I will update it every week to add new papers, including speech recognition, speech synthesis and language modelling.
+If you want to look the history of speech recognition, I have collected the significant papers since 1981 in the ASR field. You can read awesome paper list in my repo [awesome-speech-recognition-papers](https://github.com/zzw922cn/awesome-speech-recognition-papers), all download links of papers are provided. I will update it every week to add new papers, including speech recognition, speech synthesis and language modelling. I hope that we won't miss any important papers in speech domain.
+
+All my public repos will be updated in future, thanks for your stars!
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
