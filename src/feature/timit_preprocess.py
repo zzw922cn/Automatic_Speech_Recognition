@@ -26,6 +26,8 @@ import os
 from sigprocess import *
 from calcmfcc import calcMFCC_delta_delta
 import scipy.io.wavfile as wav
+from scikits.audiolab import Format, Sndfile
+from scikits.audiolab import wavread
 import numpy as np
 import glob
 import sys
@@ -60,7 +62,16 @@ for subdir, dirs, files in os.walk(rootdir):
             fullFilename = os.path.join(subdir, file)
 	    filenameNoSuffix =  os.path.splitext(fullFilename)[0]
 	    if file.endswith('.WAV'):
-	        (rate,sig)= wav.read(fullFilename)
+                rate = None
+                sig = None
+                try:
+                    (rate,sig)= wav.read(fullFilename)
+                except ValueError as e:
+                    if e.message == "File format 'NIST'... not understood.":
+                        ss = Sndfile(fullFilename, 'r')
+                        nframes = ss.nframes
+                        sig = ss.read_frames(nframes)
+                        rate = ss.samplerate
                 mfcc = calcMFCC_delta_delta(sig,rate,win_length=0.020,win_step=0.010)
 		mfcc = preprocessing.scale(mfcc)
 		mfcc = np.transpose(mfcc)
