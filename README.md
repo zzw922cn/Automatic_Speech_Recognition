@@ -13,6 +13,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add simple n-gram model for random generation or statistical use** (2017-03-23)
 - [x] **Improve some code for pre-processing and training** (2017-03-23)
 - [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
+- [x] **Add some data preparation code** (2017-05-1)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
@@ -20,6 +21,14 @@ If you want to replace feed dict operation with Tensorflow multi-thread and fifo
 If you want to look the history of speech recognition, I have collected the significant papers since 1981 in the ASR field. You can read awesome paper list in my repo [awesome-speech-recognition-papers](https://github.com/zzw922cn/awesome-speech-recognition-papers), all download links of papers are provided. I will update it every week to add new papers, including speech recognition, speech synthesis and language modelling. I hope that we won't miss any important papers in speech domain.
 
 All my public repos will be updated in future, thanks for your stars!
+
+## Dependencies
+- TensorFlow
+- Numpy
+- Scipy
+- scikit-learn
+- scikits.audiolab
+- Kaldi recipe for wsj corpus (preprocessing stage)
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
