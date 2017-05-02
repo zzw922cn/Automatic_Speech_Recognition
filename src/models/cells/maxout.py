@@ -1,29 +1,17 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
 ''' maxout network for lyrics generation or automatic speech recognition
-author: 
-Jiaqi Liu &
+author(s): 
+Jiaqi Liu, zzw922cn 
 
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
-     
 date:2016-12-16
 
 maxout cnn layer can be called only if you define the filter first.
 '''
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import tensorflow as tf
 
