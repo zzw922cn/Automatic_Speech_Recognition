@@ -52,6 +52,8 @@ from models.resnet import ResNet
 from models.brnn import BiRNN
 from models.dynamic_brnn import DBiRNN
 
+model_functions = {'ResNet': ResNet, 'BiRNN': BiRNN, 'DBiRNN': DBiRNN}
+
 
 class Trainer(object):
     def __init__(self):
@@ -179,15 +181,7 @@ class Trainer(object):
         # load data
         args = self.args
         batchedData, maxTimeSteps, totalN = self.load_data(args, mode='train', type=args.level)
-
-        if args.model == 'ResNet':
-            model = ResNet(args, maxTimeSteps)
-        elif args.model == 'BiRNN':
-            model = BiRNN(args, maxTimeSteps)
-        elif args.model == 'DBiRNN':
-            model = DBiRNN(args, maxTimeSteps)
-        else:
-            pass
+        model = model_functions[args.model](args, maxTimeSteps)
 
         # count the num of params
         num_params = count_params(model, mode='trainable')
@@ -283,12 +277,7 @@ class Trainer(object):
         # load data
         args = self.args
         batchedData, maxTimeSteps, totalN = self.load_data(args, mode='test', type=args.level)
-        if args.model == 'ResNet':
-            model = ResNet(args, maxTimeSteps)
-        elif args.model == 'BiRNN':
-            model = BiRNN(args, maxTimeSteps)
-        elif args.model == 'DBiRNN':
-            model = DBiRNN(args, maxTimeSteps)
+        model = model_functions[args.model](args, maxTimeSteps)
 
         num_params = count_params(model, mode='trainable')
         all_num_params = count_params(model, mode='all')
@@ -364,11 +353,8 @@ class Trainer(object):
 
 if __name__ == '__main__':
     tr = Trainer()
+    print(tr.args.mode + ' mode')
     if tr.args.mode == 'train':
-        print('train mode')
         tr.train()
     elif tr.args.mode == 'test':
-        print('test mode')
         tr.test()
-    else:
-        pass
