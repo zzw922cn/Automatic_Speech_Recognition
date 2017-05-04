@@ -72,7 +72,7 @@ python train.py
 	--restore_from '/src/save/'
 	--model_checkpoint_path '/src/save/'
 </pre>
-Instead of configuration in command line, you can also set the arguments above in [train.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/main/train.py) in practice.
+Instead of configuration in command line, you can also set the arguments above in [train.py](src/train.py) in practice.
 
 ## Implementation Details
 
