@@ -13,7 +13,8 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add simple n-gram model for random generation or statistical use** (2017-03-23)
 - [x] **Improve some code for pre-processing and training** (2017-03-23)
 - [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
-- [x] **Add some data preparation code** (2017-05-1)
+- [x] **Add some data preparation code** (2017-05-01)
+- [x] **Add WSJ corpus standard preprocessing by s5 recipe** (2017-05-05)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.

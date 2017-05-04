@@ -24,8 +24,8 @@ phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 
 '''
 
 import os
-from utils.sigprocess import *
-from utils.calcmfcc import calcMFCC_delta_delta
+from core.sigprocess import *
+from core.calcmfcc import calcMFCC_delta_delta
 import scipy.io.wavfile as wav
 import numpy as np
 import glob
