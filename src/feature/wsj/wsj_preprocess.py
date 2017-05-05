@@ -5,7 +5,7 @@
 author:
 zzw922cn
      
-date:2017-4-15
+date:2017-5-5
 '''
 
 import sys
@@ -28,7 +28,7 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
     for f in files:
       fullFilename = os.path.join(subdir, f)
       filenameNoSuffix =  os.path.splitext(fullFilename)[0]
-      if f.endswith('.wav'):
+      if f.endswith('.wv1'):
         rate = None
         sig = None
         try:
@@ -70,13 +70,13 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
           np.save(t_f,targets)
          
 if __name__ == '__main__':
-  keywords = ['dev-clean', 'dev-other', 'test-clean', 'test-other', 'train-clean-100', 'train-clean-360', 'train-other-500']
+  keywords = ['train_si284', 'test_eval92', 'test_dev93']
   keyword = keywords[0]
-  label_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/label/'
-  mfcc_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/mfcc/'
+  label_dir = '/home/pony/github/data/wsj/cha-level'+keyword+'/label/'
+  mfcc_dir = '/home/pony/github/data/wsj/cha-level/'+keyword+'/mfcc/'
   if not os.path.exists(label_dir):
     os.makedirs(label_dir)
   if not os.path.exists(mfcc_dir):
     os.makedirs(mfcc_dir)
-  rootdir = '/media/pony/DLdigest/study/ASR/corpus/LibriSpeech/'+keyword
+  rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/wsj/standard', keyword)
   wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword=keyword, seq2seq=True, save=False)

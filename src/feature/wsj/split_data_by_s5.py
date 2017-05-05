@@ -22,6 +22,7 @@ import os
 from core.fileUtils import check_path_exists
 
 def split_data_by_s5(src_dir, des_dir, keywords=['train_si284', 'test_eval92', 'test_dev93']):
+  count = 0
   for key in keywords:
     wav_file_list = os.path.join(src_dir, key+'.flist') 
     label_file_list = os.path.join(src_dir, key+'.txt') 
@@ -31,16 +32,21 @@ def split_data_by_s5(src_dir, des_dir, keywords=['train_si284', 'test_eval92', '
       wfl_contents = wfl.readlines()
       for line in wfl_contents:
         line = line.strip()
-        shutil.copyfile(line, os.path.join(des_dir, key, line.split('/')[-1]))
-        print line
+        if os.path.isfile(line):
+          shutil.copyfile(line, os.path.join(des_dir, key, line.split('/')[-1]))
+          print line
+        else:
+          tmp = '/'.join(line.split('/')[:-1]+[line.split('/')[-1].upper()])
+          shutil.copyfile(tmp, os.path.join(des_dir, key, line.split('/')[-1].replace('WV1', 'wv1')))
+          print tmp
 
     with open(label_file_list, 'r') as lfl:
       lfl_contents = lfl.readlines()
       for line in lfl_contents:
         label = ' '.join(line.strip().split(' ')[1:])
-        with open(os.path.join(des_dir, key, line[0]+'.label'), 'w') as lf:
-          lf.writeline(label)
-        print line[0]
+        with open(os.path.join(des_dir, key, line.strip().split(' ')[0]+'.label'), 'w') as lf:
+          lf.writelines(label)
+        print key, label
         
 
 if __name__ == '__main__':
