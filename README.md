@@ -1,7 +1,6 @@
 # Automatic-Speech-Recognition
 End-to-end automatic speech recognition system implemented in TensorFlow.
 
-(development branch)
 
 ## Recent Updates
 - [x] **Support TensorFlow r1.0** (2017-02-24)
@@ -28,6 +27,7 @@ All my public repos will be updated in future, thanks for your stars!
 
 ## Install and Usage
 Currently only python 2.7 is supported.
+
 This project depends on scikit.audiolab, for which you need to have [libsndfile](http://www.mega-nerd.com/libsndfile/) installed in your system.
 Clone the repository to your preferred directory and install the dependencies using:
 <pre>
