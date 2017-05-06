@@ -17,6 +17,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Replace TABs with blanks and add nist2wav converter script** (2017-04-20)
 - [x] **Add some data preparation code** (2017-05-01)
 - [x] **Add WSJ corpus standard preprocessing by s5 recipe** (2017-05-05)
+- [x] **Restructuring of the project. Updated train.py for usage convinience** (2017-05-06)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
@@ -25,13 +26,31 @@ If you want to look the history of speech recognition, I have collected the sign
 
 All my public repos will be updated in future, thanks for your stars!
 
-## Dependencies
-- TensorFlow
-- Numpy
-- Scipy
-- scikit-learn
-- scikits.audiolab
-- Kaldi recipe for wsj corpus (preprocessing stage)
+## Install and Usage
+Currently only python 2.7 is supported.
+This project depends on scikit.audiolab, for which you need to have [libsndfile](http://www.mega-nerd.com/libsndfile/) installed in your system.
+Clone the repository to your preferred directory and install the dependencies using:
+<pre>
+pip install -r requirements.txt
+</pre>
+To use, simply run the following command:
+<pre>
+python main/train.py \
+	--mfcc_dir '/data/mfcc/'          \
+	--label_dir '/data/label/'        \
+	--keep False                      \
+	--save True                       \
+	--evaluation False                \
+	--learning_rate 0.001             \
+	--batch_size 32                   \
+	--num_feature 39                  \
+	--num_hidden 128                  \
+	--num_classes 28                  \
+	--save_dir '/src/save/'           \
+	--restore_from '/src/save/'       \
+	--model_checkpoint_path '/src/save/'
+</pre>
+Instead of configuration in command line, you can also set the arguments above in [train.py](main/train.py) in practice.
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
@@ -57,25 +76,6 @@ This is a powerful library for **automatic speech recognition**, it is implement
 * Mini-batch Training
 * Training with GPU or CPU with TensorFlow
 * Keeping logging of epoch time and error rate in disk
-
-## Usage
-<pre>
-python train.py \
-	--mfcc_dir '/data/mfcc/'          \
-	--label_dir '/data/label/'        \
-	--keep False                      \
-	--save True                       \
-	--evaluation False                \
-	--learning_rate 0.001             \
-	--batch_size 32                   \
-	--num_feature 39                  \
-	--num_hidden 128                  \
-	--num_classes 28                  \
-	--save_dir '/src/save/'           \
-	--restore_from '/src/save/'       \
-	--model_checkpoint_path '/src/save/'
-</pre>
-Instead of configuration in command line, you can also set the arguments above in [train.py](src/train.py) in practice.
 
 ## Implementation Details
 
