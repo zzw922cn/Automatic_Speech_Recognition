@@ -1,21 +1,14 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/python
-''' deep residual model for automatic speech recognition implemented in Tensorflow
-author:
+''' Automatic Speech Recognition
 
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
+author(s):
+zzw922cn
      
-date:2016-11-07
+date:2017-4-15
 '''
 
 import sys
 sys.path.append('../')
+sys.dont_write_bytecode = True
+

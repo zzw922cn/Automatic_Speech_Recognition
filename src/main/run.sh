@@ -7,9 +7,9 @@ do
     echo "dataset is index $b"
     if [ $loop -eq 1 ]
     then
-        /usr/bin/python train.py --lb=$b || break
+        python train.py --lb=$b || break
     else
-        /usr/bin/python train.py --lb=$b --keep=True ||break
-    /usr/bin/python train.py --mode=test
+        python train.py --lb=$b --keep=True || break
+    python train.py --mode=test || break
     fi
 done
