@@ -60,19 +60,19 @@ This is a powerful library for **automatic speech recognition**, it is implement
 
 ## Usage
 <pre>
-python train.py
-	--mfcc_dir '/data/mfcc/'
-	--label_dir '/data/label/'
-	--keep False
-	--save True
-	--evaluation False
-	--learning_rate 0.001
-	--batch_size 32
-	--num_feature 39
-	--num_hidden 128
-	--num_classes 28
-	--save_dir '/src/save/'
-	--restore_from '/src/save/'
+python train.py \
+	--mfcc_dir '/data/mfcc/'          \
+	--label_dir '/data/label/'        \
+	--keep False                      \
+	--save True                       \
+	--evaluation False                \
+	--learning_rate 0.001             \
+	--batch_size 32                   \
+	--num_feature 39                  \
+	--num_hidden 128                  \
+	--num_classes 28                  \
+	--save_dir '/src/save/'           \
+	--restore_from '/src/save/'       \
 	--model_checkpoint_path '/src/save/'
 </pre>
 Instead of configuration in command line, you can also set the arguments above in [train.py](src/train.py) in practice.
