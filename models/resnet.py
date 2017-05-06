@@ -35,12 +35,12 @@ from tensorflow.contrib.rnn.python.ops import rnn_cell
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 
-from src.utils.utils import load_batched_data
-from src.utils.utils import describe
-from src.utils.utils import setAttrs
-from src.utils.utils import build_weight
-from src.utils.utils import build_forward_layer
-from src.utils.utils import build_conv_layer
+from utils.utils import load_batched_data
+from utils.utils import describe
+from utils.utils import setAttrs
+from utils.utils import build_weight
+from utils.utils import build_forward_layer
+from utils.utils import build_conv_layer
 
 
 def build_residual_block(inpt, out_channels, down_sample=False, projection=False, name='block1'):
@@ -136,6 +136,5 @@ class ResNet(object):
     	    self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=False))/tf.to_float(tf.size(self.targetY.values))
 	    self.initial_op = tf.global_variables_initializer()
 	    self.saver = tf.train.Saver(tf.global_variables(),max_to_keep=2,keep_checkpoint_every_n_hours=1)
-	    self.logfile = args.log_dir+str(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')+'.txt').replace(' ','').replace('/','')
 	    self.var_op = tf.global_variables()
 	    self.var_trainable_op = tf.trainable_variables()

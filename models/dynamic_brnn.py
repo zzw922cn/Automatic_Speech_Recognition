@@ -34,15 +34,15 @@ from tensorflow.contrib.rnn.python.ops import rnn_cell
 from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
-from src.utils.utils import load_batched_data
-from src.utils.utils import describe
-from src.utils.utils import setAttrs
-from src.utils.utils import build_weight
-from src.utils.utils import build_forward_layer
-from src.utils.utils import build_conv_layer
-from src.utils.utils import list_to_sparse_tensor
-from src.utils.utils import dropout
-from src.utils.utils import get_edit_distance
+from utils.utils import load_batched_data
+from utils.utils import describe
+from utils.utils import setAttrs
+from utils.utils import build_weight
+from utils.utils import build_forward_layer
+from utils.utils import build_conv_layer
+from utils.utils import list_to_sparse_tensor
+from utils.utils import dropout
+from utils.utils import get_edit_distance
 
 
 def build_multi_dynamic_brnn(args,
@@ -96,7 +96,7 @@ class DBiRNN(object):
         elif args.rnncell == 'lstm':
             self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
         else:
-            raise Exception("model type not supported: {}".format(args.model))
+            raise Exception("rnncell type not supported: {}".format(args.rnncell))
         self.build_graph(args, maxTimeSteps)
 
     @describe
@@ -150,7 +150,3 @@ class DBiRNN(object):
                 self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=True))
             self.initial_op = tf.global_variables_initializer()
             self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=5, keep_checkpoint_every_n_hours=1)
-            self.logfile = args.log_dir + str(
-                datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S') + '.txt').replace(' ',
-                                                                                                           '').replace(
-                '/', '')

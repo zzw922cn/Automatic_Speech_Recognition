@@ -2,18 +2,9 @@
 # !/usr/bin/python
 
 ''' Training or testing for Automatic Speech Recognition
+Deprecated now! This would be removed soon.
 author:
-
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
+zzw922cn, Hitesh Paul
 
 date:2016-11-09
 '''
@@ -22,8 +13,6 @@ from __future__ import division
 from __future__ import print_function
 
 import sys
-
-sys.dont_write_bytecode = True
 
 import argparse
 import time
@@ -36,8 +25,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.contrib.rnn.python.ops import rnn_cell
+from tensorflow.contrib.rnn.python.ops.core_rnn import static_bidirectional_rnn
 
-bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 from utils.utils import load_batched_data
 from utils.utils import describe
 from utils.utils import getAttrs
@@ -352,9 +341,9 @@ class Trainer(object):
 
 
 if __name__ == '__main__':
-    tr = Trainer()
-    print(tr.args.mode + ' mode')
-    if tr.args.mode == 'train':
-        tr.train()
-    elif tr.args.mode == 'test':
-        tr.test()
+  tr = Trainer()
+  print(tr.args.mode + ' mode')
+  if tr.args.mode == 'train':
+      tr.train()
+  elif tr.args.mode == 'test':
+      tr.test()
