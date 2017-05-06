@@ -204,7 +204,7 @@ def list_to_sparse_tensor(targetList, mode, type):
         return (np.array(indices), np.array(vals), np.array(shape))
 
     group_phn = group_phoneme(phn,mapping)
-    print group_phn
+
     for tI, target in enumerate(targetList):
         for seqI, val in enumerate(target):
             if(mode == 'train'):

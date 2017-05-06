@@ -2,6 +2,7 @@
 # !/usr/bin/python
 
 ''' Training or testing for Automatic Speech Recognition
+Deprecated now! This would be removed soon.
 author:
 zzw922cn, Hitesh Paul
 

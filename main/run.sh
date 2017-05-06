@@ -1,15 +1,13 @@
 #!/bin/bash
 
-for loop in {3..30} 
+for loop in {1..300} 
 do
-    echo "loop is $loop"
-    b=$(( $loop % 3 ))
-    echo "dataset is index $b"
+    echo "loop index: $loop"
     if [ $loop -eq 1 ]
     then
-        python train.py --lb=$b || break
+        python train.py --mode=train || break
     else
-        python train.py --lb=$b --keep=True || break
-    python train.py --mode=test || break
+        python train.py --mode=train --keep=True || break
+    python train.py --mode=test --keep=True || break
     fi
 done

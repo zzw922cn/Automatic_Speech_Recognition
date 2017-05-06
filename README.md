@@ -1,7 +1,6 @@
 # Automatic-Speech-Recognition
 End-to-end automatic speech recognition system implemented in TensorFlow.
 
-
 ## Recent Updates
 - [x] **Support TensorFlow r1.0** (2017-02-24)
 - [x] **Support dropout for dynamic rnn** (2017-03-11)
@@ -35,22 +34,54 @@ pip install -r requirements.txt
 </pre>
 To use, simply run the following command:
 <pre>
-python main/train.py \
-	--mfcc_dir '/data/mfcc/'          \
-	--label_dir '/data/label/'        \
-	--keep False                      \
-	--save True                       \
-	--evaluation False                \
-	--learning_rate 0.001             \
-	--batch_size 32                   \
-	--num_feature 39                  \
-	--num_hidden 128                  \
-	--num_classes 28                  \
-	--save_dir '/src/save/'           \
-	--restore_from '/src/save/'       \
-	--model_checkpoint_path '/src/save/'
+python main/timit_train.py [-h] [--mode MODE] [--keep [KEEP]] [--nokeep]
+                      [--level LEVEL] [--model MODEL] [--rnncell RNNCELL]
+                      [--num_layer NUM_LAYER] [--activation ACTIVATION]
+                      [--optimizer OPTIMIZER] [--batch_size BATCH_SIZE]
+                      [--num_hidden NUM_HIDDEN] [--num_feature NUM_FEATURE]
+                      [--num_classes NUM_CLASSES] [--num_epochs NUM_EPOCHS]
+                      [--lr LR] [--dropout_prob DROPOUT_PROB]
+                      [--grad_clip GRAD_CLIP] [--datadir DATADIR]
+                      [--logdir LOGDIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --mode MODE           set whether to train or test
+  --keep [KEEP]         set whether to restore a model, when test mode, keep
+                        should be set to True
+  --nokeep
+  --level LEVEL         set the task level, phn, cha, or seq2seq, seq2seq will
+                        be supported soon
+  --model MODEL         set the model to use, DBiRNN, BiRNN, ResNet..
+  --rnncell RNNCELL     set the rnncell to use, rnn, gru, lstm...
+  --num_layer NUM_LAYER
+                        set the layers for rnn
+  --activation ACTIVATION
+                        set the activation to use, sigmoid, tanh, relu, elu...
+  --optimizer OPTIMIZER
+                        set the optimizer to use, sgd, adam...
+  --batch_size BATCH_SIZE
+                        set the batch size
+  --num_hidden NUM_HIDDEN
+                        set the hidden size of rnn cell
+  --num_feature NUM_FEATURE
+                        set the size of input feature
+  --num_classes NUM_CLASSES
+                        set the number of output classes
+  --num_epochs NUM_EPOCHS
+                        set the number of epochs
+  --lr LR               set the learning rate
+  --dropout_prob DROPOUT_PROB
+                        set probability of dropout
+  --grad_clip GRAD_CLIP
+                        set the threshold of gradient clipping
+  --datadir DATADIR     set the data root directory
+  --logdir LOGDIR       set the log directory
+
 </pre>
 Instead of configuration in command line, you can also set the arguments above in [train.py](main/train.py) in practice.
+
+Besides, you can also run `main/run.sh` for both training and testing simultaneously! See [run.sh](main/run.sh) for details.
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
@@ -130,8 +161,8 @@ TODO
 - [ ] Implement more ASR models following newest investigations 
 - [ ] Provide fast TensorFlow Input Pipeline 
 
-## Contact Me
-If my code is helpful to you, please give me a **star and fork** to encourage me to keep updating. Thank you.
+## Contact Us
+If this program is helpful to you, please give us a **star or fork** to encourage us to keep updating. Thank you! Besides, any issues or pulls are appreciated.
 
-For any questions, welcome to send email to :**zzw922cn@gmail.com**. If you want to contribute to this program, welcome to email me!
+For any questions, welcome to send email to :**zzw922cn@gmail.com**. Both I and **Hitesh Paul** are main contributors.
 
