@@ -161,8 +161,10 @@ TODO
 - [ ] Implement more ASR models following newest investigations 
 - [ ] Provide fast TensorFlow Input Pipeline 
 
+## License
+MIT
+
 ## Contact Us
 If this program is helpful to you, please give us a **star or fork** to encourage us to keep updating. Thank you! Besides, any issues or pulls are appreciated.
 
 For any questions, welcome to send email to :**zzw922cn@gmail.com**. Both I and **Hitesh Paul** are main contributors.
-
