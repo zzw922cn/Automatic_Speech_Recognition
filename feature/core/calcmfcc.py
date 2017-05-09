@@ -111,7 +111,7 @@ def calcMFCC(signal,samplerate=16000,win_length=0.025,win_step=0.01,cep_num=13,f
     feat=lifter(feat,cep_lifter)
     if appendEnergy:
     # Replace the first coefficient with logE and get 2-13 coefficients.
-	feat[:,0]=numpy.log(energy)
+	    feat[:,0]=numpy.log(energy)
     return feat
 
 def fbank(signal,samplerate=16000,win_length=0.025,win_step=0.01,filters_num=26,NFFT=512,low_freq=0,high_freq=None,pre_emphasis_coeff=0.97):
@@ -164,7 +164,7 @@ def ssc(signal,samplerate=16000,win_length=0.025,win_step=0.01,filters_num=26,NF
     high_freq=high_freq or samplerate/2
     signal=pre_emphasis(signal,pre_emphasis_coeff)
     frames=audio2frame(signal,win_length*samplerate,win_step*samplerate)
-    spec_power=sigprocess.spectrum_power(frames,NFFT)
+    spec_power=spectrum_power(frames,NFFT)
     spec_power=numpy.where(spec_power==0,numpy.finfo(float).eps,spec_power) #能量谱
     fb=get_filter_banks(filters_num,NFFT,samplerate,low_freq,high_freq)
     feat=numpy.dot(spec_power,fb.T)  #计算能量
@@ -223,9 +223,9 @@ def lifter(cepstra,L=22):
         L: Numbers of lifters. Defaulted to 22.
     '''
     if L>0:
-	nframes,ncoeff=numpy.shape(cepstra)
-	n=numpy.arange(ncoeff)
-	lift=1+(L/2)*numpy.sin(numpy.pi*n/L)
-	return lift*cepstra
+	    nframes,ncoeff=numpy.shape(cepstra)
+	    n=numpy.arange(ncoeff)
+	    lift=1+(L/2)*numpy.sin(numpy.pi*n/L)
+	    return lift*cepstra
     else:
-	return cepstra
+	    return cepstra
