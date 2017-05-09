@@ -4,13 +4,12 @@
 
 author:
 zzw922cn
-     
-date:2017-4-15
+hiteshpaul
+date:2017-5-09
 '''
 
 import sys
 sys.path.append('../')
-sys.dont_write_bytecode = True
 
 from core.sigprocess import *
 from core.calcmfcc import calcMFCC_delta_delta
@@ -20,11 +19,53 @@ import os
 import cPickle
 import glob
 import sklearn
+import argparse
 from sklearn import preprocessing
+from subprocess import check_call, CalledProcessError
 
-def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
+def preprocess(root_directory):
+    """
+    Function to walk through the directory and convert flac to wav files
+    """
+    for subdir, dirs, files in os.walk(root_directory):
+        for f in files:
+            filename = os.path.join(subdir, f)
+            if f.endswith('.flac'):
+                try:
+                    check_call(['flac', '-d', filename])
+                    os.remove(filename)
+                except CalledProcessError:
+                    print "Failed to convert file {}".format(filename)
+            elif f.endswith('.TXT'):
+                os.remove(filename)
+            elif f.endswith('.txt'):
+                with open(filename, 'r') as fp:
+                    lines = fp.readlines()
+                    for line in lines:
+                        sub_n = line.split(' ')[0] + '.label'
+                        subfile = os.path.join(subdir, sub_n)
+                        sub_c = ' '.join(line.split(' ')[1:])
+                        sub_c = sub_c.lower()
+                        with open(subfile, 'w') as sf:
+                            sf.write(sub_c)
+            elif f.endswith('.wav'):
+                if not os.path.isfile(os.path.splitext(filename)[0] +
+                                      '.label'):
+                    raise ValueError(".label file not found for {}".format(filename))
+            else:
+                pass
+
+
+def wav2feature(root_directory, name, win_len=0.02, win_step=0.01, mode='mfcc', seq2seq=False, save=False):
   count = 0
-  for subdir, dirs, files in os.walk(rootdir):
+  label_dir = root_directory + 'label/'
+  mfcc_dir = root_directory + 'mfcc/'
+  if not os.path.isdir(label_dir):
+    os.mkdir(label_dir)
+  if not os.path.isdir(mfcc_dir):
+    os.mkdir(mfcc_dir)
+  preprocess(root_directory+name)
+  for subdir, dirs, files in os.walk(root_directory+name):
     for f in files:
       fullFilename = os.path.join(subdir, f)
       filenameNoSuffix =  os.path.splitext(fullFilename)[0]
@@ -68,15 +109,21 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
           t_f = label_dir + filenameNoSuffix.split('/')[-1] +'.npy'
           print t_f
           np.save(t_f,targets)
-         
-if __name__ == '__main__':
-  keywords = ['dev-clean', 'dev-other', 'test-clean', 'test-other', 'train-clean-100', 'train-clean-360', 'train-other-500']
-  keyword = keywords[0]
-  label_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/label/'
-  mfcc_dir = '/home/pony/github/data/libri/cha-level/'+keyword+'/mfcc/'
-  if not os.path.exists(label_dir):
-    os.makedirs(label_dir)
-  if not os.path.exists(mfcc_dir):
-    os.makedirs(mfcc_dir)
-  rootdir = '/media/pony/DLdigest/study/ASR/corpus/LibriSpeech/'+keyword
-  wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword=keyword, seq2seq=True, save=False)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog='libri_preprocess',
+                                     description='Script to preprocess libri data')
+    parser.add_argument("path", help="Directory where extracted LibriSpeech dataset is contained", type=str)
+    parser.add_argument("-n", "--name", help="Name of the dataset",
+                        choices=['dev-clean', 'dev-other', 'test-clean',
+                                 'test-other'], type=str, default='dev-clean')
+    args = parser.parse_args()
+    root_directory = args.path
+    name = args.name
+    if root_directory == '.':
+        root_directory = os.getcwd()
+    root_directory += "/LibriSpeech/"
+    if not os.path.exists(root_directory):
+        raise ValueError("Directory does not exist!")
+    wav2feature(root_directory, name=name, win_len=0.02, win_step=0.01,
+                seq2seq=True, save=True)
