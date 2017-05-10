@@ -8,6 +8,9 @@ zzw922cn
 date:2017-5-5
 '''
 
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import sys
 sys.path.append('../')
 sys.dont_write_bytecode = True
@@ -21,6 +24,9 @@ import cPickle
 import glob
 import sklearn
 from sklearn import preprocessing
+from scikits.audiolab import Format, Sndfile
+from scikits.audiolab import wavread
+
 
 def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
   count = 0
@@ -33,12 +39,16 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
         sig = None
         try:
           (rate,sig)= wav.read(fullFilename)
+        except:
+          pass
+        '''
         except ValueError as e:
           if e.message == "File format 'NIST'... not understood.":
             sf = Sndfile(fullFilename, 'r')
             nframes = sf.nframes
             sig = sf.read_frames(nframes)
             rate = sf.samplerate
+        '''
         mfcc = calcMFCC_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
         mfcc = preprocessing.scale(mfcc)
         mfcc = np.transpose(mfcc)
