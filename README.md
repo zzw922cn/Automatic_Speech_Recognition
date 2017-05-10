@@ -167,4 +167,10 @@ MIT
 ## Contact Us
 If this program is helpful to you, please give us a **star or fork** to encourage us to keep updating. Thank you! Besides, any issues or pulls are appreciated.
 
-For any questions, welcome to send email to :**zzw922cn@gmail.com**. Both I and **Hitesh Paul** are main contributors.
+For any questions, welcome to send email to :**zzw922cn@gmail.com**. 
+
+Collaborators: 
+
+[zzw922cn](https://github.com/zzw922cn)
+[hiteshpaul](https://github.com/hiteshpaul)
+[xxxxyzt](https://github.com/xxxxyzt)
