@@ -26,9 +26,13 @@ import sklearn
 from sklearn import preprocessing
 from scikits.audiolab import Format, Sndfile
 from scikits.audiolab import wavread
+from subprocess import check_call, CalledProcessError
 
 
-def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
+def wav2feature(rootdir, mfcc_dir, label_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
+  """ 
+  To run for WSJ corpus, you should download sph2pipe_v2.5 first!
+  """
   count = 0
   for subdir, dirs, files in os.walk(rootdir):
     for f in files:
@@ -39,9 +43,10 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
         sig = None
         try:
           (rate,sig)= wav.read(fullFilename)
-        except:
-          pass
         except ValueError as e:
+          sph2pipe = os.path.join(sph2pipe_dir, 'sph2pipe')
+          #check_call([sph2pipe, '-f', 'rif', fullFilename, fullFilename.split
+          './sph2pipe -f rif 4k0c030a.wv1 a.wav'
           if e.message == "File format 'NIST'... not understood.":
             sf = Sndfile(fullFilename, 'r')
             nframes = sf.nframes
@@ -50,7 +55,7 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
         mfcc = calcMFCC_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
         mfcc = preprocessing.scale(mfcc)
         mfcc = np.transpose(mfcc)
-        print mfcc.shape
+        print(mfcc.shape)
         labelFilename = filenameNoSuffix + '.label'
         with open(labelFilename,'r') as f:
           characters = f.readline().strip().lower()
@@ -67,14 +72,14 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
         if seq2seq is True:
           targets.append(29)
         targets = np.array(targets)
-        print targets
+        print(targets)
         count+=1
-        print 'file index:',count
+        print('file index:', count)
         if save:
           featureFilename = mfcc_dir + filenameNoSuffix.split('/')[-1] +'.npy'
           np.save(featureFilename,mfcc)
           t_f = label_dir + filenameNoSuffix.split('/')[-1] +'.npy'
-          print t_f
+          print(t_f)
           np.save(t_f,targets)
          
 if __name__ == '__main__':
