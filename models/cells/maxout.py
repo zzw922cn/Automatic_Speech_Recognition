@@ -1,8 +1,8 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/python
 ''' maxout network for lyrics generation or automatic speech recognition
-author(s): 
-Jiaqi Liu, zzw922cn 
+author(s):
+Jiaqi Liu, zzw922cn
 
 date:2016-12-16
 
@@ -15,8 +15,8 @@ sys.dont_write_bytecode = True
 
 import tensorflow as tf
 
-def maxout_cnn_layer(inputs, filter, bind_num,strides,
-                    padding, name=None):
+def maxout_cnn_layer(inputs, filter, bind_num, strides,
+                     padding, name=None):
     ''' maxout convolutional layer
     maxout_cnn_layer(inputs, filter, bind_num, strides, padding)
 
@@ -31,19 +31,19 @@ def maxout_cnn_layer(inputs, filter, bind_num,strides,
     '''
 
     conv = tf.nn.conv2d(input=inputs,
-                filter=filter,
-                strides=strides,
-                padding=padding,
-                name=name)
+                        filter=filter,
+                        strides=strides,
+                        padding=padding,
+                        name=name)
     return maxout(conv, bind_num)
 
-def maxout_weights(filter_shape,bind_num):
+def maxout_weights(filter_shape, bind_num):
     ''' Weight intialization for maxout cnn layer. Automatically expand filter
     size for binding.
 
     filter_shape: the real filter shape we like to have.
     '''
-    filter_shape[-1]=filter_shape[-1]*bind_num
+    filter_shape[-1] = filter_shape[-1]*bind_num
     return tf.Variable(tf.random_normal(filter_shape, stddev=0.01))
 
 def maxout(inputs, bind_num):
@@ -64,6 +64,5 @@ def maxout(inputs, bind_num):
     in_chan = shape[-1]
     shape[-1] = in_chan//bind_num
     shape += [bind_num]
-    shape[0]=-1
-    return tf.reduce_max(tf.reshape(inputs,shape),-1,keep_dims=False)
-
+    shape[0] = -1
+    return tf.reduce_max(tf.reshape(inputs, shape), -1, keep_dims=False)

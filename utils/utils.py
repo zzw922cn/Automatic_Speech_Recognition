@@ -4,17 +4,16 @@
 ''' This library provides some common functions
 author:
 
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
-     
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!
+      #        ###            #        ###           ###        I#        #:
+      #      ###              #      I##;             ##;       ##       ##
+            ###                     ###               !##      ####      #
+           ###                     ###                 ###    ## ###    #'
+         !##;                    `##%                   ##;  ##   ###  ##
+        ###                     ###                     $## `#     ##  #
+       ###        #            ###        #              ####      ####;
+     `###        -#           ###        `#               ###       ###
+     ##############          ##############               `#         #
 date:2016-11-09
 
 common function list:
@@ -33,7 +32,7 @@ common function list:
 	list_dirs(mfcc_dir,label_dir)
 	build_weight(shape,name=None,func='truncated_normal')
 	build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1')
-	build_conv_layer(inpt,filter_shape,stride,name=None)	
+	build_conv_layer(inpt,filter_shape,stride,name=None)
 '''
 import time
 from functools import wraps
@@ -54,91 +53,94 @@ phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h',
        'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux',
        'v', 'w', 'y', 'z', 'zh']
 
-mapping = {'ux':'uw','axr':'er','em':'m','nx':'en','n':'en',
-              'eng':'ng','hv':'hh','cl':'sil','bcl':'sil','dcl':'sil',
-              'gcl':'sil','epi':'sil','h#':'sil','kcl':'sil','pau':'sil',
-              'pcl':'sil','tcl':'sil','vcl':'sil','l':'el','zh':'sh',
-              'aa':'ao','ix':'ih','ax':'ah'}
+mapping = {'ux':'uw', 'axr':'er', 'em':'m', 'nx':'en', 'n':'en',
+           'eng':'ng', 'hv':'hh', 'cl':'sil', 'bcl':'sil', 'dcl':'sil',
+           'gcl':'sil', 'epi':'sil', 'h#':'sil', 'kcl':'sil', 'pau':'sil',
+           'pcl':'sil', 'tcl':'sil', 'vcl':'sil', 'l':'el', 'zh':'sh',
+           'aa':'ao', 'ix':'ih', 'ax':'ah'}
 
-mapped_phn = ['ae', 'ah', 'ao', 'aw', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'iy', 'jh', 'k', 'm', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 'sil', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z']
+mapped_phn = ['ae', 'ah', 'ao', 'aw', 'ax-h', 'ay', 'b', 'ch', 'd',
+              'dh', 'dx', 'eh', 'el', 'en', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'iy',
+              'jh', 'k', 'm', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 'sil',
+              't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z']
 
 def describe(func):
     ''' wrap function,to add some descriptions for function and its running time
     '''
     @wraps(func)
-    def wrapper(*args,**kwargs):
+    def wrapper(*args, **kwargs):
         print(func.__name__+'...')
         start = time.time()
-        result = func(*args,**kwargs)
+        result = func(*args, **kwargs)
         end = time.time()
         print(str(func.__name__+' in '+ str(end-start)+' s'))
         return result
     return wrapper
 
-def getAttrs(object,name):
+def getAttrs(object, name):
     ''' get attributes for object
     '''
-    assert type(name)==list, 'name must be a list'
+    assert type(name) == list, 'name must be a list'
     value = []
     for n in name:
-        value.append(getattr(object,n,'None'))
+        value.append(getattr(object, n, 'None'))
     return value
 
-def setAttrs(object,attrsName,attrsValue):
+def setAttrs(object, attrsName, attrsValue):
     ''' register attributes for this class '''
-    assert type(attrsName)==list, 'attrsName must be a list'
-    assert type(attrsValue)==list, 'attrsValue must be a list'
-    for name,value in zip(attrsName,attrsValue):
-        object.__dict__[name]=value
+    assert type(attrsName) == list, 'attrsName must be a list'
+    assert type(attrsValue) == list, 'attrsValue must be a list'
+    for name, value in zip(attrsName, attrsValue):
+        object.__dict__[name] = value
 
-def output_to_sequence(lmt,type='phn'):
+def output_to_sequence(lmt, type='phn'):
     ''' convert the output into sequences of characters or phonemes
     '''
     sequences = []
     start = 0
     sequences.append([])
     for i in range(len(lmt[0])):
-	if lmt[0][i][0] == start:
-	    sequences[start].append(lmt[1][i])
-	else:
-	    start = start + 1
+        if lmt[0][i][0] == start:
+            sequences[start].append(lmt[1][i])
+        else:
+            start = start + 1
             sequences.append([])
 
     #here, we only print the first sequence of batch
     indexes = sequences[0] #here, we only print the first sequence of batch
-    if type=='phn':
-	seq = []
+    if type == 'phn':
+        seq = []
         for ind in indexes:
-            if ind==len(phn):
+            if ind == len(phn):
                 pass
             else:
                 seq.append(phn[ind])
         seq = ' '.join(seq)
         return seq
-	
-    elif type=='cha':
+
+    elif type == 'cha':
         seq = []
         for ind in indexes:
-            if ind==0:
+            if ind == 0:
                 seq.append(' ')
-            elif ind==27:
+            elif ind == 27:
                 seq.append("'")
-            elif ind==28:
-		pass
+            elif ind == 28:
+                pass
             else:
                 seq.append(chr(ind+96))
         seq = ''.join(seq)
         return seq
     else:
-	raise TypeError('mode should be phoneme or character')
+        raise TypeError('mode should be phoneme or character')
 
 def target2phoneme(target):
     seq = []
     for t in target:
-	if t==len(phn):
-	    pass
-	else:
-	    seq.append(phn[t])
+        if t == len(phn):
+            pass
+        else:
+            seq.append(phn[t])
     seq = ' '.join(seq)
     return seq
 
@@ -146,26 +148,26 @@ def target2phoneme(target):
 def logging(model,logfile,errorRate,epoch=0,delta_time=0,mode='train'):
     ''' log the cost and error rate and time while training or testing
     '''
-    if mode != 'train' and mode!='test' and mode!='config':
-	raise TypeError('mode should be train or test or config.')
+    if mode != 'train' and mode != 'test' and mode != 'config':
+        raise TypeError('mode should be train or test or config.')
     logfile = logfile
     if mode == 'config':
-	with open(logfile, "a") as myfile:
+        with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
     elif mode == 'train':
         with open(logfile, "a") as myfile:
-	    myfile.write(str(time.strftime('%X %x %Z'))+'\n')
-    	    myfile.write("Epoch:"+str(epoch+1)+' '+"train error rate:"+str(errorRate)+'\n')
-    	    myfile.write("Epoch:"+str(epoch+1)+' '+"train time:"+str(delta_time)+' s\n')
+            myfile.write(str(time.strftime('%X %x %Z'))+'\n')
+            myfile.write("Epoch:"+str(epoch+1)+' '+"train error rate:"+str(errorRate)+'\n')
+            myfile.write("Epoch:"+str(epoch+1)+' '+"train time:"+str(delta_time)+' s\n')
     elif mode == 'test':
         logfile = logfile+'_TEST'
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
-	    myfile.write(str(time.strftime('%X %x %Z'))+'\n')
-    	    myfile.write("test error rate:"+str(errorRate)+'\n')
+            myfile.write(str(time.strftime('%X %x %Z'))+'\n')
+            myfile.write("test error rate:"+str(errorRate)+'\n')
 
 @describe
-def count_params(model,mode='trainable'):
+def count_params(model, mode='trainable'):
     ''' count all parameters of a tensorflow graph
     '''
     if mode == 'all':
@@ -173,11 +175,11 @@ def count_params(model,mode='trainable'):
     elif mode == 'trainable':
         num = np.sum([np.product([xi.value for xi in x.get_shape()]) for x in model.var_trainable_op])
     else:
-	raise TypeError('mode should be all or trainable.')
+        raise TypeError('mode should be all or trainable.')
     print('number of '+mode+' parameters: '+str(num))
     return num
 
-def group_phoneme(orig_phn,mapping):
+def group_phoneme(orig_phn, mapping):
     group_phn = []
     for val in orig_phn:
         group_phn.append(val)
@@ -195,15 +197,15 @@ def list_to_sparse_tensor(targetList, mode, type):
     vals = [] #value
     assert mode == 'train' or mode == 'test', 'mode must be train or test'
     assert type == 'phn' or type == 'cha', 'type must be phoneme or character'
-    if type=='cha':
-	for tI, target in enumerate(targetList):
+    if type == 'cha':
+        for tI, target in enumerate(targetList):
             for seqI, val in enumerate(target):
-		indices.append([tI, seqI])
-		vals.append(val)
-	shape = [len(targetList), np.asarray(indices).max(axis=0)[1]+1] #shape
+                indices.append([tI, seqI])
+                vals.append(val)
+        shape = [len(targetList), np.asarray(indices).max(axis=0)[1]+1] #shape
         return (np.array(indices), np.array(vals), np.array(shape))
 
-    group_phn = group_phoneme(phn,mapping)
+    group_phn = group_phoneme(phn, mapping)
 
     for tI, target in enumerate(targetList):
         for seqI, val in enumerate(target):
@@ -211,19 +213,19 @@ def list_to_sparse_tensor(targetList, mode, type):
                 indices.append([tI, seqI])
                 vals.append(val)
             elif(mode == 'test'):
-                if val<len(phn) and (phn[val] in mapping.keys()):
+                if val < len(phn) and (phn[val] in mapping.keys()):
                     val = group_phn.index(mapping[phn[val]])
                 indices.append([tI, seqI])
                 vals.append(val)
             else:
-                raise ValueError("Invalid mode.",mode)
+                raise ValueError("Invalid mode.", mode)
     shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
     return (np.array(indices), np.array(vals), np.array(shape))
 
 def get_edit_distance(hyp_arr,truth_arr, normalize, mode, type):
-    ''' calculate edit distance 
+    ''' calculate edit distance
     '''
-    
+
     graph = tf.Graph()
     with graph.as_default():
         truth = tf.sparse_placeholder(tf.int32)
@@ -248,7 +250,7 @@ def data_lists_to_batches(inputList, targetList, batchSize, mode, type):
     for inp in inputList:
 	# find the max time_length
         maxLength = max(maxLength, inp.shape[1])
-    # randIxs is the shuffled index from range(0,len(inputList)) 
+    # randIxs is the shuffled index from range(0,len(inputList))
     randIxs = np.random.permutation(len(inputList))
     start, end = (0, batchSize)
     dataBatches = []
@@ -257,13 +259,13 @@ def data_lists_to_batches(inputList, targetList, batchSize, mode, type):
 	# batchSeqLengths store the time-length of each sample in a mini-batch
         batchSeqLengths = np.zeros(batchSize)
   	# randIxs is the shuffled index of input list
-	for batchI, origI in enumerate(randIxs[start:end]):
-            batchSeqLengths[batchI] = inputList[origI].shape[-1]
+    for batchI, origI in enumerate(randIxs[start:end]):
+        batchSeqLengths[batchI] = inputList[origI].shape[-1]
 
         batchInputs = np.zeros((maxLength, batchSize, nFeatures))
         batchTargetList = []
         for batchI, origI in enumerate(randIxs[start:end]):
-	    # padSecs is the length of padding  
+	    # padSecs is the length of padding
             padSecs = maxLength - inputList[origI].shape[1]
 	    # numpy.pad pad the inputList[origI] with zeos at the tail
             batchInputs[:,batchI,:] = np.pad(inputList[origI].T, ((0,padSecs),(0,0)), 'constant', constant_values=0)
@@ -282,11 +284,11 @@ def load_batched_data(mfccPath, labelPath, batchSize, mode, type):
                                  batchSize, mode, type) + \
             (len(os.listdir(mfccPath)),)
 
-def list_dirs(mfcc_dir,label_dir):
+def list_dirs(mfcc_dir, label_dir):
     mfcc_dirs = glob(mfcc_dir)
     label_dirs = glob(label_dir)
     for mfcc,label in zip(mfcc_dirs,label_dirs):
-	yield (mfcc,label)
+        yield (mfcc,label)
 
 
 def build_weight(shape, name, func='he_normal', range=None):
@@ -298,7 +300,7 @@ def build_weight(shape, name, func='he_normal', range=None):
     We also add the L2 loss to weight for training.
     """
     if type(shape) is not list:
-	raise TypeError('shape must be a list')
+        raise TypeError('shape must be a list')
 
     initializer = tf.constant_initializer()
     if func == 'xavier':
@@ -321,22 +323,22 @@ def build_weight(shape, name, func='he_normal', range=None):
 
     with tf.variable_scope(name or "weight_var"):
         var = tf.get_variable(name, shape, initializer=initializer)
-    tf.add_to_collection('l2', tf.nn.l2_loss(var))  
+    tf.add_to_collection('l2', tf.nn.l2_loss(var))
     return var
 
 
-def build_forward_layer(inpt,shape,kernel='relu',name_scope='fc1'):
+def build_forward_layer(inpt, shape, kernel='relu', name_scope='fc1'):
     fc_w = build_weight(shape,name=name_scope+'_w')
     fc_b = build_weight([shape[1]],name=name_scope+'_b')
     if kernel == 'relu':
-	fc_h = tf.nn.relu(tf.matmul(inpt,fc_w) + fc_b)
+        fc_h = tf.nn.relu(tf.matmul(inpt,fc_w) + fc_b)
     elif kernel == 'elu':
-	fc_h = tf.nn.elu(tf.matmul(inpt,fc_w) + fc_b)
+        fc_h = tf.nn.elu(tf.matmul(inpt,fc_w) + fc_b)
     elif kernel == 'linear':
-	fc_h = tf.matmul(inpt,fc_w) + fc_b
+        fc_h = tf.matmul(inpt,fc_w) + fc_b
     return fc_h
 
-def build_conv_layer(inpt,filter_shape,stride,name=None):
+def build_conv_layer(inpt, filter_shape, stride,name=None):
     ''' build a convolutional layer with batch normalization
     '''
     # BN->ReLU->conv
@@ -347,17 +349,17 @@ def build_conv_layer(inpt,filter_shape,stride,name=None):
         beta = tf.Variable(tf.zeros([in_channels]), name="beta")
         gamma = build_weight([in_channels], name="gamma")
     batch_normed = tf.nn.batch_normalization(
-    				inpt, 
-				mean, var, 
-				beta, gamma, 
-				0.001,
-				name=name+'_bn')
+    				inpt,
+				    mean, var,
+				    beta, gamma,
+				    0.001,
+				    name=name+'_bn')
     # 2.relu
     activated = tf.nn.relu(batch_normed)
     # 3.convolution
-    filter_ = build_weight(filter_shape,name=name+'_filter')
+    filter_ = build_weight(filter_shape, name=name+'_filter')
     output = tf.nn.conv2d(activated, filter=filter_, strides=[1, stride, stride, 1], padding='SAME')
-    output = tf.nn.dropout(output,keep_prob=0.6)
+    output = tf.nn.dropout(output, keep_prob=0.6)
     return output
 
 def batch_norm(x, is_training=True):
@@ -385,8 +387,8 @@ def batch_norm(x, is_training=True):
     return normed
 
 def _get_dims(shape):
-    ''' get shape for initialization
-    '''
+    """get shape for initialization
+    """
     fan_in = shape[0] if len(shape) == 2 else np.prod(shape[:-1])
     fan_out = shape[1] if len(shape) == 2 else shape[-1]
     return fan_in, fan_out
@@ -398,5 +400,5 @@ def dropout(x, keep_prob, is_training):
 
 
 # test code
-if __name__=='__main__':
+if __name__ == '__main__':
     print len(phn)
