@@ -1,21 +1,24 @@
 #-*- coding:utf-8 -*-
 #!/usr/bin/python
 
-''' 
+'''
 author:
 
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
-     
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!
+      #        ###            #        ###           ###        I#        #:
+      #      ###              #      I##;             ##;       ##       ##
+            ###                     ###               !##      ####      #
+           ###                     ###                 ###    ## ###    #'
+         !##;                    `##%                   ##;  ##   ###  ##
+        ###                     ###                     $## `#     ##  #
+       ###        #            ###        #              ####      ####;
+     `###        -#           ###        `#               ###       ###
+     ##############          ##############               `#         #
+
 date:2016-11-09
+
+Liujq: Add English annotations.
+date:2017-05-08
 '''
 
 
@@ -23,28 +26,40 @@ import numpy
 import math
 
 def audio2frame(signal,frame_length,frame_step,winfunc=lambda x:numpy.ones((x,))):
-    '''将音频信号转化为帧，以采样点为单位。
-	参数含义：
-	signal:原始音频型号
-	frame_length:每一帧的长度(这里指采样点的长度，即采样频率乘以时间间隔)
-	frame_step:相邻帧的间隔（同上定义）
-	winfunc:lambda函数，用于生成一个向量
-    '''
-    signal_length=len(signal) #信号总长度
-    frame_length=int(round(frame_length)) #以帧帧时间长度
-    frame_step=int(round(frame_step)) #相邻帧之间的步长
-    if signal_length<=frame_length: #若信号长度小于一个帧的长度，则帧数定义为1
+    """ Framing audio signal. Uses numbers of samples as unit.
+
+    Args:
+    signal: 1-D numpy array.
+	frame_length: In this situation, frame_length=samplerate*win_length, since we
+        use numbers of samples as unit.
+    frame_step:In this situation, frame_step=samplerate*win_step,
+        representing the number of samples between the start point of adjacent frames.
+	winfunc:lambda function, to generate a vector with shape (x,) filled with ones.
+
+    Returns:
+        frames*win: 2-D numpy array with shape (frames_num, frame_length).
+    """
+    signal_length=len(signal)
+    # Use round() to ensure length and step are integer, considering that we use numbers
+    # of samples as unit.
+    frame_length=int(round(frame_length))
+    frame_step=int(round(frame_step))
+    if signal_length<=frame_length:
         frames_num=1
-    else: #否则，计算帧的总长度
+    else:
         frames_num=1+int(math.ceil((1.0*signal_length-frame_length)/frame_step))
-    pad_length=int((frames_num-1)*frame_step+frame_length) #所有帧加起来总的铺平后的长度
-    zeros=numpy.zeros((pad_length-signal_length,)) #不够的长度使用0填补，类似于FFT中的扩充数组操作
-    pad_signal=numpy.concatenate((signal,zeros)) #填补后的信号记为pad_signal
-    indices=numpy.tile(numpy.arange(0,frame_length),(frames_num,1))+numpy.tile(numpy.arange(0,frames_num*frame_step,frame_step),(frame_length,1)).T  #相当于对所有帧的时间点进行抽取，得到frames_num*frame_length长度的矩阵
-    indices=numpy.array(indices,dtype=numpy.int32) #将indices转化为矩阵
-    frames=pad_signal[indices] #得到帧信号
-    win=numpy.tile(winfunc(frame_length),(frames_num,1))  #window窗函数，这里默认取1
-    return frames*win   #返回帧信号矩阵
+    pad_length=int((frames_num-1)*frame_step+frame_length)
+    # Padding zeros at the end of signal if pad_length > signal_length.
+    zeros=numpy.zeros((pad_length-signal_length,))
+    pad_signal=numpy.concatenate((signal,zeros))
+    # Calculate the indice of signal for every sample in frames, shape (frams_nums, frams_length)
+    indices=numpy.tile(numpy.arange(0,frame_length),(frames_num,1))+numpy.tile(
+        numpy.arange(0,frames_num*frame_step,frame_step),(frame_length,1)).T
+    indices=numpy.array(indices,dtype=numpy.int32)
+    # Get signal data according to indices.
+    frames=pad_signal[indices]
+    win=numpy.tile(winfunc(frame_length),(frames_num,1))
+    return frames*win
 
 def deframesignal(frames,signal_length,frame_length,frame_step,winfunc=lambda x:numpy.ones((x,))):
     '''定义函数对原信号的每一帧进行变换，应该是为了消除关联性
@@ -75,31 +90,36 @@ def deframesignal(frames,signal_length,frame_length,frame_step,winfunc=lambda x:
     return recalc_signal[0:signal_length] #返回该新的调整信号
 
 def spectrum_magnitude(frames,NFFT):
-    '''计算每一帧经过FFY变换以后的频谱的幅度，若frames的大小为N*L,则返回矩阵的大小为N*NFFT
-    参数说明：
-    frames:即audio2frame函数中的返回值矩阵，帧矩阵
-    NFFT:FFT变换的数组大小,如果帧长度小于NFFT，则帧的其余部分用0填充铺满
+    '''Apply FFT and Calculate magnitude of the spectrum.
+    Args:
+        frames: 2-D frames array calculated by audio2frame(...).
+        NFFT:FFT size.
+    Returns:
+        Return magnitude of the spectrum after FFT, with shape (frames_num, NFFT).
     '''
-    complex_spectrum=numpy.fft.rfft(frames,NFFT) #对frames进行FFT变换
-    return numpy.absolute(complex_spectrum)  #返回频谱的幅度值
+    complex_spectrum=numpy.fft.rfft(frames,NFFT)
+    return numpy.absolute(complex_spectrum)
 
 def spectrum_power(frames,NFFT):
-    '''计算每一帧傅立叶变换以后的功率谱
-    参数说明：
-    frames:audio2frame函数计算出来的帧矩阵
-    NFFT:FFT的大小
-    '''
-    return 1.0/NFFT * numpy.square(spectrum_magnitude(frames,NFFT)) #功率谱等于每一点的幅度平方/NFFT
+    """Calculate power spectrum for every frame after FFT.
+    Args:
+        frames: 2-D frames array calculated by audio2frame(...).
+        NFFT:FFT size
+    Returns:
+        Power spectrum: PS = magnitude^2/NFFT
+    """
+    return 1.0/NFFT * numpy.square(spectrum_magnitude(frames,NFFT))
 
 def log_spectrum_power(frames,NFFT,norm=1):
-    '''计算每一帧的功率谱的对数形式
-    参数说明：
-    frames:帧矩阵，即audio2frame返回的矩阵
-    NFFT：FFT变换的大小
-    norm:范数，即归一化系数
+    '''Calculate log power spectrum.
+    Args:
+        frames:2-D frames array calculated by audio2frame(...)
+        NFFT：FFT size
+        norm: Norm.
     '''
     spec_power=spectrum_power(frames,NFFT)
-    spec_power[spec_power<1e-30]=1e-30 #为了防止出现功率谱等于0，因为0无法取对数
+    # In case of calculating log0, we set 0 in spec_power to 0.
+    spec_power[spec_power<1e-30]=1e-30
     log_spec_power=10*numpy.log10(spec_power)
     if norm:
         return log_spec_power-numpy.max(log_spec_power)
@@ -107,10 +127,12 @@ def log_spectrum_power(frames,NFFT,norm=1):
         return log_spec_power
 
 def pre_emphasis(signal,coefficient=0.95):
-    '''对信号进行预加重
-    参数含义：
-    signal:原始信号
-    coefficient:加重系数，默认为0.95
+    '''Pre-emphasis.
+    Args:
+        signal: 1-D numpy array.
+        coefficient:Coefficient for pre-emphasis. Defauted to 0.95.
+    Returns:
+        pre-emphasis signal.
     '''
     return numpy.append(signal[0],signal[1:]-coefficient*signal[:-1])
 
