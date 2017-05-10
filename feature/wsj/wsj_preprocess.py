@@ -41,14 +41,12 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
           (rate,sig)= wav.read(fullFilename)
         except:
           pass
-        '''
         except ValueError as e:
           if e.message == "File format 'NIST'... not understood.":
             sf = Sndfile(fullFilename, 'r')
             nframes = sf.nframes
             sig = sf.read_frames(nframes)
             rate = sf.samplerate
-        '''
         mfcc = calcMFCC_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
         mfcc = preprocessing.scale(mfcc)
         mfcc = np.transpose(mfcc)
