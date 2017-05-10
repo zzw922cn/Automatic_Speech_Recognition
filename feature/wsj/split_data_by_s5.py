@@ -12,6 +12,9 @@ validation set: eval92
 test set: dev93
 '''
 
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import sys
 sys.path.append('../')
 sys.dont_write_bytecode = True
