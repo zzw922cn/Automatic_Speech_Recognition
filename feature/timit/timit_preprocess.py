@@ -4,7 +4,7 @@
 
 author(s):
 zzw922cn, nemik
-     
+
 date:2017-4-15
 '''
 
@@ -77,7 +77,7 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
               phenome.append(len(phn)+1) # <end token>
             print phenome
           phenome = np.array(phenome)
-            
+
         elif level == 'cha':
           labelFilename = filenameNoSuffix + '.WRD'
           phenome = []
@@ -109,7 +109,7 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
           labelFilename = label_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
           print labelFilename
           np.save(labelFilename,phenome)
-          
+
 
 
 if __name__ == '__main__':

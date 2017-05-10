@@ -59,11 +59,11 @@ def calcMFCC_delta_delta(signal,samplerate=16000,win_length=0.025,win_step=0.01,
         2-D numpy array with shape:(NUMFRAMES, 39). In each frame, coefficients are
             concatenated in (feature, delta features, delta delta feature) way.
     """
-    feat=calcMFCC(signal,samplerate,win_length,win_step,cep_num,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff,cep_lifter,appendEnergy)   #首先获取13个一般MFCC系数
-    feat_delta=delta(feat)
-    feat_delta_delta=delta(feat_delta)
+    feat = calcMFCC(signal,samplerate,win_length,win_step,cep_num,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff,cep_lifter,appendEnergy)   #首先获取13个一般MFCC系数
+    feat_delta = delta(feat)
+    feat_delta_delta = delta(feat_delta)
 
-    result=numpy.concatenate((feat,feat_delta,feat_delta_delta),axis=1)
+    result = numpy.concatenate((feat,feat_delta,feat_delta_delta),axis=1)
     return result
 
 def delta(feat, N=2):
@@ -110,8 +110,8 @@ def calcMFCC(signal,samplerate=16000,win_length=0.025,win_step=0.01,cep_num=13,f
     feat=dct(feat,type=2,axis=1,norm='ortho')[:,:cep_num]
     feat=lifter(feat,cep_lifter)
     if appendEnergy:
-    # Replace the first coefficient with logE and get 2-13 coefficients.
-	    feat[:,0]=numpy.log(energy)
+        # Replace the first coefficient with logE and get 2-13 coefficients.
+        feat[:,0]=numpy.log(energy)
     return feat
 
 def fbank(signal,samplerate=16000,win_length=0.025,win_step=0.01,filters_num=26,NFFT=512,low_freq=0,high_freq=None,pre_emphasis_coeff=0.97):
@@ -210,10 +210,10 @@ def get_filter_banks(filters_num=20,NFFT=512,samplerate=16000,low_freq=0,high_fr
     # Build Mel filters' expression.First and third points of each filter are zeros.
     fbank=numpy.zeros([filters_num,NFFT/2+1])
     for j in xrange(0,filters_num):
-	for i in xrange(int(bin[j]),int(bin[j+1])):
-	    fbank[j,i]=(i-bin[j])/(bin[j+1]-bin[j])
-	for i in xrange(int(bin[j+1]),int(bin[j+2])):
-	    fbank[j,i]=(bin[j+2]-i)/(bin[j+2]-bin[j+1])
+        for i in xrange(int(bin[j]),int(bin[j+1])):
+            fbank[j,i]=(i-bin[j])/(bin[j+1]-bin[j])
+        for i in xrange(int(bin[j+1]),int(bin[j+2])):
+            fbank[j,i]=(bin[j+2]-i)/(bin[j+2]-bin[j+1])
     return fbank
 
 def lifter(cepstra,L=22):
@@ -223,9 +223,9 @@ def lifter(cepstra,L=22):
         L: Numbers of lifters. Defaulted to 22.
     '''
     if L>0:
-	    nframes,ncoeff=numpy.shape(cepstra)
-	    n=numpy.arange(ncoeff)
-	    lift=1+(L/2)*numpy.sin(numpy.pi*n/L)
-	    return lift*cepstra
+        nframes,ncoeff=numpy.shape(cepstra)
+        n=numpy.arange(ncoeff)
+        lift=1+(L/2)*numpy.sin(numpy.pi*n/L)
+        return lift*cepstra
     else:
-	    return cepstra
+        return cepstra
