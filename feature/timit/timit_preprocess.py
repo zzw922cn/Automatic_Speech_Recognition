@@ -25,7 +25,7 @@ phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 
 
 import os
 from core.sigprocess import *
-from core.calcmfcc import calcMFCC_delta_delta
+from core.calcmfcc import calcfeat_delta_delta
 import scipy.io.wavfile as wav
 import numpy as np
 import glob
@@ -126,4 +126,4 @@ if __name__ == '__main__':
   if not os.path.exists(feat_dir):
     os.makedirs(feat_dir)
   rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
-  wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=mode, level='cha', keywords='train', seq2seq=True, save=True)
+  wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=mode, level='cha', keywords='train', seq2seq=True, save=False)
