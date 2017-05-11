@@ -7,7 +7,8 @@ zzw922cn, nemik
 
 date:2017-4-15
 '''
-
+from __future__ import print_function
+from __future__ import unicode_literals
 import sys
 sys.path.append('../')
 
@@ -23,6 +24,7 @@ phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 
 '''
 
 import os
+import argparse
 from core.sigprocess import *
 from core.calcmfcc import calcfeat_delta_delta
 import scipy.io.wavfile as wav
@@ -61,7 +63,7 @@ def wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=
                 if mode == 'mfcc':
                     feat = preprocessing.scale(feat)
                 feat = np.transpose(feat)
-                print feat.shape
+                print(feat.shape)
 
                 if level == 'phn':
                     labelFilename = filenameNoSuffix + '.PHN'
@@ -75,7 +77,7 @@ def wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=
                             phenome.append(p_index)
                         if seq2seq is True:
                             phenome.append(len(phn)+1) # <end token>
-                        print phenome
+                        print(phenome)
                     phenome = np.array(phenome)
 
                 elif level == 'cha':
@@ -98,16 +100,16 @@ def wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=
                         phenome = phenome[:-1]
                         if seq2seq is True:
                             phenome.append(29)
-                    print phenome
-                    print sentence
+                    print(phenome)
+                    print(sentence)
 
                 count+=1
-                print 'file index:',count
+                print('file index:',count)
                 if save:
                     featureFilename = feat_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
                     np.save(featureFilename,feat)
                     labelFilename = label_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-                    print labelFilename
+                    print(labelFilename)
                     np.save(labelFilename,phenome)
 
 
