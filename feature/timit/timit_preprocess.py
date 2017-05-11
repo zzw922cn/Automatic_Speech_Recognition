@@ -4,7 +4,7 @@
 
 author(s):
 zzw922cn, nemik
-     
+
 date:2017-4-15
 '''
 
@@ -41,7 +41,7 @@ phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch'
 ## cleaned phonemes
 #phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'epi', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'ix', 'iy', 'jh', 'k', 'l', 'm', 'n', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z', 'zh']
 
-def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', level='phn', keywords='train', seq2seq=False, save=False):
+def wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', level='phn', keywords='train', seq2seq=False, save=False):
   count = 0
   for subdir, dirs, files in os.walk(rootdir):
     for file in files:
@@ -58,10 +58,11 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
             nframes = sf.nframes
             sig = sf.read_frames(nframes)
             rate = sf.samplerate
-        mfcc = calcMFCC_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
-        mfcc = preprocessing.scale(mfcc)
-        mfcc = np.transpose(mfcc)
-        print mfcc.shape
+        feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step,mode=mode)
+        if mode == 'mfcc':
+          feat = preprocessing.scale(feat)
+        feat = np.transpose(feat)
+        print feat.shape
 
         if level == 'phn':
           labelFilename = filenameNoSuffix + '.PHN'
@@ -77,7 +78,7 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
               phenome.append(len(phn)+1) # <end token>
             print phenome
           phenome = np.array(phenome)
-            
+
         elif level == 'cha':
           labelFilename = filenameNoSuffix + '.WRD'
           phenome = []
@@ -104,12 +105,12 @@ def wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode=
         count+=1
         print 'file index:',count
         if save:
-          featureFilename = mfcc_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-          np.save(featureFilename,mfcc)
+          featureFilename = feat_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
+          np.save(featureFilename,feat)
           labelFilename = label_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
           print labelFilename
           np.save(labelFilename,phenome)
-          
+
 
 
 if __name__ == '__main__':
@@ -117,11 +118,12 @@ if __name__ == '__main__':
   level = 'cha'
   # train or test dataset
   keywords = 'train'
-  mfcc_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'mfcc')
+  mode = 'mfcc'
+  feat_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, mode)
   label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
   if not os.path.exists(label_dir):
     os.makedirs(label_dir)
-  if not os.path.exists(mfcc_dir):
-    os.makedirs(mfcc_dir)
+  if not os.path.exists(feat_dir):
+    os.makedirs(feat_dir)
   rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
-  wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', level='cha', keywords='train', seq2seq=True, save=True)
+  wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=mode, level='cha', keywords='train', seq2seq=True, save=True)

@@ -2,10 +2,10 @@
 #!/usr/bin/python
 ''' Automatic Speech Recognition for TIMIT corpus
 
-Support for LibriSpeech will come soon. 
+Support for LibriSpeech will come soon.
 author(s):
 zzw922cn
-     
+
 date:2017-4-15
 '''
 
@@ -46,7 +46,7 @@ from models.dynamic_brnn import DBiRNN
 
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
-    
+
 flags.DEFINE_string('mode', 'train', 'set whether to train or test')
 flags.DEFINE_boolean('keep', False, 'set whether to restore a model, when test mode, keep should be set to True')
 flags.DEFINE_string('level', 'phn', 'set the task level, phn, cha, or seq2seq, seq2seq will be supported soon')
@@ -96,22 +96,22 @@ keep = FLAGS.keep
 keep_prob = 1-FLAGS.dropout_prob
 
 if mode == 'test':
-  print 'Inference Mode...'
-  batch_size = 100
-  num_epochs = 1
+    print 'Inference Mode...'
+    batch_size = 100
+    num_epochs = 1
 
 train_mfcc_dir = os.path.join(datadir, level, 'train', 'mfcc')
 train_label_dir = os.path.join(datadir, level, 'train', 'label')
 test_mfcc_dir = os.path.join(datadir, level, 'test', 'mfcc')
 test_label_dir = os.path.join(datadir, level, 'test', 'label')
-logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datetime.now(), 
+logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datetime.now(),
     '%Y-%m-%d %H:%M:%S') + '.txt').replace(' ', '').replace('/', ''))
 
 
 class Runner(object):
 
     def _default_configs(self):
-      return {'rnncell': rnncell,
+        return {'rnncell': rnncell,
               'batch_size': batch_size,
               'num_hidden': num_hidden,
               'num_feature': num_feature,
@@ -122,7 +122,7 @@ class Runner(object):
               'learning_rate': lr,
               'keep_prob': keep_prob,
               'grad_clip': grad_clip,
-            }
+                }
 
     @describe
     def load_data(self, args, mode, type):
@@ -184,7 +184,7 @@ class Runner(object):
                             print('\n{} mode, total:{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train CER={:.3f}\n'.format(
                                 level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
                         elif mode == 'test':
-                            l, pre, y, er = sess.run([model.loss, model.predictions, 
+                            l, pre, y, er = sess.run([model.loss, model.predictions,
                                 model.targetY, model.errorRate], feed_dict=feedDict)
                             batchErrors[batch] = er
                             print('\n{} mode, total:{},batch:{}/{},test loss={:.3f},mean test CER={:.3f}\n'.format(
@@ -195,7 +195,7 @@ class Runner(object):
                             _, l, pre, y = sess.run([model.optimizer, model.loss,
                                 model.predictions, model.targetY],
                                 feed_dict=feedDict)
-                  
+
                             er = get_edit_distance([pre.values], [y.values], True, 'train', level)
                             print('\n{} mode, total:{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train PER={:.3f}\n'.format(
                                 level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
@@ -215,7 +215,7 @@ class Runner(object):
                         print('Truth:\n' + output_to_sequence(y, type=level))
                         print('Output:\n' + output_to_sequence(pre, type=level))
 
-                    
+
                     if mode=='train' and ((epoch * len(batchRandIxs) + batch + 1) % 20 == 0 or (
                            epoch == num_epochs - 1 and batch == len(batchRandIxs) - 1)):
                         checkpoint_path = os.path.join(savedir, 'model.ckpt')
@@ -248,5 +248,5 @@ class Runner(object):
 
 
 if __name__ == '__main__':
-  runner = Runner()
-  runner.run()
+    runner = Runner()
+    runner.run()
