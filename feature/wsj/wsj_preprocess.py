@@ -29,10 +29,14 @@ from scikits.audiolab import wavread
 from subprocess import check_call, CalledProcessError
 
 
-def wav2feature(rootdir, mfcc_dir, label_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
+def wav2feature(rootdir, save_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
   """ 
   To run for WSJ corpus, you should download sph2pipe_v2.5 first!
   """
+  wav_dir = os.path.join(save_dir, 'wav')
+  mfcc_dir = os.path.join(save_dir, 'mfcc')
+  label_dir = os.path.join(save_dir, 'label')
+  
   count = 0
   for subdir, dirs, files in os.walk(rootdir):
     for f in files:
@@ -45,6 +49,7 @@ def wav2feature(rootdir, mfcc_dir, label_dir, sph2pipe_dir, win_len=0.02, win_st
           (rate,sig)= wav.read(fullFilename)
         except ValueError as e:
           sph2pipe = os.path.join(sph2pipe_dir, 'sph2pipe')
+          wav_filename = 
           #check_call([sph2pipe, '-f', 'rif', fullFilename, fullFilename.split
           './sph2pipe -f rif 4k0c030a.wv1 a.wav'
           if e.message == "File format 'NIST'... not understood.":
