@@ -42,7 +42,13 @@ phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch'
 ## cleaned phonemes
 #phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'epi', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'ix', 'iy', 'jh', 'k', 'l', 'm', 'n', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z', 'zh']
 
-def wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', level='phn', keywords='train', seq2seq=False, save=False):
+def wav2feature(rootdir, save_directory, mode, level, keywords, win_len=0.02, win_step=0.01,  seq2seq=False, save=False):
+    feat_dir = os.path.join(save_directory, level, keywords, mode)
+    label_dir = os.path.join(save_directory, level, keywords, 'label')
+    if not os.path.exists(label_dir):
+        os.makedirs(label_dir)
+    if not os.path.exists(feat_dir):
+        os.makedirs(feat_dir)
     count = 0
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:
@@ -115,15 +121,37 @@ def wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=
 
 if __name__ == '__main__':
     # character or phoneme
-    level = 'cha'
-    # train or test dataset
-    keywords = 'train'
-    mode = 'mfcc'
-    feat_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, mode)
-    label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
-    if not os.path.exists(label_dir):
-        os.makedirs(label_dir)
-    if not os.path.exists(feat_dir):
-        os.makedirs(feat_dir)
-    rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
-    wav2feature(rootdir, feat_dir, label_dir, win_len=0.02, win_step=0.01, mode=mode, level='cha', keywords='train', seq2seq=True, save=False)
+    parser = argparse.ArgumentParser(prog='timit_preprocess',
+                                     description="""
+                                     Script to preprocess timit data
+                                     """)
+    parser.add_argument("path", help="Directory where Timit dataset is contained", type=str)
+    parser.add_argument("save", help="Directory where preprocessed arrays are to be saved",
+                        type=str)
+    parser.add_argument("-n", "--name", help="Name of the dataset",
+                        choices=['train', 'test'],
+                        type=str, default='train')
+    parser.add_argument("-l", "--level", help="Level",
+                        choices=['cha', 'phn'],
+                        type=str, default='cha')
+    parser.add_argument("-m", "--mode", help="Mode",
+                        choices=['mfcc'],
+                        type=str, default='mfcc')
+    args = parser.parse_args()
+    root_directory = args.path
+    save_directory = args.save
+    level = args.level
+    mode = args.mode
+    name = args.name
+
+    # level = 'cha'
+    # # train or test dataset
+    # keywords = 'train'
+    # mode = 'mfcc'
+    # feat_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, mode)
+    # label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
+    # rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
+    root_directory = os.path.join(root_directory, 'TIMIT', name)
+    wav2feature(root_directory, save_directory, mode=mode,
+                level=level, keywords=name, win_len=0.02, win_step=0.01,
+                seq2seq=True, save=False)
