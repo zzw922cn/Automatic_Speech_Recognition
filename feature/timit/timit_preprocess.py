@@ -137,12 +137,14 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--mode", help="Mode",
                         choices=['mfcc'],
                         type=str, default='mfcc')
+    parser.add_argument("--seq2seq", help="set this flag to use seq2seq", action="store_true")
     args = parser.parse_args()
     root_directory = args.path
     save_directory = args.save
     level = args.level
     mode = args.mode
     name = args.name
+    seq2seq = args.seq2seq
 
     # level = 'cha'
     # # train or test dataset
@@ -152,6 +154,12 @@ if __name__ == '__main__':
     # label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
     # rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
     root_directory = os.path.join(root_directory, 'TIMIT', name)
+    if root_directory == ".":
+        root_directory = os.getcwd()
+    if save_directory == ".":
+        save_directory = os.getcwd()
+    if not os.path.isdir(root_directory) or not os.path.isdir(save_directory):
+        raise ValueError("Directory does not exist!")
     wav2feature(root_directory, save_directory, mode=mode,
                 level=level, keywords=name, win_len=0.02, win_step=0.01,
-                seq2seq=True, save=False)
+                seq2seq=seq2seq, save=False)
