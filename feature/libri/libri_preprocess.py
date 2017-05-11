@@ -125,9 +125,11 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--name", help="Name of the dataset",
                         choices=['dev-clean', 'dev-other', 'test-clean',
                                  'test-other'], type=str, default='dev-clean')
+    parser.add_argument("--seq2seq", help="set this flag to use seq2seq", action="store_true")
     args = parser.parse_args()
     root_directory = args.path
     save_directory = args.save
+    seq2seq = args.seq2seq
     name = args.name
     if root_directory == '.':
         root_directory = os.getcwd()
@@ -137,4 +139,4 @@ if __name__ == "__main__":
     if not os.path.isdir(root_directory) or not os.path.isdir(save_directory):
         raise ValueError("LibriSpeech Directory does not exist!")
     wav2feature(root_directory, save_directory, name=name, win_len=0.02, win_step=0.01,
-                seq2seq=True, save=True)
+                seq2seq=seq2seq, save=True)
