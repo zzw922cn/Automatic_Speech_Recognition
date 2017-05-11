@@ -9,14 +9,14 @@ date:2017-5-5
 '''
 
 from __future__ import print_function
-from __future__ import unicode_literals
+#from __future__ import unicode_literals
 
 import sys
 sys.path.append('../')
 sys.dont_write_bytecode = True
 
 from core.sigprocess import *
-from core.calcmfcc import calcMFCC_delta_delta
+from core.calcmfcc import calcfeat_delta_delta
 import scipy.io.wavfile as wav
 import numpy as np
 import os
@@ -29,13 +29,12 @@ from scikits.audiolab import wavread
 from subprocess import check_call, CalledProcessError
 
 
-def wav2feature(rootdir, save_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', seq2seq=False, save=False):
+def wav2feature(rootdir, save_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', level='seq2seq', save=False):
   """ 
   To run for WSJ corpus, you should download sph2pipe_v2.5 first!
   """
-  wav_dir = os.path.join(save_dir, 'wav')
-  mfcc_dir = os.path.join(save_dir, 'mfcc')
-  label_dir = os.path.join(save_dir, 'label')
+  mfcc_dir = os.path.join(save_dir, keyword, mode)
+  label_dir = os.path.join(save_dir, keyword, 'label')
   
   count = 0
   for subdir, dirs, files in os.walk(rootdir):
@@ -47,17 +46,14 @@ def wav2feature(rootdir, save_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mo
         sig = None
         try:
           (rate,sig)= wav.read(fullFilename)
+
         except ValueError as e:
           sph2pipe = os.path.join(sph2pipe_dir, 'sph2pipe')
-          wav_filename = 
-          #check_call([sph2pipe, '-f', 'rif', fullFilename, fullFilename.split
-          './sph2pipe -f rif 4k0c030a.wv1 a.wav'
-          if e.message == "File format 'NIST'... not understood.":
-            sf = Sndfile(fullFilename, 'r')
-            nframes = sf.nframes
-            sig = sf.read_frames(nframes)
-            rate = sf.samplerate
-        mfcc = calcMFCC_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
+          check_call(['./sph2pipe', '-f', 'rif', fullFilename, fullFilename.replace('wv1', 'wav')])
+          print(fullFilename)
+          (rate,sig)= wav.read(fullFilename.replace('wv1', 'wav'))
+
+        mfcc = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
         mfcc = preprocessing.scale(mfcc)
         mfcc = np.transpose(mfcc)
         print(mfcc.shape)
@@ -65,7 +61,7 @@ def wav2feature(rootdir, save_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mo
         with open(labelFilename,'r') as f:
           characters = f.readline().strip().lower()
         targets = []
-        if seq2seq is True:
+        if level=='seq2seq':
           targets.append(28)
         for c in characters:
           if c == ' ':
@@ -74,7 +70,7 @@ def wav2feature(rootdir, save_dir, sph2pipe_dir, win_len=0.02, win_step=0.01, mo
             targets.append(27)
           else:
             targets.append(ord(c)-96) 
-        if seq2seq is True:
+        if level=='seq2seq':
           targets.append(29)
         targets = np.array(targets)
         print(targets)
@@ -97,4 +93,4 @@ if __name__ == '__main__':
   if not os.path.exists(mfcc_dir):
     os.makedirs(mfcc_dir)
   rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/wsj/standard', keyword)
-  wav2feature(rootdir, mfcc_dir, label_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword=keyword, seq2seq=True, save=False)
+  wav2feature(rootdir, save_dir='/home/pony/github/data/wsj', sph2pipe_dir='/home/pony/sph2pipe_v2.5', win_len=0.02, win_step=0.01, mode='mfcc', keyword=keyword, level='cha', save=False)

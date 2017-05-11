@@ -37,11 +37,11 @@ def split_data_by_s5(src_dir, des_dir, keywords=['train_si284', 'test_eval92', '
         line = line.strip()
         if os.path.isfile(line):
           shutil.copyfile(line, os.path.join(des_dir, key, line.split('/')[-1]))
-          print line
+          print(line)
         else:
           tmp = '/'.join(line.split('/')[:-1]+[line.split('/')[-1].upper()])
           shutil.copyfile(tmp, os.path.join(des_dir, key, line.split('/')[-1].replace('WV1', 'wv1')))
-          print tmp
+          print(tmp)
 
     with open(label_file_list, 'r') as lfl:
       lfl_contents = lfl.readlines()
@@ -49,7 +49,7 @@ def split_data_by_s5(src_dir, des_dir, keywords=['train_si284', 'test_eval92', '
         label = ' '.join(line.strip().split(' ')[1:])
         with open(os.path.join(des_dir, key, line.strip().split(' ')[0]+'.label'), 'w') as lf:
           lf.writelines(label)
-        print key, label
+        print(key, label)
         
 
 if __name__ == '__main__':
