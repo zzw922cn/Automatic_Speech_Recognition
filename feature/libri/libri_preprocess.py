@@ -63,7 +63,7 @@ def preprocess(root_directory):
                 pass
 
 
-def wav2feature(root_directory, save_directory,  name, win_len, win_step, mode, seq2seq, save):
+def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, seq2seq, save):
     count = 0
     label_dir = save_directory + '/{}/label/'.format(name)
     mfcc_dir = save_directory + '/{}/mfcc/'.format(name)
@@ -71,8 +71,9 @@ def wav2feature(root_directory, save_directory,  name, win_len, win_step, mode, 
         os.makedirs(label_dir)
     if not os.path.isdir(mfcc_dir):
         os.makedirs(mfcc_dir)
-    preprocess(root_directory+name)
-    for subdir, dirs, files in os.walk(root_directory+name):
+    data_dir = os.path.join(root_directory, name)
+    preprocess(data_dir)
+    for subdir, dirs, files in os.walk(data_dir):
         for f in files:
             fullFilename = os.path.join(subdir, f)
             filenameNoSuffix =  os.path.splitext(fullFilename)[0]
