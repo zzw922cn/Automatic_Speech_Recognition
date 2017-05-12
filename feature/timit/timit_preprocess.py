@@ -42,7 +42,7 @@ phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch'
 ## cleaned phonemes
 #phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'epi', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'ix', 'iy', 'jh', 'k', 'l', 'm', 'n', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z', 'zh']
 
-def wav2feature(rootdir, save_directory, mode, level, keywords, win_len=0.02, win_step=0.01,  seq2seq=False, save=False):
+def wav2feature(rootdir, save_directory, mode, level, keywords, win_len, win_step,  seq2seq, save):
     feat_dir = os.path.join(save_directory, level, keywords, mode)
     label_dir = os.path.join(save_directory, level, keywords, 'label')
     if not os.path.exists(label_dir):
@@ -138,6 +138,13 @@ if __name__ == '__main__':
                         choices=['mfcc'],
                         type=str, default='mfcc')
     parser.add_argument("--seq2seq", help="set this flag to use seq2seq", action="store_true")
+
+    parser.add_argument("-winlen", "--winlen", type=float,
+                        default=0.02, help="specify the window length of feature")
+
+    parser.add_argument("-winstep", "--winstep", type=float,
+                        default=0.01, help="specify the window step length of feature")
+
     args = parser.parse_args()
     root_directory = args.path
     save_directory = args.save
@@ -145,6 +152,8 @@ if __name__ == '__main__':
     mode = args.mode
     name = args.name
     seq2seq = args.seq2seq
+    win_len = args.winlen
+    win_step = args.winstep
 
     # level = 'cha'
     # # train or test dataset
@@ -153,7 +162,7 @@ if __name__ == '__main__':
     # feat_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, mode)
     # label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
     # rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
-    root_directory = os.path.join(root_directory, 'TIMIT', name)
+    root_directory = os.path.join(root_directory, name)
     if root_directory == ".":
         root_directory = os.getcwd()
     if save_directory == ".":
@@ -161,5 +170,5 @@ if __name__ == '__main__':
     if not os.path.isdir(root_directory) or not os.path.isdir(save_directory):
         raise ValueError("Directory does not exist!")
     wav2feature(root_directory, save_directory, mode=mode,
-                level=level, keywords=name, win_len=0.02, win_step=0.01,
-                seq2seq=seq2seq, save=False)
+                level=level, keywords=name, win_len=win_len, win_step=win_step,
+                seq2seq=seq2seq, save=True)
