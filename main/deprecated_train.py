@@ -154,7 +154,7 @@ class Trainer(object):
 
         self.logfile = self.args.log_dir + str(
             datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S') + '.txt').replace(' ', '').replace(
-                '/', '')
+            '/', '')
 
     @describe
     def load_data(self, args, mode, type):
@@ -245,7 +245,7 @@ class Trainer(object):
                         print('Output:\n' + output_to_sequence(pre, type=args.level))
 
                     if (args.save == True) and ((epoch * len(batchRandIxs) + batch + 1) % 20 == 0 or (
-                            epoch == args.num_epoch - 1 and batch == len(batchRandIxs) - 1)):
+                                    epoch == args.num_epoch - 1 and batch == len(batchRandIxs) - 1)):
                         checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                         model.saver.save(sess, checkpoint_path, global_step=epoch)
                         print('Model has been saved in file')
@@ -341,9 +341,9 @@ class Trainer(object):
 
 
 if __name__ == '__main__':
-    tr = Trainer()
-    print(tr.args.mode + ' mode')
-    if tr.args.mode == 'train':
-        tr.train()
-    elif tr.args.mode == 'test':
-        tr.test()
+  tr = Trainer()
+  print(tr.args.mode + ' mode')
+  if tr.args.mode == 'train':
+      tr.train()
+  elif tr.args.mode == 'test':
+      tr.test()
