@@ -122,22 +122,49 @@ In folder data/mfcc, each file is a feature matrix with size timeLength\*39 of o
 
 If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
-Since the original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training and evaluation, but when scoring, we mappd the 61 phonemes into 39 phonemes for better performance. We do this mapping according to the paper [Speaker-independent phone recognition using hidden Markov models](http://repository.cmu.edu/cgi/viewcontent.cgi?article=2768&context=compsci). The mapping details are as follows:
+The original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training and evaluation, but when scoring, we mappd the 61 phonemes into 39 phonemes for better performance. We do this mapping according to the paper [Speaker-independent phone recognition using hidden Markov models](http://repository.cmu.edu/cgi/viewcontent.cgi?article=2768&context=compsci). The mapping details are as follows:
 
-| original phoneme(s) | mapped into phoneme |
+| Original Phoneme(s) | Mapped Phoneme |
 | :------------------  | :-------------------: |
-| ux | uw |
-| axr | er |
-| em | m |
-| nx, n  | en |
-| eng | ng |
-| hv | hh |
-| cl, bcl, dcl, gcl, epi, h#, kcl, pau, pcl, tcl, vcl | sil |
-| l | el |
-| zh | sh |
-| aa | ao |
-| ix | ih |
-| ax | ah | 
+| iy | iy |
+| ih | ix |
+| eh | eh |
+| ae | ae |
+| ax, ah, ax-h | ax | 
+| uw, ux | uw |
+| uh | uh |
+| ao, aa | ao |
+| ey | ey |
+| ay | ay |
+| oy | oy |
+| aw | aw |
+| ow | ow |
+| er, axr | er |
+| l, el | l |
+| r | r |
+| w | w |
+| y | y |
+| m, em | m |
+| n, en, nx | n |
+| ng, eng | ng |
+| v | v |
+| f | f |
+| dh | dh |
+| th | th |
+| z | z |
+| s | s |
+| zh, sh | zh |
+| jh | jh |
+| ch | ch |
+| b | b |
+| p | p |
+| d | d |
+| dx | dx |
+| t | t |
+| g | g |
+| k | k |
+| hh, hv | hh |
+| bcl, pcl, dcl, tcl, gcl, kcl, q, epi, pau, h# | h# |
  
 
 #### LibriSpeech corpus
