@@ -34,8 +34,9 @@ except:
 
 
 
-def calcfeat_delta_delta(signal,samplerate=16000,win_length=0.025,win_step=0.01,cep_num=13,filters_num=26,NFFT=512,low_freq=0,high_freq=None,pre_emphasis_coeff=0.97,cep_lifter=22,appendEnergy=True,mode='mfcc'):
-    """Calculate 13 Mel-Frequency Cepstral Coefficients(MFCC), 13 first order difference
+def calcfeat_delta_delta(signal,samplerate=16000,win_length=0.025,win_step=0.01,filters_num=26,NFFT=512,low_freq=0,high_freq=None,pre_emphasis_coeff=0.97,cep_lifter=22,appendEnergy=True,mode='mfcc',feature_len=13):
+    """Calculate features, fist order difference, and second order difference coefficients.
+        13 Mel-Frequency Cepstral Coefficients(MFCC), 13 first order difference
        coefficients, and 13 second order difference coefficients. There are 39 features
        in total.
 
@@ -45,7 +46,7 @@ def calcfeat_delta_delta(signal,samplerate=16000,win_length=0.025,win_step=0.01,
         win_length: Window length. Defaulted to 0.025, which is 25ms/frame.
         win_step: Interval between the start points of adjacent frames.
             Defaulted to 0.01, which is 10ms.
-        cep_num: Numbers of cepstral coefficients. Defaulted to 13.
+        feature_len: Numbers of features. Defaulted to 13.
         filters_num: Numbers of filters. Defaulted to 26.
         NFFT: Size of FFT. Defaulted to 512.
         low_freq: Lowest frequency.
@@ -54,12 +55,16 @@ def calcfeat_delta_delta(signal,samplerate=16000,win_length=0.025,win_step=0.01,
             the energy of signal at higher frequency. Defaulted to 0.97.
         cep_lifter: Numbers of lifter for cepstral. Defaulted to 22.
         appendEnergy: Wheter to append energy. Defaulted to True.
+        mode: 'mfcc' or 'fbank'.
+            'mfcc': Mel-Frequency Cepstral Coefficients(MFCC).
+                    Complete process: Mel filtering -> log -> DCT.
+            'fbank': Apply Mel filtering -> log.
 
     Returns:
         2-D numpy array with shape:(NUMFRAMES, 39). In each frame, coefficients are
             concatenated in (feature, delta features, delta delta feature) way.
     """
-    feat = calcMFCC(signal,samplerate,win_length,win_step,cep_num,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff,cep_lifter,appendEnergy,mode=mode)   #首先获取13个一般MFCC系数
+    feat = calcMFCC(signal,samplerate,win_length,win_step,feature_len,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff,cep_lifter,appendEnergy,mode=mode)   #首先获取13个一般MFCC系数
     feat_delta = delta(feat)
     feat_delta_delta = delta(feat_delta)
 
@@ -83,15 +88,15 @@ def delta(feat, N=2):
         dfeat.append(numpy.sum([n*feat[N+j+n] for n in range(-1*N,N+1)], axis=0)/denom)
     return dfeat
 
-def calcMFCC(signal,samplerate=16000,win_length=0.025,win_step=0.01,cep_num=13,filters_num=26,NFFT=512,low_freq=0,high_freq=None,pre_emphasis_coeff=0.97,cep_lifter=22,appendEnergy=True,mode='mfcc'):
-    """Caculate 13 MFCC.
+def calcMFCC(signal,samplerate=16000,win_length=0.025,win_step=0.01,feature_len=13,filters_num=26,NFFT=512,low_freq=0,high_freq=None,pre_emphasis_coeff=0.97,cep_lifter=22,appendEnergy=True,mode='mfcc'):
+    """Caculate Features.
     Args:
         signal: 1-D numpy array.
         samplerate: Sampling rate. Defaulted to 16KHz.
         win_length: Window length. Defaulted to 0.025, which is 25ms/frame.
         win_step: Interval between the start points of adjacent frames.
             Defaulted to 0.01, which is 10ms.
-        cep_num: Numbers of cepstral coefficients. Defaulted to 13.
+        feature_len: Numbers of features. Defaulted to 13.
         filters_num: Numbers of filters. Defaulted to 26.
         NFFT: Size of FFT. Defaulted to 512.
         low_freq: Lowest frequency.
@@ -100,16 +105,22 @@ def calcMFCC(signal,samplerate=16000,win_length=0.025,win_step=0.01,cep_num=13,f
             the energy of signal at higher frequency. Defaulted to 0.97.
         cep_lifter: Numbers of lifter for cepstral. Defaulted to 22.
         appendEnergy: Wheter to append energy. Defaulted to True.
+        mode: 'mfcc' or 'fbank'.
+            'mfcc': Mel-Frequency Cepstral Coefficients(MFCC).
+                    Complete process: Mel filtering -> log -> DCT.
+            'fbank': Apply Mel filtering -> log.
 
     Returns:
-        2-D numpy array with shape (NUMFRAMES, features). Each frame containing 13 MFCC.
+        2-D numpy array with shape (NUMFRAMES, features). Each frame containing feature_len of features.
     """
     feat,energy=fbank(signal,samplerate,win_length,win_step,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff)
     feat=numpy.log(feat)
     # Performing DCT and get first 13 coefficients
     if mode == 'mfcc':
-        feat=dct(feat,type=2,axis=1,norm='ortho')[:,:cep_num]
+        feat=dct(feat,type=2,axis=1,norm='ortho')[:,:feature_len]
         feat=lifter(feat,cep_lifter)
+    elif mode == 'fbank':
+        feat = feat[:,:feature_len]
     if appendEnergy:
         # Replace the first coefficient with logE and get 2-13 coefficients.
         feat[:,0]=numpy.log(energy)

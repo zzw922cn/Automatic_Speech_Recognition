@@ -63,14 +63,14 @@ def preprocess(root_directory):
                 pass
 
 
-def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, seq2seq, save):
+def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, feature_len, seq2seq, save):
     count = 0
     label_dir = save_directory + '/{}/label/'.format(name)
-    mfcc_dir = save_directory + '/{}/mfcc/'.format(name)
+    feat_dir = save_directory + '/{}/feat/'.format(name)
     if not os.path.isdir(label_dir):
         os.makedirs(label_dir)
-    if not os.path.isdir(mfcc_dir):
-        os.makedirs(mfcc_dir)
+    if not os.path.isdir(feat_dir):
+        os.makedirs(feat_dir)
     data_dir = os.path.join(root_directory, name)
     preprocess(data_dir)
     for subdir, dirs, files in os.walk(data_dir):
@@ -88,10 +88,10 @@ def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, s
                     nframes = sf.nframes
                     sig = sf.read_frames(nframes)
                     rate = sf.samplerate
-                mfcc = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
-                mfcc = preprocessing.scale(mfcc)
-                mfcc = np.transpose(mfcc)
-                print(mfcc.shape)
+                feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step,mode=mode,feature_len=feature_len)
+                feat = preprocessing.scale(feat)
+                feat = np.transpose(feat)
+                print(feat.shape)
                 labelFilename = filenameNoSuffix + '.label'
                 with open(labelFilename,'r') as f:
                     characters = f.readline().strip().lower()
@@ -111,8 +111,8 @@ def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, s
                 count+=1
                 print('file index:',count)
                 if save:
-                    featureFilename = mfcc_dir + filenameNoSuffix.split('/')[-1] +'.npy'
-                    np.save(featureFilename,mfcc)
+                    featureFilename = feat_dir + filenameNoSuffix.split('/')[-1] +'.npy'
+                    np.save(featureFilename,feat)
                     t_f = label_dir + filenameNoSuffix.split('/')[-1] +'.npy'
                     print(t_f)
                     np.save(t_f,targets)
@@ -129,10 +129,10 @@ if __name__ == "__main__":
                                  'test-other'], type=str, default='dev-clean')
 
     parser.add_argument("-m", "--mode", help="Mode",
-                        choices=['mfcc'],
+                        choices=['mfcc', 'fbank'],
                         type=str, default='mfcc')
-
-    parser.add_argument("-s", "--seq2seq", default=False, 
+    parser.add_argument("--featlen", help='Features length', type=int, default=13)
+    parser.add_argument("-s", "--seq2seq", default=False,
                         help="set this flag to use seq2seq", action="store_true")
 
     parser.add_argument("-wl", "--winlen", type=float,
@@ -145,6 +145,7 @@ if __name__ == "__main__":
     root_directory = args.path
     save_directory = args.save
     mode = args.mode
+    feature_len = args.featlen
     seq2seq = args.seq2seq
     name = args.name
     win_len = args.winlen
@@ -160,4 +161,4 @@ if __name__ == "__main__":
         raise ValueError("LibriSpeech Directory does not exist!")
 
     wav2feature(root_directory, save_directory, name=name, win_len=win_len, win_step=win_step,
-                mode=mode, seq2seq=seq2seq, save=True)
+                mode=mode, feature_len=feature_len, seq2seq=seq2seq, save=True)
