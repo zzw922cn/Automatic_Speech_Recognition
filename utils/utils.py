@@ -4,6 +4,7 @@
 ''' This library provides some common functions
 author:
 zzw922cn
+liujq
 
 date:2016-11-09
 fix: 2017-5-13
@@ -145,102 +146,6 @@ def count_params(model, mode='trainable'):
     print('number of '+mode+' parameters: '+str(num))
     return num
 
-def group_phoneme(orig_phn, mapping):
-    phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h',
-       'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl',
-       'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng',
-       'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#',
-       'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k',
-       'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow',
-       'oy', 'p', 'pau', 'pcl', 'q', 'r', 's',
-       'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux',
-       'v', 'w', 'y', 'z', 'zh']
-
-    mapping = {'ux':'uw', 'axr':'er', 'em':'m', 'nx':'en', 'n':'en',
-           'eng':'ng', 'hv':'hh', 'cl':'sil', 'bcl':'sil', 'dcl':'sil',
-           'gcl':'sil', 'epi':'sil', 'h#':'sil', 'kcl':'sil', 'pau':'sil',
-           'pcl':'sil', 'tcl':'sil', 'vcl':'sil', 'l':'el', 'zh':'sh',
-           'aa':'ao', 'ix':'ih', 'ax':'ah'}
-
-    mapped_phn = ['ae', 'ah', 'ao', 'aw', 'ax-h', 'ay', 'b', 'ch', 'd',
-              'dh', 'dx', 'eh', 'el', 'en', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'iy',
-              'jh', 'k', 'm', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 'sil',
-              't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z']
-
-    group_phn = []
-    for val in orig_phn:
-        group_phn.append(val)
-    group_phn.append('sil')
-    for key in mapping.keys():
-        if key in orig_phn:
-            group_phn.remove(key)
-    group_phn.sort()
-    return group_phn
-
-"""
-def list_to_sparse_tensor(targetList, mode, level):
-    ''' turn 2-D List to SparseTensor
-    '''
-    indices = [] #index
-    vals = [] #value
-    assert mode == 'train' or mode == 'test', 'mode must be train or test'
-    assert level == 'phn' or level == 'cha', 'type must be phoneme or character'
-
-    if level == 'cha':
-        for tI, target in enumerate(targetList):
-            for seqI, val in enumerate(target):
-                indices.append([tI, seqI])
-                vals.append(val)
-        shape = [len(targetList), np.asarray(indices).max(axis=0)[1]+1] #shape
-        return (np.array(indices), np.array(vals), np.array(shape))
-
-    elif level == 'phn':
-        '''
-        for phn level, we should collapse 61 labels into 39 labels before scoring
-        
-        Reference:
-          Heterogeneous Acoustic Measurements and Multiple Classifiers for Speech Recognition(1986), 
-            Andrew K. Halberstadt, https://groups.csail.mit.edu/sls/publications/1998/phdthesis-drew.pdf
-        '''
-        group_phn = group_phoneme(phn, mapping)
-        print(group_phn)
-
-        for tI, target in enumerate(targetList):
-            for seqI, val in enumerate(target):
-                if(mode == 'train'):
-                    indices.append([tI, seqI])
-                    vals.append(val)
-                elif(mode == 'test'):
-                    if val < len(phn) and (phn[val] in mapping.keys()):
-                        val = group_phn.index(mapping[phn[val]])
-                    indices.append([tI, seqI])
-                    vals.append(val)
-                else:
-                    raise ValueError('Invalid mode: %s'%str(mode))
-        shape = [len(targetList), np.asarray(indices).max(0)[1]+1] #shape
-        return (np.array(indices), np.array(vals), np.array(shape))
-    else:
-        raise ValueError('Invalid level: %s'%str(level))
-
-def get_edit_distance(hyp_arr,truth_arr, normalize, mode, level, task):
-    ''' calculate edit distance
-    This is very universal, both for cha-level and phn-level
-    '''
-
-    graph = tf.Graph()
-    with graph.as_default():
-        truth = tf.sparse_placeholder(tf.int32)
-        hyp = tf.sparse_placeholder(tf.int32)
-        editDist = tf.reduce_sum(tf.edit_distance(hyp, truth, normalize=normalize))
-
-    with tf.Session(graph=graph) as session:
-        truthTest = list_to_sparse_tensor(truth_arr, mode, level)
-        hypTest = list_to_sparse_tensor(hyp_arr, mode, level)
-        feedDict = {truth: truthTest, hyp: hypTest}
-        dist = session.run(editDist, feed_dict=feedDict)
-    return dist
-
-"""
 def list_to_sparse_tensor(targetList, level):
     ''' turn 2-D List to SparseTensor
     '''
