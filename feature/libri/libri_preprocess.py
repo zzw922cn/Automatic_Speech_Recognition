@@ -157,8 +157,11 @@ if __name__ == "__main__":
     if save_directory == '.':
         save_directory = os.getcwd()
 
-    if not os.path.isdir(root_directory) or not os.path.isdir(save_directory):
+    if not os.path.isdir(root_directory):
         raise ValueError("LibriSpeech Directory does not exist!")
+
+    if not os.path.isdir(save_directory):
+        os.makedirs(save_directory)
 
     wav2feature(root_directory, save_directory, name=name, win_len=win_len, win_step=win_step,
                 mode=mode, feature_len=feature_len, seq2seq=seq2seq, save=True)
