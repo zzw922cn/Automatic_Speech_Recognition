@@ -4,7 +4,7 @@
 
 author:
 zzw922cn
-     
+
 date:2017-5-5
 '''
 
@@ -27,17 +27,17 @@ from sklearn import preprocessing
 from subprocess import check_call, CalledProcessError
 
 
-def wav2feature(rootdir, save_dir, win_len=0.02, win_step=0.01, mode='mfcc', keyword='dev-clean', level='seq2seq', save=False):
-  """ 
+def wav2feature(rootdir, save_dir, win_len=0.02, win_step=0.01, mode='mfcc', feature_len=feature_len, keyword='dev-clean', level='seq2seq', save=False):
+  """
   To run for WSJ corpus, you should download sph2pipe_v2.5 first!
   """
-  mfcc_dir = os.path.join(save_dir, keyword, mode)
+  feat_dir = os.path.join(save_dir, keyword, mode)
   label_dir = os.path.join(save_dir, keyword, 'label')
   if not os.path.exists(label_dir):
     os.makedirs(label_dir)
-  if not os.path.exists(mfcc_dir):
-    os.makedirs(mfcc_dir)
-  
+  if not os.path.exists(feat_dir):
+    os.makedirs(feat_dir)
+
   count = 0
   for subdir, dirs, files in os.walk(rootdir):
     for f in files:
@@ -57,10 +57,10 @@ def wav2feature(rootdir, save_dir, win_len=0.02, win_step=0.01, mode='mfcc', key
           (rate,sig)= wav.read(wav_name)
           os.remove(fullFilename)
 
-        mfcc = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
-        mfcc = preprocessing.scale(mfcc)
-        mfcc = np.transpose(mfcc)
-        print(mfcc.shape)
+        feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step)
+        feat = preprocessing.scale(feat)
+        feat = np.transpose(feat)
+        print(feat.shape)
         labelFilename = filenameNoSuffix + '.label'
         with open(labelFilename,'r') as f:
           characters = f.readline().strip().lower()
@@ -73,7 +73,7 @@ def wav2feature(rootdir, save_dir, win_len=0.02, win_step=0.01, mode='mfcc', key
           elif c == "'":
             targets.append(27)
           else:
-            targets.append(ord(c)-96) 
+            targets.append(ord(c)-96)
         if level=='seq2seq':
           targets.append(29)
         targets = np.array(targets)
@@ -81,14 +81,14 @@ def wav2feature(rootdir, save_dir, win_len=0.02, win_step=0.01, mode='mfcc', key
         count+=1
         print('file index:', count)
         if save:
-          featureFilename = os.path.join(mfcc_dir, filenameNoSuffix.split('/')[-1] +'.npy')
-          np.save(featureFilename,mfcc)
+          featureFilename = os.path.join(feat_dir, filenameNoSuffix.split('/')[-1] +'.npy')
+          np.save(featureFilename,feat)
           t_f = os.path.join(label_dir, filenameNoSuffix.split('/')[-1] +'.npy')
           print(t_f)
           np.save(t_f,targets)
-         
+
 if __name__ == '__main__':
-    keywords = ['train_si284', 'test_eval92', 'test_dev93'] 
+    keywords = ['train_si284', 'test_eval92', 'test_dev93']
     for keyword in keywords:
         rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/wsj/standard', keyword)
-        wav2feature(rootdir, save_dir='/home/pony/github/data/wsj', win_len=0.02, win_step=0.01, mode='mfcc', keyword=keyword, level='cha', save=True)
+        wav2feature(rootdir, save_dir='/home/pony/github/data/wsj', win_len=0.02, win_step=0.01, mode='mfcc', feature_len=feature_len, keyword=keyword, level='cha', save=True)
