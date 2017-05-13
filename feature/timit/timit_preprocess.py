@@ -42,7 +42,7 @@ phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch'
 ## cleaned phonemes
 #phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'epi', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'ix', 'iy', 'jh', 'k', 'l', 'm', 'n', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z', 'zh']
 
-def wav2feature(rootdir, save_directory, mode, level, keywords, win_len, win_step,  seq2seq, save):
+def wav2feature(rootdir, save_directory, mode, feature_len,level, keywords, win_len, win_step,  seq2seq, save):
     feat_dir = os.path.join(save_directory, level, keywords, mode)
     label_dir = os.path.join(save_directory, level, keywords, 'label')
     if not os.path.exists(label_dir):
@@ -65,9 +65,8 @@ def wav2feature(rootdir, save_directory, mode, level, keywords, win_len, win_ste
                         nframes = sf.nframes
                         sig = sf.read_frames(nframes)
                         rate = sf.samplerate
-                feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step,mode=mode)
-                if mode == 'mfcc':
-                    feat = preprocessing.scale(feat)
+                feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step,mode=mode,feature_len=feature_len)
+                feat = preprocessing.scale(feat)
                 feat = np.transpose(feat)
                 print(feat.shape)
 
@@ -135,8 +134,9 @@ if __name__ == '__main__':
                         choices=['cha', 'phn'],
                         type=str, default='cha')
     parser.add_argument("-m", "--mode", help="Mode",
-                        choices=['mfcc'],
+                        choices=['mfcc', 'fbank'],
                         type=str, default='mfcc')
+    parser.add_argument('--featlen', type=int, default=13, help='Features length')
     parser.add_argument("--seq2seq", help="set this flag to use seq2seq", action="store_true")
 
     parser.add_argument("-winlen", "--winlen", type=float,
@@ -150,6 +150,7 @@ if __name__ == '__main__':
     save_directory = args.save
     level = args.level
     mode = args.mode
+    feature_len = args.featlen
     name = args.name
     seq2seq = args.seq2seq
     win_len = args.winlen
@@ -169,6 +170,6 @@ if __name__ == '__main__':
         save_directory = os.getcwd()
     if not os.path.isdir(root_directory) or not os.path.isdir(save_directory):
         raise ValueError("Directory does not exist!")
-    wav2feature(root_directory, save_directory, mode=mode,
+    wav2feature(root_directory, save_directory, mode=mode, feature_len=feature_len,
                 level=level, keywords=name, win_len=win_len, win_step=win_step,
                 seq2seq=seq2seq, save=True)
