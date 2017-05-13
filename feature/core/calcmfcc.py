@@ -64,6 +64,7 @@ def calcfeat_delta_delta(signal,samplerate=16000,win_length=0.025,win_step=0.01,
         2-D numpy array with shape:(NUMFRAMES, 39). In each frame, coefficients are
             concatenated in (feature, delta features, delta delta feature) way.
     """
+    filters_num = 2*feature_len
     feat = calcMFCC(signal,samplerate,win_length,win_step,feature_len,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff,cep_lifter,appendEnergy,mode=mode)   #首先获取13个一般MFCC系数
     feat_delta = delta(feat)
     feat_delta_delta = delta(feat_delta)
@@ -113,6 +114,7 @@ def calcMFCC(signal,samplerate=16000,win_length=0.025,win_step=0.01,feature_len=
     Returns:
         2-D numpy array with shape (NUMFRAMES, features). Each frame containing feature_len of features.
     """
+    filters_num = 2*feature_len
     feat,energy=fbank(signal,samplerate,win_length,win_step,filters_num,NFFT,low_freq,high_freq,pre_emphasis_coeff)
     feat=numpy.log(feat)
     # Performing DCT and get first 13 coefficients
