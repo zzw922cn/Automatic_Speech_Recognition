@@ -174,8 +174,8 @@ LibriSpeech is a corpus of approximately 1000 hours of 16kHz read English speech
 
 In order to preprocess LibriSpeech data, download the dataset from the above mentioned link, extract it and run the following:
 <pre>
-$ cd feature/libri
-$ python libri_preprocess.py -h 
+cd feature/libri
+python libri_preprocess.py -h 
 usage: libri_preprocess [-h]
                         [-n {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}]
                         [-m {mfcc,fbank}] [--featlen FEATLEN] [-s]
@@ -202,11 +202,11 @@ optional arguments:
                         specify the window step length of feature
 </pre>
 
-The processed data will be saved in the <pre>save</pre> path. 
+The processed data will be saved in the "save" path. 
 
 To train the model, run the following:
 <pre>
-$ python main/libri_train.py -h 
+python main/libri_train.py -h 
 usage: libri_train.py [-h] [--task TASK] [--train_dataset TRAIN_DATASET]
                       [--dev_dataset DEV_DATASET]
                       [--test_dataset TEST_DATASET] [--mode MODE]
@@ -263,7 +263,7 @@ optional arguments:
   --logdir LOGDIR       set the log directory
 </pre>
 
-where the <pre>datadir</pre> is the <pre>save</pre> path used in preprocess stage.
+where the "datadir" is the "save" path used in preprocess stage.
 
 #### Wall Street Journal corpus
 
