@@ -66,7 +66,7 @@ flags.DEFINE_integer('batch_size', 64, 'set the batch size')
 flags.DEFINE_integer('num_hidden', 256, 'set the hidden size of rnn cell')
 flags.DEFINE_integer('num_feature', 60, 'set the size of input feature')
 flags.DEFINE_integer('num_classes', 30, 'set the number of output classes')
-flags.DEFINE_integer('num_epochs', 500, 'set the number of epochs')
+flags.DEFINE_integer('num_epochs', 1, 'set the number of epochs')
 flags.DEFINE_float('lr', 0.0001, 'set the learning rate')
 flags.DEFINE_float('dropout_prob', 0.1, 'set probability of dropout')
 flags.DEFINE_float('grad_clip', 1, 'set the threshold of gradient clipping, -1 denotes no clipping')
@@ -163,6 +163,7 @@ class Runner(object):
     def load_data(self, feature_dir, label_dir, mode, level):
         return load_batched_data(feature_dir, label_dir, batch_size, mode, level)
 
+
     def run(self):
         # load data
         args_dict = self._default_configs()
@@ -171,35 +172,32 @@ class Runner(object):
         batchedData, maxTimeSteps, totalN = self.load_data(feature_dirs[0], label_dirs[0], mode, level)
         model = model_fn(args, maxTimeSteps)
 
-        with tf.Session(graph=model.graph) as sess:
-            # restore from stored model
-            if keep == True:
-                ckpt = tf.train.get_checkpoint_state(savedir)
-                if ckpt and ckpt.model_checkpoint_path:
-                    model.saver.restore(sess, ckpt.model_checkpoint_path)
-                    print('Model restored from:' + savedir)
-            else:
-                print('Initializing')
-                sess.run(model.initial_op)
+        for feature_dir, label_dir in zip(feature_dirs, label_dirs):
+            id_dir = feature_dirs.index(feature_dir)
+            print('dir id:{}'.format(id_dir))
+            batchedData, maxTimeSteps, totalN = self.load_data(feature_dir, label_dir, mode, level)
+            model = model_fn(args, maxTimeSteps)
+            num_params = count_params(model, mode='trainable')
+            all_num_params = count_params(model, mode='all')
+            model.config['trainable params'] = num_params
+            model.config['all params'] = all_num_params
+            print(model.config)
+            with tf.Session(graph=model.graph) as sess:
+                # restore from stored model
+                if keep == True:
+                    ckpt = tf.train.get_checkpoint_state(savedir)
+                    if ckpt and ckpt.model_checkpoint_path:
+                        model.saver.restore(sess, ckpt.model_checkpoint_path)
+                        print('Model restored from:' + savedir)
+                else:
+                    print('Initializing')
+                    sess.run(model.initial_op)
 
-            for epoch in range(num_epochs):
-                ## training
-                start = time.time()
-                if mode == 'train':
-                    print('Epoch {} ...'.format(epoch + 1))
-                
-                for feature_dir, label_dir in zip(feature_dirs, label_dirs):
-                    id_dir = feature_dirs.index(feature_dir)
-                    print('dir id:{}'.format(id_dir))
-                    if id_dir != 0:
-                        batchedData, maxTimeSteps, totalN = self.load_data(feature_dir, label_dir, mode, level)
-                        model = model_fn(args, maxTimeSteps)
-                        # count the num of params
-                    num_params = count_params(model, mode='trainable')
-                    all_num_params = count_params(model, mode='all')
-                    model.config['trainable params'] = num_params
-                    model.config['all params'] = all_num_params
-                    print(model.config)
+                for epoch in range(num_epochs):
+                    ## training
+                    start = time.time()
+                    if mode == 'train':
+                        print('Epoch {} ...'.format(epoch + 1))
 
                     batchErrors = np.zeros(len(batchedData))
                     batchRandIxs = np.random.permutation(len(batchedData))
