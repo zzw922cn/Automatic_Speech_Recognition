@@ -62,7 +62,7 @@ flags.DEFINE_integer('num_layer', 2, 'set the layers for rnn')
 flags.DEFINE_string('activation', 'tanh', 'set the activation to use, sigmoid, tanh, relu, elu...')
 flags.DEFINE_string('optimizer', 'adam', 'set the optimizer to use, sgd, adam...')
 
-flags.DEFINE_integer('batch_size', 32, 'set the batch size')
+flags.DEFINE_integer('batch_size', 64, 'set the batch size')
 flags.DEFINE_integer('num_hidden', 256, 'set the hidden size of rnn cell')
 flags.DEFINE_integer('num_feature', 60, 'set the size of input feature')
 flags.DEFINE_integer('num_classes', 30, 'set the number of output classes')
@@ -109,7 +109,7 @@ keep = FLAGS.keep
 keep_prob = 1-FLAGS.dropout_prob
 
 print('%s mode...'%str(mode))
-if mode == 'test':
+if mode == 'test' or mode == 'dev':
   batch_size = 100
   num_epochs = 1
 
@@ -168,14 +168,8 @@ class Runner(object):
         args_dict = self._default_configs()
         args = dotdict(args_dict)
         feature_dirs, label_dirs = get_data(datadir, level, train_dataset, dev_dataset, test_dataset, mode)
-        batchedData, maxTimeSteps, totalN = self.load_data(feature_dirs[0], label_dirs[1], mode, level)
+        batchedData, maxTimeSteps, totalN = self.load_data(feature_dirs[0], label_dirs[0], mode, level)
         model = model_fn(args, maxTimeSteps)
-        # count the num of params
-        num_params = count_params(model, mode='trainable')
-        all_num_params = count_params(model, mode='all')
-        model.config['trainable params'] = num_params
-        model.config['all params'] = all_num_params
-        print(model.config)
 
         with tf.Session(graph=model.graph) as sess:
             # restore from stored model
@@ -192,11 +186,20 @@ class Runner(object):
                 ## training
                 start = time.time()
                 if mode == 'train':
-                    print('Epoch', epoch + 1, '...')
-                
+                    print('Epoch {} ...'.format(epoch + 1))
                 
                 for feature_dir, label_dir in zip(feature_dirs, label_dirs):
-                    batchedData, maxTimeSteps, totalN = self.load_data(feature_dir, label_dir, mode, level)
+                    id_dir = feature_dirs.index(feature_dir)
+                    print('dir id:{}'.format(id_dir))
+                    if id_dir != 0:
+                        batchedData, maxTimeSteps, totalN = self.load_data(feature_dir, label_dir, mode, level)
+                        model = model_fn(args, maxTimeSteps)
+                        # count the num of params
+                    num_params = count_params(model, mode='trainable')
+                    all_num_params = count_params(model, mode='all')
+                    model.config['trainable params'] = num_params
+                    model.config['all params'] = all_num_params
+                    print(model.config)
 
                     batchErrors = np.zeros(len(batchedData))
                     batchRandIxs = np.random.permutation(len(batchedData))
@@ -215,16 +218,22 @@ class Runner(object):
                                     feed_dict=feedDict)
 
                                 batchErrors[batch] = er
-                                print('\n{} mode, total:{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train CER={:.3f}\n'.format(
-                                    level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
+                                print('\n{} mode, total:{},subdir:{}/{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train CER={:.3f}\n'.format(
+                                    level, totalN, id_dir+1, len(feature_dirs), batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
+
+                            elif mode == 'dev':
+                                l, pre, y, er = sess.run([model.loss, model.predictions, 
+                                    model.targetY, model.errorRate], feed_dict=feedDict)
+                                batchErrors[batch] = er
+                                print('\n{} mode, total:{},subdir:{}/{},batch:{}/{},dev loss={:.3f},mean dev CER={:.3f}\n'.format(
+                                    level, totalN, id_dir+1, len(feature_dirs), batch+1, len(batchRandIxs), l, er/batch_size))
 
                             elif mode == 'test':
                                 l, pre, y, er = sess.run([model.loss, model.predictions, 
                                     model.targetY, model.errorRate], feed_dict=feedDict)
                                 batchErrors[batch] = er
-                                print('\n{} mode, total:{},batch:{}/{},test loss={:.3f},mean test CER={:.3f}\n'.format(
-                                    level, totalN, batch+1, len(batchRandIxs), l, er/batch_size))
-
+                                print('\n{} mode, total:{},subdir:{}/{},batch:{}/{},test loss={:.3f},mean test CER={:.3f}\n'.format(
+                                    level, totalN, id_dir+1, len(feature_dirs), batch+1, len(batchRandIxs), l, er/batch_size))
                         elif level=='seq2seq':
                             raise ValueError('level %s is not supported now'%str(level))
 
@@ -258,7 +267,7 @@ class Runner(object):
                         logging(model, logfile, epochER, epoch, delta_time, mode='config')
                         logging(model, logfile, epochER, epoch, delta_time, mode=mode)
 
-                    if mode=='test':
+                    if mode=='test' or mode=='dev':
                         with open(os.path.join(resultdir, level + '_result.txt'), 'a') as result:
                             result.write(output_to_sequence(y, type=level) + '\n')
                             result.write(output_to_sequence(pre, type=level) + '\n')
