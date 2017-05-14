@@ -170,7 +170,100 @@ The original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training
 
 #### LibriSpeech corpus
 
-TODO
+LibriSpeech is a corpus of approximately 1000 hours of 16kHz read English speech. It can be downloaded from [here](http://www.openslr.org/12/)
+
+In order to preprocess LibriSpeech data, download the dataset from the above mentioned link, extract it and run the following:
+<pre>
+$ cd feature/libri
+$ python libri_preprocess.py -h 
+usage: libri_preprocess [-h]
+                        [-n {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}]
+                        [-m {mfcc,fbank}] [--featlen FEATLEN] [-s]
+                        [-wl WINLEN] [-ws WINSTEP]
+                        path save
+
+Script to preprocess libri data
+
+positional arguments:
+  path                  Directory of LibriSpeech dataset
+  save                  Directory where preprocessed arrays are to be saved
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}, --name {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}
+                        Name of the dataset
+  -m {mfcc,fbank}, --mode {mfcc,fbank}
+                        Mode
+  --featlen FEATLEN     Features length
+  -s, --seq2seq         set this flag to use seq2seq
+  -wl WINLEN, --winlen WINLEN
+                        specify the window length of feature
+  -ws WINSTEP, --winstep WINSTEP
+                        specify the window step length of feature
+</pre>
+
+The processed data will be saved in the <pre>save</pre> path. 
+
+To train the model, run the following:
+<pre>
+$ python main/libri_train.py -h 
+usage: libri_train.py [-h] [--task TASK] [--train_dataset TRAIN_DATASET]
+                      [--dev_dataset DEV_DATASET]
+                      [--test_dataset TEST_DATASET] [--mode MODE]
+                      [--keep [KEEP]] [--nokeep] [--level LEVEL]
+                      [--model MODEL] [--rnncell RNNCELL]
+                      [--num_layer NUM_LAYER] [--activation ACTIVATION]
+                      [--optimizer OPTIMIZER] [--batch_size BATCH_SIZE]
+                      [--num_hidden NUM_HIDDEN] [--num_feature NUM_FEATURE]
+                      [--num_classes NUM_CLASSES] [--num_epochs NUM_EPOCHS]
+                      [--lr LR] [--dropout_prob DROPOUT_PROB]
+                      [--grad_clip GRAD_CLIP] [--datadir DATADIR]
+                      [--logdir LOGDIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --task TASK           set task name of this program
+  --train_dataset TRAIN_DATASET
+                        set the training dataset
+  --dev_dataset DEV_DATASET
+                        set the development dataset
+  --test_dataset TEST_DATASET
+                        set the test dataset
+  --mode MODE           set whether to train, dev or test
+  --keep [KEEP]         set whether to restore a model, when test mode, keep
+                        should be set to True
+  --nokeep
+  --level LEVEL         set the task level, phn, cha, or seq2seq, seq2seq will
+                        be supported soon
+  --model MODEL         set the model to use, DBiRNN, BiRNN, ResNet..
+  --rnncell RNNCELL     set the rnncell to use, rnn, gru, lstm...
+  --num_layer NUM_LAYER
+                        set the layers for rnn
+  --activation ACTIVATION
+                        set the activation to use, sigmoid, tanh, relu, elu...
+  --optimizer OPTIMIZER
+                        set the optimizer to use, sgd, adam...
+  --batch_size BATCH_SIZE
+                        set the batch size
+  --num_hidden NUM_HIDDEN
+                        set the hidden size of rnn cell
+  --num_feature NUM_FEATURE
+                        set the size of input feature
+  --num_classes NUM_CLASSES
+                        set the number of output classes
+  --num_epochs NUM_EPOCHS
+                        set the number of epochs
+  --lr LR               set the learning rate
+  --dropout_prob DROPOUT_PROB
+                        set probability of dropout
+  --grad_clip GRAD_CLIP
+                        set the threshold of gradient clipping, -1 denotes no
+                        clipping
+  --datadir DATADIR     set the data root directory
+  --logdir LOGDIR       set the log directory
+</pre>
+
+where the <pre>datadir</pre> is the <pre>save</pre> path used in preprocess stage.
 
 #### Wall Street Journal corpus
 
