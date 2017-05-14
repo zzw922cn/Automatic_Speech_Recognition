@@ -72,6 +72,7 @@ flags.DEFINE_string('logdir', '/home/pony/github/log/libri', 'set the log direct
 
 FLAGS = flags.FLAGS
 task = FLAGS.task
+dataset = FLAGS.dataset
 level = FLAGS.level
 model_fn = model_functions_dict[FLAGS.model]
 rnncell = FLAGS.rnncell
@@ -129,7 +130,7 @@ class Runner(object):
             }
 
     @describe
-    def load_data(self, args, mode, level):
+    def load_data(self, mode, level):
         if mode == 'train':
             return load_batched_data(train_mfcc_dir, train_label_dir, batch_size, mode, level)
         elif mode == 'test':
@@ -141,7 +142,7 @@ class Runner(object):
         # load data
         args_dict = self._default_configs()
         args = dotdict(args_dict)
-        batchedData, maxTimeSteps, totalN = self.load_data(args, mode=mode, level=level)
+        batchedData, maxTimeSteps, totalN = self.load_data(mode=mode, level=level)
         model = model_fn(args, maxTimeSteps)
 
         # count the num of params
@@ -194,7 +195,7 @@ class Runner(object):
                             print('\n{} mode, total:{},batch:{}/{},test loss={:.3f},mean test CER={:.3f}\n'.format(
                                 level, totalN, batch+1, len(batchRandIxs), l, er/batch_size))
 
-                    elif level='seq2seq':
+                    elif level=='seq2seq':
                         raise ValueError('level %s is not supported now'%str(level))
 
 
@@ -212,6 +213,7 @@ class Runner(object):
                         checkpoint_path = os.path.join(savedir, 'model.ckpt')
                         model.saver.save(sess, checkpoint_path, global_step=epoch)
                         print('Model has been saved in {}'.format(savedir))
+
                 end = time.time()
                 delta_time = end - start
                 print('Epoch ' + str(epoch + 1) + ' needs time:' + str(delta_time) + ' s')
