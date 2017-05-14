@@ -2,17 +2,17 @@
 ''' data visualization for automatic speech recognition
 author:
 
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
-     
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!
+      #        ###            #        ###           ###        I#        #:
+      #      ###              #      I##;             ##;       ##       ##
+            ###                     ###               !##      ####      #
+           ###                     ###                 ###    ## ###    #'
+         !##;                    `##%                   ##;  ##   ###  ##
+        ###                     ###                     $## `#     ##  #
+       ###        #            ###        #              ####      ####;
+     `###        -#           ###        `#               ###       ###
+     ##############          ##############               `#         #
+
 date:2017-3-14
 '''
 
@@ -28,30 +28,29 @@ def readlogs(rootdir):
     fullFilenames = []
     for subdir, dirs, files in os.walk(rootdir):
         for f in files:
-	    fullFilename = os.path.join(subdir, f)
-	    fullFilenames.append(fullFilename)
+            fullFilename = os.path.join(subdir, f)
+            fullFilenames.append(fullFilename)
     fullFilenames.sort(key=lambda x: os.path.getctime(x))
     print fullFilenames
     epoch = 0
     if True:
         for fullFilename in fullFilenames:
-	    if fullFilename.endswith('.txt'):
-	        with open(fullFilename, 'r') as train_file:
-		    content = train_file.readlines()
-	        for line in content:
-		    if 'train error rate' in line:
-		        trainER = line.split(':')[2]
-		        trainERs.append(float(trainER))
-			epoch += 1
+            if fullFilename.endswith('.txt'):
+                with open(fullFilename, 'r') as train_file:
+                    content = train_file.readlines()
+                for line in content:
+                    if 'train error rate' in line:
+                        trainER = line.split(':')[2]
+                        trainERs.append(float(trainER))
+                        epoch += 1
+            elif fullFilename.endswith('TEST'):
+                with open(fullFilename, 'r') as test_file:
+                    content = test_file.readlines()
+                for line in content:
+                    if 'test error rate' in line:
+                        testER = line.split(':')[1]
+                        testERs.append(float(testER))
 
-	    elif fullFilename.endswith('TEST'):
-	        with open(fullFilename, 'r') as test_file:
-		    content = test_file.readlines()
-	        for line in content:
-		    if 'test error rate' in line:
-		        testER = line.split(':')[1]
-		        testERs.append(float(testER))
-			
     return trainERs, testERs
 
 def visualize(trainERs, testERs):

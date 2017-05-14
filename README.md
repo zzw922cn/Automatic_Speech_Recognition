@@ -16,6 +16,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add some data preparation code** (2017-05-01)
 - [x] **Add WSJ corpus standard preprocessing by s5 recipe** (2017-05-05)
 - [x] **Restructuring of the project. Updated train.py for usage convinience** (2017-05-06)
+- [x] **Finish feature module for timit, libri, wsj, support training for LibriSpeech** (2017-05-14)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
@@ -122,27 +123,147 @@ In folder data/mfcc, each file is a feature matrix with size timeLength\*39 of o
 
 If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
-Since the original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training and evaluation, but when scoring, we mappd the 61 phonemes into 39 phonemes for better performance. We do this mapping according to the paper [Speaker-independent phone recognition using hidden Markov models](http://repository.cmu.edu/cgi/viewcontent.cgi?article=2768&context=compsci). The mapping details are as follows:
+The original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training and evaluation, but when scoring, we mappd the 61 phonemes into 39 phonemes for better performance. We do this mapping according to the paper [Speaker-independent phone recognition using hidden Markov models](http://repository.cmu.edu/cgi/viewcontent.cgi?article=2768&context=compsci). The mapping details are as follows:
 
-| original phoneme(s) | mapped into phoneme |
+| Original Phoneme(s) | Mapped Phoneme |
 | :------------------  | :-------------------: |
-| ux | uw |
-| axr | er |
-| em | m |
-| nx, n  | en |
-| eng | ng |
-| hv | hh |
-| cl, bcl, dcl, gcl, epi, h#, kcl, pau, pcl, tcl, vcl | sil |
-| l | el |
-| zh | sh |
-| aa | ao |
-| ix | ih |
-| ax | ah | 
+| iy | iy |
+| ih | ix |
+| eh | eh |
+| ae | ae |
+| ax, ah, ax-h | ax | 
+| uw, ux | uw |
+| uh | uh |
+| ao, aa | ao |
+| ey | ey |
+| ay | ay |
+| oy | oy |
+| aw | aw |
+| ow | ow |
+| er, axr | er |
+| l, el | l |
+| r | r |
+| w | w |
+| y | y |
+| m, em | m |
+| n, en, nx | n |
+| ng, eng | ng |
+| v | v |
+| f | f |
+| dh | dh |
+| th | th |
+| z | z |
+| s | s |
+| zh, sh | zh |
+| jh | jh |
+| ch | ch |
+| b | b |
+| p | p |
+| d | d |
+| dx | dx |
+| t | t |
+| g | g |
+| k | k |
+| hh, hv | hh |
+| bcl, pcl, dcl, tcl, gcl, kcl, q, epi, pau, h# | h# |
  
 
 #### LibriSpeech corpus
 
-TODO
+LibriSpeech is a corpus of approximately 1000 hours of 16kHz read English speech. It can be downloaded from [here](http://www.openslr.org/12/)
+
+In order to preprocess LibriSpeech data, download the dataset from the above mentioned link, extract it and run the following:
+<pre>
+cd feature/libri
+python libri_preprocess.py -h 
+usage: libri_preprocess [-h]
+                        [-n {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}]
+                        [-m {mfcc,fbank}] [--featlen FEATLEN] [-s]
+                        [-wl WINLEN] [-ws WINSTEP]
+                        path save
+
+Script to preprocess libri data
+
+positional arguments:
+  path                  Directory of LibriSpeech dataset
+  save                  Directory where preprocessed arrays are to be saved
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}, --name {dev-clean,dev-other,test-clean,test-other,train-clean-100,train-clean-360,train-other-500}
+                        Name of the dataset
+  -m {mfcc,fbank}, --mode {mfcc,fbank}
+                        Mode
+  --featlen FEATLEN     Features length
+  -s, --seq2seq         set this flag to use seq2seq
+  -wl WINLEN, --winlen WINLEN
+                        specify the window length of feature
+  -ws WINSTEP, --winstep WINSTEP
+                        specify the window step length of feature
+</pre>
+
+The processed data will be saved in the "save" path. 
+
+To train the model, run the following:
+<pre>
+python main/libri_train.py -h 
+usage: libri_train.py [-h] [--task TASK] [--train_dataset TRAIN_DATASET]
+                      [--dev_dataset DEV_DATASET]
+                      [--test_dataset TEST_DATASET] [--mode MODE]
+                      [--keep [KEEP]] [--nokeep] [--level LEVEL]
+                      [--model MODEL] [--rnncell RNNCELL]
+                      [--num_layer NUM_LAYER] [--activation ACTIVATION]
+                      [--optimizer OPTIMIZER] [--batch_size BATCH_SIZE]
+                      [--num_hidden NUM_HIDDEN] [--num_feature NUM_FEATURE]
+                      [--num_classes NUM_CLASSES] [--num_epochs NUM_EPOCHS]
+                      [--lr LR] [--dropout_prob DROPOUT_PROB]
+                      [--grad_clip GRAD_CLIP] [--datadir DATADIR]
+                      [--logdir LOGDIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --task TASK           set task name of this program
+  --train_dataset TRAIN_DATASET
+                        set the training dataset
+  --dev_dataset DEV_DATASET
+                        set the development dataset
+  --test_dataset TEST_DATASET
+                        set the test dataset
+  --mode MODE           set whether to train, dev or test
+  --keep [KEEP]         set whether to restore a model, when test mode, keep
+                        should be set to True
+  --nokeep
+  --level LEVEL         set the task level, phn, cha, or seq2seq, seq2seq will
+                        be supported soon
+  --model MODEL         set the model to use, DBiRNN, BiRNN, ResNet..
+  --rnncell RNNCELL     set the rnncell to use, rnn, gru, lstm...
+  --num_layer NUM_LAYER
+                        set the layers for rnn
+  --activation ACTIVATION
+                        set the activation to use, sigmoid, tanh, relu, elu...
+  --optimizer OPTIMIZER
+                        set the optimizer to use, sgd, adam...
+  --batch_size BATCH_SIZE
+                        set the batch size
+  --num_hidden NUM_HIDDEN
+                        set the hidden size of rnn cell
+  --num_feature NUM_FEATURE
+                        set the size of input feature
+  --num_classes NUM_CLASSES
+                        set the number of output classes
+  --num_epochs NUM_EPOCHS
+                        set the number of epochs
+  --lr LR               set the learning rate
+  --dropout_prob DROPOUT_PROB
+                        set probability of dropout
+  --grad_clip GRAD_CLIP
+                        set the threshold of gradient clipping, -1 denotes no
+                        clipping
+  --datadir DATADIR     set the data root directory
+  --logdir LOGDIR       set the log directory
+</pre>
+
+where the "datadir" is the "save" path used in preprocess stage.
 
 #### Wall Street Journal corpus
 

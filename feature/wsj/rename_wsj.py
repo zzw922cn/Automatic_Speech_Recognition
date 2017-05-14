@@ -2,19 +2,13 @@
 #!/usr/bin/python
 ''' Preprocessing for WSJ speech corpus
 author:
-      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
-      #        ###            #        ###           ###        I#        #:     
-      #      ###              #      I##;             ##;       ##       ##      
-            ###                     ###               !##      ####      #       
-           ###                     ###                 ###    ## ###    #'       
-         !##;                    `##%                   ##;  ##   ###  ##        
-        ###                     ###                     $## `#     ##  #         
-       ###        #            ###        #              ####      ####;         
-     `###        -#           ###        `#               ###       ###          
-     ##############          ##############               `#         #     
+zzw922cn
      
 date:2017-4-15
 '''
+
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import sys
 sys.path.append('../')

@@ -1,3 +1,20 @@
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
+
+author:
+zzw922cn
+     
+date:2017-5-5
+'''
+
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
+
 import os
 import subprocess
 
@@ -9,4 +26,3 @@ def extract(rootdir):
         subprocess.call(['atool', '-x', fullFilename])
         print f
 
-extract('./')
