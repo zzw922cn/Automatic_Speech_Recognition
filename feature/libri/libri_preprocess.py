@@ -65,13 +65,8 @@ def preprocess(root_directory):
 
 def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, feature_len, seq2seq, save):
     count = 0
-    level = 'cha-level' if seq2seq is False else 'seq2seq-level'
-    label_dir = os.path.join(save_directory, level, name, 'label')
-    feat_dir = os.path.join(save_directory, level, name, 'feature')
-    if not os.path.isdir(label_dir):
-        os.makedirs(label_dir)
-    if not os.path.isdir(feat_dir):
-        os.makedirs(feat_dir)
+    dirid = 0
+    level = 'cha' if seq2seq is False else 'seq2seq'
     data_dir = os.path.join(root_directory, name)
     preprocess(data_dir)
     for subdir, dirs, files in os.walk(data_dir):
@@ -109,9 +104,18 @@ def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, f
                 if seq2seq is True:
                     targets.append(29)
                 print(targets)
-                count+=1
-                print('file index:',count)
                 if save:
+                    count+=1
+                    if count%4000 == 0:
+                        dirid += 1
+                    print('file index:',count)
+                    print('dir index:',dirid)
+                    label_dir = os.path.join(save_directory, level, name, str(dirid), 'label')
+                    feat_dir = os.path.join(save_directory, level, name, str(dirid), 'feature')
+                    if not os.path.isdir(label_dir):
+                        os.makedirs(label_dir)
+                    if not os.path.isdir(feat_dir):
+                        os.makedirs(feat_dir)
                     featureFilename = os.path.join(feat_dir, filenameNoSuffix.split('/')[-1] +'.npy')
                     np.save(featureFilename,feat)
                     t_f = os.path.join(label_dir, filenameNoSuffix.split('/')[-1] +'.npy')
