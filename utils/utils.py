@@ -121,22 +121,26 @@ def logging(model,logfile,errorRate,epoch=0,delta_time=0,mode='train'):
     if mode == 'config':
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
+
     elif mode == 'train':
         with open(logfile, "a") as myfile:
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
             myfile.write("Epoch:"+str(epoch+1)+' '+"train error rate:"+str(errorRate)+'\n')
             myfile.write("Epoch:"+str(epoch+1)+' '+"train time:"+str(delta_time)+' s\n')
+
     elif mode == 'test':
         logfile = logfile+'_TEST'
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
             myfile.write("test error rate:"+str(errorRate)+'\n')
+
     elif mode == 'dev':
         logfile = logfile+'_DEV'
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
+            myfile.write("development error rate:"+str(errorRate)+'\n')
 
 @describe
 def count_params(model, mode='trainable'):

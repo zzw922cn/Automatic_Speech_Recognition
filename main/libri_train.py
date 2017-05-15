@@ -110,7 +110,7 @@ keep_prob = 1-FLAGS.dropout_prob
 
 print('%s mode...'%str(mode))
 if mode == 'test' or mode == 'dev':
-  batch_size = 100
+  batch_size = 10
   num_epochs = 1
 
 
@@ -240,7 +240,7 @@ class Runner(object):
                         if er / batch_size == 1.0:
                             break
 
-                        if batch % 30 == 0:
+                        if batch % 20 == 0:
                             print('Truth:\n' + output_to_sequence(y, type=level))
                             print('Output:\n' + output_to_sequence(pre, type=level))
 
