@@ -127,14 +127,12 @@ def logging(model,logfile,errorRate,epoch=0,delta_time=0,mode='train'):
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
             myfile.write("Epoch:"+str(epoch+1)+' '+"train error rate:"+str(errorRate)+'\n')
             myfile.write("Epoch:"+str(epoch+1)+' '+"train time:"+str(delta_time)+' s\n')
-
     elif mode == 'test':
         logfile = logfile+'_TEST'
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
             myfile.write("test error rate:"+str(errorRate)+'\n')
-
     elif mode == 'dev':
         logfile = logfile+'_DEV'
         with open(logfile, "a") as myfile:
@@ -170,6 +168,7 @@ def list_to_sparse_tensor(targetList, level):
        'oy', 'p', 'pau', 'pcl', 'q', 'r', 's',\
        'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux',\
        'v', 'w', 'y', 'z', 'zh']
+<<<<<<< HEAD
 
     mapping = {'ah': 'ax', 'ax-h': 'ax', 'ux': 'uw', 'aa': 'ao', 'ih': 'ix', \
                'axr': 'er', 'el': 'l', 'em': 'm', 'en': 'n', 'nx': 'n',\
@@ -182,6 +181,20 @@ def list_to_sparse_tensor(targetList, level):
                  'm', 'n', 'ng', 'ow', 'oy', 'p', 'r', 's', 't', 'th', 'uh', 'uw',\
                  'v', 'w', 'y', 'z', 'zh']
 
+=======
+
+    mapping = {'ah': 'ax', 'ax-h': 'ax', 'ux': 'uw', 'aa': 'ao', 'ih': 'ix', \
+               'axr': 'er', 'el': 'l', 'em': 'm', 'en': 'n', 'nx': 'n',\
+               'eng': 'ng', 'sh': 'zh', 'hv': 'hh', 'bcl': 'h#', 'pcl': 'h#',\
+               'dcl': 'h#', 'tcl': 'h#', 'gcl': 'h#', 'kcl': 'h#',\
+               'q': 'h#', 'epi': 'h#', 'pau': 'h#'}
+
+    group_phn = ['ae', 'ao', 'aw', 'ax', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', \
+                 'er', 'ey', 'f', 'g', 'h#', 'hh', 'ix', 'iy', 'jh', 'k', 'l', \
+                 'm', 'n', 'ng', 'ow', 'oy', 'p', 'r', 's', 't', 'th', 'uh', 'uw',\
+                 'v', 'w', 'y', 'z', 'zh']
+
+>>>>>>> 76e4fd3671a93f45ce293e0110f03a6349097e9c
     if level == 'cha':
         for tI, target in enumerate(targetList):
             for seqI, val in enumerate(target):
