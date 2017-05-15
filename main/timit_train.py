@@ -47,27 +47,31 @@ from models.dynamic_brnn import DBiRNN
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
     
+flags.DEFINE_string('task', 'timit', 'set task name of this program')
 flags.DEFINE_string('mode', 'train', 'set whether to train or test')
 flags.DEFINE_boolean('keep', False, 'set whether to restore a model, when test mode, keep should be set to True')
 flags.DEFINE_string('level', 'phn', 'set the task level, phn, cha, or seq2seq, seq2seq will be supported soon')
 flags.DEFINE_string('model', 'DBiRNN', 'set the model to use, DBiRNN, BiRNN, ResNet..')
-flags.DEFINE_string('rnncell', 'gru', 'set the rnncell to use, rnn, gru, lstm...')
+flags.DEFINE_string('rnncell', 'lstm', 'set the rnncell to use, rnn, gru, lstm...')
 flags.DEFINE_integer('num_layer', 2, 'set the layers for rnn')
-flags.DEFINE_string('activation', 'relu', 'set the activation to use, sigmoid, tanh, relu, elu...')
+flags.DEFINE_string('activation', 'tanh', 'set the activation to use, sigmoid, tanh, relu, elu...')
 flags.DEFINE_string('optimizer', 'adam', 'set the optimizer to use, sgd, adam...')
 
 flags.DEFINE_integer('batch_size', 32, 'set the batch size')
-flags.DEFINE_integer('num_hidden', 128, 'set the hidden size of rnn cell')
+flags.DEFINE_integer('num_hidden', 256, 'set the hidden size of rnn cell')
 flags.DEFINE_integer('num_feature', 39, 'set the size of input feature')
 flags.DEFINE_integer('num_classes', 30, 'set the number of output classes')
-flags.DEFINE_integer('num_epochs', 5, 'set the number of epochs')
+flags.DEFINE_integer('num_epochs', 500, 'set the number of epochs')
 flags.DEFINE_float('lr', 0.0001, 'set the learning rate')
 flags.DEFINE_float('dropout_prob', 0.1, 'set probability of dropout')
-flags.DEFINE_float('grad_clip', 2.0, 'set the threshold of gradient clipping')
+flags.DEFINE_float('grad_clip', 1, 'set the threshold of gradient clipping, -1 denotes no clipping')
 flags.DEFINE_string('datadir', '/home/pony/github/data/timit', 'set the data root directory')
 flags.DEFINE_string('logdir', '/home/pony/github/log/timit', 'set the log directory')
 
+
 FLAGS = flags.FLAGS
+
+task = FLAGS.task
 level = FLAGS.level
 model_fn = model_functions_dict[FLAGS.model]
 rnncell = FLAGS.rnncell
@@ -95,8 +99,8 @@ mode = FLAGS.mode
 keep = FLAGS.keep
 keep_prob = 1-FLAGS.dropout_prob
 
+print('%s mode...'%str(mode))
 if mode == 'test':
-  print 'Inference Mode...'
   batch_size = 100
   num_epochs = 1
 
@@ -111,7 +115,8 @@ logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datet
 class Runner(object):
 
     def _default_configs(self):
-      return {'rnncell': rnncell,
+      return {'level': level,
+              'rnncell': rnncell,
               'batch_size': batch_size,
               'num_hidden': num_hidden,
               'num_feature': num_feature,
@@ -135,7 +140,6 @@ class Runner(object):
 
     def run(self):
         # load data
-        print('{} mode'.format(mode))
         args_dict = self._default_configs()
         args = dotdict(args_dict)
         batchedData, maxTimeSteps, totalN = self.load_data(args, mode=mode, type=level)
@@ -183,6 +187,7 @@ class Runner(object):
                             batchErrors[batch] = er
                             print('\n{} mode, total:{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train CER={:.3f}\n'.format(
                                 level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
+
                         elif mode == 'test':
                             l, pre, y, er = sess.run([model.loss, model.predictions, 
                                 model.targetY, model.errorRate], feed_dict=feedDict)
@@ -196,15 +201,15 @@ class Runner(object):
                                 model.predictions, model.targetY],
                                 feed_dict=feedDict)
                   
-                            er = get_edit_distance([pre.values], [y.values], True, 'train', level)
+                            er = get_edit_distance([pre.values], [y.values], True, level)
                             print('\n{} mode, total:{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train PER={:.3f}\n'.format(
-                                level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
+                                level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er))
                             batchErrors[batch] = er * len(batchSeqLengths)
                         elif mode == 'test':
                             l, pre, y = sess.run([model.loss, model.predictions, model.targetY], feed_dict=feedDict)
-                            er = get_edit_distance([pre.values], [y.values], True, mode, level)
+                            er = get_edit_distance([pre.values], [y.values], True, level)
                             print('\n{} mode, total:{},batch:{}/{},test loss={:.3f},mean test PER={:.3f}\n'.format(
-                                level, totalN, batch+1, len(batchRandIxs), l, er/batch_size))
+                                level, totalN, batch+1, len(batchRandIxs), l, er))
                             batchErrors[batch] = er * len(batchSeqLengths)
 
                     # NOTE:
