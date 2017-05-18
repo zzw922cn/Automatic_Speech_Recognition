@@ -128,7 +128,7 @@ The original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training
 | Original Phoneme(s) | Mapped Phoneme |
 | :------------------  | :-------------------: |
 | iy | iy |
-| ih | ix |
+| ix, ih | ix |
 | eh | eh |
 | ae | ae |
 | ax, ah, ax-h | ax | 
