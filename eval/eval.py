@@ -59,6 +59,7 @@ from sklearn import preprocessing
 
 flags.DEFINE_string('wav_file', '', 'location of wav file to do prediction with')
 flags.DEFINE_string('model_dir', '', 'path to saved checkpoint of trained model to use for prediction')
+flags.DEFINE_integer('max_time_slices', 1000, 'set the maximum number of 10ms time slices to do processing for, max audio file duration')
 
 flags.DEFINE_string('preprocess_mode', 'mfcc', 'mfcc or fbank mode for preprocess')
 flags.DEFINE_float('winlen', 0.02, 'specify the window length of feature')
@@ -111,6 +112,8 @@ lr = FLAGS.lr
 
 keep_prob = 1-FLAGS.dropout_prob
 
+max_time_slices = FLAGS.max_time_slices
+
 # first preprocess the input file
 # 9 inputs, this is the one being used
 # returns the features
@@ -151,9 +154,12 @@ def _default_configs():
 args_dict = _default_configs()
 args = dotdict(args_dict)
 
-batchedData, maxTimeSteps = data_lists_to_batches([np.array(feats)], [[np.array(0)]], batch_size, level)
+# find some maximum size here and pad the inputs to fit for next runs. to not have to rebuild the model each time.
+# as is done on line 271 in utils.utils
+# how many 10ms chunks to be able to process 10 * (10**2)
+max_time_slicesn = 1000 # this is 10 seconds max
 
-model = model_fn(args, maxTimeSteps)
+model = model_fn(args, max_time_slices)
 num_params = count_params(model, mode='trainable')
 all_num_params = count_params(model, mode='all')
 model.config['trainable params'] = num_params
@@ -168,6 +174,8 @@ with tf.Session(graph=model.graph) as sess:
     else:
         print("please select a path for an existing model")
         sys.exit(1)
+
+    batchedData, maxTimeSteps = data_lists_to_batches([np.array(feats)], [[np.array(0)]], batch_size, level, max_time_slices)
 
     batchErrors = np.zeros(len(batchedData))
     batchRandIxs = np.random.permutation(len(batchedData))
