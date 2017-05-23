@@ -95,7 +95,6 @@ winlen = FLAGS.winlen
 winstep = FLAGS.winstep
 featlen = FLAGS.featlen
 
-
 model_fn = model_functions_dict[FLAGS.model]
 rnncell = FLAGS.rnncell
 num_layer = FLAGS.num_layer
@@ -134,9 +133,6 @@ def wav2feature(in_wav, win_len, win_step, mode, feature_len, seq2seq=False):
         feat = np.transpose(feat)
         return feat
 
-wav_file = FLAGS.wav_file
-feats = wav2feature(wav_file, winlen, winstep, preprocess_mode, featlen)
-
 def _default_configs():
     return {'level': level,
             'rnncell': rnncell,
@@ -154,6 +150,26 @@ def _default_configs():
 args_dict = _default_configs()
 args = dotdict(args_dict)
 
+def do_eval(in_wav, winlen=winlen, winstep=winstep, preprocess_mode=preprocess_mode, featlen=featlen):
+    feats = wav2feature(in_wav, winlen, winstep, preprocess_mode, featlen)
+    batchedData, maxTimeSteps = data_lists_to_batches([np.array(feats)], [[np.array(0)]], batch_size, level, max_time_slices)
+
+    batchErrors = np.zeros(len(batchedData))
+    batchRandIxs = np.random.permutation(len(batchedData))
+
+    for batch, batchOrigI in enumerate(batchRandIxs):
+        batchInputs, batchTargetSparse, batchSeqLengths = batchedData[batchOrigI]
+        batchTargetIxs, batchTargetVals, batchTargetShape = batchTargetSparse
+        feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs,
+            model.targetVals: batchTargetVals, model.targetShape: batchTargetShape,
+            model.seqLengths: batchSeqLengths}
+
+        #l, pre, y, er = sess.run([model.loss, model.predictions, 
+        #    model.targetY, model.errorRate], feed_dict=feedDict)
+        pre = sess.run([model.predictions], feed_dict=feedDict)
+        result = output_to_sequence(pre[0], type=level)
+        return result
+
 # find some maximum size here and pad the inputs to fit for next runs. to not have to rebuild the model each time.
 # as is done on line 271 in utils.utils
 # how many 10ms chunks to be able to process 10 * (10**2)
@@ -166,29 +182,16 @@ model.config['trainable params'] = num_params
 model.config['all params'] = all_num_params
 print(model.config)
 
-with tf.Session(graph=model.graph) as sess:
-    ckpt = tf.train.get_checkpoint_state(model_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        model.saver.restore(sess, ckpt.model_checkpoint_path)
-        print('Model restored from:' + model_dir)
-    else:
-        print("please select a path for an existing model")
-        sys.exit(1)
+sess = tf.Session(graph=model.graph) 
+ckpt = tf.train.get_checkpoint_state(model_dir)
+if ckpt and ckpt.model_checkpoint_path:
+    model.saver.restore(sess, ckpt.model_checkpoint_path)
+    print('Model restored from:' + model_dir)
+else:
+    print("please select a path for an existing model")
+    sys.exit(1)
 
-    batchedData, maxTimeSteps = data_lists_to_batches([np.array(feats)], [[np.array(0)]], batch_size, level, max_time_slices)
+wav_file = FLAGS.wav_file
 
-    batchErrors = np.zeros(len(batchedData))
-    batchRandIxs = np.random.permutation(len(batchedData))
-
-    for batch, batchOrigI in enumerate(batchRandIxs):
-        batchInputs, batchTargetSparse, batchSeqLengths = batchedData[batchOrigI]
-        batchTargetIxs, batchTargetVals, batchTargetShape = batchTargetSparse
-        feedDict = {model.inputX: batchInputs, model.targetIxs: batchTargetIxs,
-                    model.targetVals: batchTargetVals, model.targetShape: batchTargetShape,
-                    model.seqLengths: batchSeqLengths}
-
-        #l, pre, y, er = sess.run([model.loss, model.predictions, 
-        #    model.targetY, model.errorRate], feed_dict=feedDict)
-        pre = sess.run([model.predictions], feed_dict=feedDict)
-        result = output_to_sequence(pre[0], type=level)
-        print("\nRESULT: {}\n".format(result))
+res = do_eval(wav_file)
+print("\nRESULT: {}\n".format(res))
