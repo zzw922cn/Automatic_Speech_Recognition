@@ -173,7 +173,7 @@ def do_eval(in_wav, winlen=winlen, winstep=winstep, preprocess_mode=preprocess_m
 # find some maximum size here and pad the inputs to fit for next runs. to not have to rebuild the model each time.
 # as is done on line 271 in utils.utils
 # how many 10ms chunks to be able to process 10 * (10**2)
-max_time_slicesn = 1000 # this is 10 seconds max
+max_time_slicesn = FLAGS.max_time_slices 
 
 model = model_fn(args, max_time_slices)
 num_params = count_params(model, mode='trainable')
