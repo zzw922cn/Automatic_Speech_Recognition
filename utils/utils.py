@@ -239,14 +239,14 @@ def get_edit_distance(hyp_arr, truth_arr, normalize, level):
         dist = session.run(editDist, feed_dict=feedDict)
     return dist
 
-def data_lists_to_batches(inputList, targetList, batchSize, level):
+def data_lists_to_batches(inputList, targetList, batchSize, level, maxlen=0):
     ''' padding the input list to a same dimension, integrate all data into batchInputs
     '''
     assert len(inputList) == len(targetList)
     # dimensions of inputList:batch*39*time_length
 
     nFeatures = inputList[0].shape[0]
-    maxLength = 0
+    maxLength = maxlen
     for inp in inputList:
 	    # find the max time_length
         maxLength = max(maxLength, inp.shape[1])
