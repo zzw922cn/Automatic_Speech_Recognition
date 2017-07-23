@@ -28,19 +28,16 @@ from sklearn import preprocessing
 from subprocess import check_call, CalledProcessError
 
 
-def wav2feature(rootdir, save_dir, name, feature_len, win_len=0.02, win_step=0.01, mode='mfcc', seq2seq=False, save=False):
+def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, feature_len, seq2seq, save):
   """
   To run for WSJ corpus, you should download sph2pipe_v2.5 first!
   """
-  feat_dir = os.path.join(save_dir, name, mode)
-  label_dir = os.path.join(save_dir, name, 'label')
-  if not os.path.exists(label_dir):
-    os.makedirs(label_dir)
-  if not os.path.exists(feat_dir):
-    os.makedirs(feat_dir)
+  
 
   count = 0
-  for subdir, dirs, files in os.walk(rootdir):
+  dirid = 0
+  level = 'cha' if seq2seq is False else 'seq2seq'
+  for subdir, dirs, files in os.walk(root_directory):
     for f in files:
       fullFilename = os.path.join(subdir, f)
       filenameNoSuffix =  os.path.splitext(fullFilename)[0]
@@ -79,9 +76,18 @@ def wav2feature(rootdir, save_dir, name, feature_len, win_len=0.02, win_step=0.0
           targets.append(29)
         targets = np.array(targets)
         print(targets)
-        count+=1
-        print('file index:', count)
         if save:
+          count += 1
+          if count%1000 == 0:
+              dirid += 1
+          print('file index:',count)
+          print('dir index:',dirid)
+          label_dir = os.path.join(save_directory, level, name, str(dirid), 'label')
+          feat_dir = os.path.join(save_directory, level, name, str(dirid), mode)
+          if not os.path.isdir(label_dir):
+              os.makedirs(label_dir)
+          if not os.path.isdir(feat_dir):
+              os.makedirs(feat_dir)
           featureFilename = os.path.join(feat_dir, filenameNoSuffix.split('/')[-1] +'.npy')
           np.save(featureFilename,feat)
           t_f = os.path.join(label_dir, filenameNoSuffix.split('/')[-1] +'.npy')
@@ -129,7 +135,7 @@ if __name__ == '__main__':
         save_directory = os.getcwd()
 
     if not os.path.isdir(root_directory):
-        raise ValueError("LibriSpeech Directory does not exist!")
+        raise ValueError("WSJ Directory does not exist!")
 
     if not os.path.isdir(save_directory):
         os.makedirs(save_directory)

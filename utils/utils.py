@@ -168,7 +168,6 @@ def list_to_sparse_tensor(targetList, level):
        'oy', 'p', 'pau', 'pcl', 'q', 'r', 's',\
        'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux',\
        'v', 'w', 'y', 'z', 'zh']
-<<<<<<< HEAD
 
     mapping = {'ah': 'ax', 'ax-h': 'ax', 'ux': 'uw', 'aa': 'ao', 'ih': 'ix', \
                'axr': 'er', 'el': 'l', 'em': 'm', 'en': 'n', 'nx': 'n',\
@@ -181,7 +180,6 @@ def list_to_sparse_tensor(targetList, level):
                  'm', 'n', 'ng', 'ow', 'oy', 'p', 'r', 's', 't', 'th', 'uh', 'uw',\
                  'v', 'w', 'y', 'z', 'zh']
 
-=======
 
     mapping = {'ah': 'ax', 'ax-h': 'ax', 'ux': 'uw', 'aa': 'ao', 'ih': 'ix', \
                'axr': 'er', 'el': 'l', 'em': 'm', 'en': 'n', 'nx': 'n',\
@@ -194,7 +192,6 @@ def list_to_sparse_tensor(targetList, level):
                  'm', 'n', 'ng', 'ow', 'oy', 'p', 'r', 's', 't', 'th', 'uh', 'uw',\
                  'v', 'w', 'y', 'z', 'zh']
 
->>>>>>> 76e4fd3671a93f45ce293e0110f03a6349097e9c
     if level == 'cha':
         for tI, target in enumerate(targetList):
             for seqI, val in enumerate(target):
@@ -404,6 +401,3 @@ def dropout(x, keep_prob, is_training):
     return tf.contrib.layers.dropout(x, keep_prob=keep_prob, is_training=is_training)
 
 
-# test code
-if __name__ == '__main__':
-    print len(phn)
