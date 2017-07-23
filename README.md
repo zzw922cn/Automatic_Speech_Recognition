@@ -17,6 +17,8 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add WSJ corpus standard preprocessing by s5 recipe** (2017-05-05)
 - [x] **Restructuring of the project. Updated train.py for usage convinience** (2017-05-06)
 - [x] **Finish feature module for timit, libri, wsj, support training for LibriSpeech** (2017-05-14)
+- [x] **Remove some unnecessary codes** (2017-07-22)
+- [x] **Add DeepSpeech2 implementation code** (2017-07-23)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
