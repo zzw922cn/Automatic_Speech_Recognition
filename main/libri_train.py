@@ -18,6 +18,7 @@ import datetime
 import os
 from six.moves import cPickle
 from functools import wraps
+import random
 
 import numpy as np
 import tensorflow as tf
@@ -171,6 +172,11 @@ class Runner(object):
         feature_dirs, label_dirs = get_data(datadir, level, train_dataset, dev_dataset, test_dataset, mode)
         batchedData, maxTimeSteps, totalN = self.load_data(feature_dirs[0], label_dirs[0], mode, level)
         model = model_fn(args, maxTimeSteps)
+
+        ## shuffle feature_dir and label_dir by same order
+        FL_pair = list(zip(feature_dirs, label_dirs))
+        random.shuffle(FL_pair)
+        feature_dirs, label_dirs = zip(*FL_pair)
 
         for feature_dir, label_dir in zip(feature_dirs, label_dirs):
             id_dir = feature_dirs.index(feature_dir)
