@@ -157,13 +157,6 @@ if __name__ == '__main__':
     win_len = args.winlen
     win_step = args.winstep
 
-    # level = 'cha'
-    # # train or test dataset
-    # keywords = 'train'
-    # mode = 'mfcc'
-    # feat_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, mode)
-    # label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
-    # rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
     root_directory = os.path.join(root_directory, name)
     if root_directory == ".":
         root_directory = os.getcwd()
