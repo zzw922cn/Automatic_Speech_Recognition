@@ -40,9 +40,6 @@ from utils.functionDictUtils import model_functions_dict
 from utils.functionDictUtils import activation_functions_dict
 from utils.functionDictUtils import optimizer_functions_dict
 
-from models.resnet import ResNet
-from models.brnn import BiRNN
-from models.dynamic_brnn import DBiRNN
 
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
@@ -56,6 +53,7 @@ flags.DEFINE_string('rnncell', 'lstm', 'set the rnncell to use, rnn, gru, lstm..
 flags.DEFINE_integer('num_layer', 2, 'set the layers for rnn')
 flags.DEFINE_string('activation', 'tanh', 'set the activation to use, sigmoid, tanh, relu, elu...')
 flags.DEFINE_string('optimizer', 'adam', 'set the optimizer to use, sgd, adam...')
+flags.DEFINE_boolean('layerNormalization', False, 'set whether to apply layer normalization to rnn cell')
 
 flags.DEFINE_integer('batch_size', 32, 'set the batch size')
 flags.DEFINE_integer('num_hidden', 256, 'set the hidden size of rnn cell')

@@ -37,13 +37,13 @@ from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 from utils.utils import load_batched_data
 from utils.utils import describe
 from utils.utils import setAttrs
-from utils.utils import build_weight
-from utils.utils import build_forward_layer
-from utils.utils import build_conv_layer
 from utils.utils import list_to_sparse_tensor
 from utils.utils import dropout
 from utils.utils import get_edit_distance
 
+from utils.lnRNNCell import BasicRNNCell as lnBasicRNNCell
+from utils.lnRNNCell import GRUCell as lnGRUCell
+from utils.lnRNNCell import BasicLSTMCell as lnBasicLSTMCell
 
 def build_multi_dynamic_brnn(args,
                              maxTimeSteps,
@@ -89,14 +89,25 @@ class DBiRNN(object):
     def __init__(self, args, maxTimeSteps):
         self.args = args
         self.maxTimeSteps = maxTimeSteps
-        if args.rnncell == 'rnn':
-            self.cell_fn = rnn_cell.BasicRNNCell
-        elif args.rnncell == 'gru':
-            self.cell_fn = tf.contrib.rnn.GRUCell
-        elif args.rnncell == 'lstm':
-            self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
+        if args.layerNormalization is True:
+            if args.rnncell == 'rnn':
+                self.cell_fn = lnBasicRNNCell
+            elif args.rnncell == 'gru':
+                self.cell_fn = lnGRUCell
+            elif args.rnncell == 'lstm':
+                self.cell_fn = lnBasicLSTMCell
+            else:
+                raise Exception("rnncell type not supported: {}".format(args.rnncell))
         else:
-            raise Exception("rnncell type not supported: {}".format(args.rnncell))
+            if args.rnncell == 'rnn':
+                self.cell_fn = rnn_cell.BasicRNNCell
+            elif args.rnncell == 'gru':
+                self.cell_fn = tf.contrib.rnn.GRUCell
+            elif args.rnncell == 'lstm':
+                self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
+            else:
+                raise Exception("rnncell type not supported: {}".format(args.rnncell))
+
         self.build_graph(args, maxTimeSteps)
 
     @describe

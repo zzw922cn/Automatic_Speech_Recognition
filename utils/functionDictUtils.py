@@ -13,11 +13,11 @@ sys.path.append('../')
 sys.dont_write_bytecode = True
 
 import tensorflow as tf 
-from models.resnet import ResNet
-from models.brnn import BiRNN
-from models.dynamic_brnn import DBiRNN
 
-model_functions_dict = {'ResNet': ResNet, 'BiRNN': BiRNN, 'DBiRNN': DBiRNN}
+from models.dynamic_brnn import DBiRNN
+from models.deepSpeech2 import DeepSpeech2
+
+model_functions_dict = {'DBiRNN': DBiRNN, 'deepSpeech2': DeepSpeech2}
 
 activation_functions_dict = {
     'sigmoid': tf.sigmoid, 'tanh': tf.tanh, 'relu': tf.nn.relu, 'relu6': tf.nn.relu6,
