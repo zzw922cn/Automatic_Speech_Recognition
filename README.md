@@ -94,112 +94,128 @@ Besides, you can also run `main/run.sh` for both training and testing simultaneo
 ![image](https://github.com/zzw922cn/Automatic_Speech_Recognition/blob/master/PER.png)
 
 ### LibriSpeech recognition result without LM
-**Label**:
 
-it was about noon when captain waverley entered the straggling village or rather hamlet of tully veolan close to which was situated the mansion of the proprietor
+| Label | Prediction |
+| :--- | :--- | 
+| it was about noon when captain waverley entered the straggling village or rather hamlet of tully veolan close to which was situated the mansion of the proprietor | it was about noon when captain wavraly entered the stragling bilagor of rather hamlent of tulevallon close to which wi situated the mantion of the propriater |
+| the english it is evident had they not been previously assured of receiving the king would never have parted with so considerable a sum and while they weakened themselves by the same measure have strengthened a people with whom they must afterwards have so material an interest to discuss | the onglish it is evident had they not being previously showed of receiving the king would never have parted with so considerable a some an quile they weakene themselves by the same measure haf streigth and de people with whom they must afterwards have so material and interest to discuss |
+| one who writes of such an era labours under a troublesome disadvantage | one how rights of such an er a labours onder a troubles hom disadvantage |
+| then they started on again and two hours later came in sight of the house of doctor pipt | then they started on again and two hours laytor came in sight of the house of doctor pipd |
+| what does he want | whit daes he want |
+| there just in front | there just infront |
+| under ordinary circumstances the abalone is tough and unpalatable but after the deft manipulation of herbert they are tender and make a fine dish either fried as chowder or a la newberg | under ordinary circumstancesi the abl ony is tufgh and unpelitable but after the deftominiculation of hurbourt and they are tender and make a fine dish either fride as choder or alanuburg |
+| by degrees all his happiness all his brilliancy subsided into regret and uneasiness so that his limbs lost their power his arms hung heavily by his sides and his head drooped as though he was stupefied | by degrees all his happiness ill his brilliancy subsited inter regret and aneasiness so that his limbs lost their power his arms hung heavily by his sides and his head druped as though he was stupified |
+| i am the one to go after walt if anyone has to i'll go down mister thomas | i have the one to go after walt if ety wod hastu i'll go down mister thommas |
+| i had to read it over carefully as the text must be absolutely correct | i had to readit over carefully as the tex must be absolutely correct |
+| with a shout the boys dashed pell mell to meet the pack train and falling in behind the slow moving burros urged them on with derisive shouts and sundry resounding slaps on the animals flanks | with a shok the boy stash pale mele to meek the pecktrait ane falling in behind the slow lelicg burs ersh tlan with deressive shouts and sudery resounding sleps on the animal slankes |
+| i suppose though it's too early for them then came the explosion | i suppouse gho waths two early for them then came the explosion | 
 
-**Prediction**:
+### **Label**:
 
-it was about noon when captain wavraly entered the stragling bilagor of rather hamlent of tulevallon close to which wi situated the mantion of the propriater
-
-
-**Label**:
-
-the english it is evident had they not been previously assured of receiving the king would never have parted with so considerable a sum and while they weakened themselves by the same measure have strengthened a people with whom they must afterwards have so material an interest to discuss
-
-**Prediction**:
-
-the onglish it is evident had they not being previously showed of receiving the king would never have parted with so considerable a some an quile they weakene themselves by the same measure haf streigth and de people with whom they must afterwards have so material and interest to discuss
-
-
-**Label**:
-
-one who writes of such an era labours under a troublesome disadvantage
+### it was about noon when captain waverley entered the straggling village or rather hamlet of tully veolan close to which was situated the mansion of the proprietor
 
 **Prediction**:
 
-one how rights of such an er a labours onder a troubles hom disadvantage
-
-
-**Label**:
-
-then they started on again and two hours later came in sight of the house of doctor pipt
-
-**Prediction**:
-
-then they started on again and two hours laytor came in sight of the house of doctor pipd
+### it was about noon when captain wavraly entered the stragling bilagor of rather hamlent of tulevallon close to which wi situated the mantion of the propriater
 
 
 **Label**:
 
-what does he want
+### the english it is evident had they not been previously assured of receiving the king would never have parted with so considerable a sum and while they weakened themselves by the same measure have strengthened a people with whom they must afterwards have so material an interest to discuss
 
 **Prediction**:
 
-whit daes he want
+####the onglish it is evident had they not being previously showed of receiving the king would never have parted with so considerable a some an quile they weakene themselves by the same measure haf streigth and de people with whom they must afterwards have so material and interest to discuss
 
 
 **Label**:
 
-there just in front
+# one who writes of such an era labours under a troublesome disadvantage
 
 **Prediction**:
 
-there just infront
+# one how rights of such an er a labours onder a troubles hom disadvantage
 
 
 **Label**:
 
-under ordinary circumstances the abalone is tough and unpalatable but after the deft manipulation of herbert they are tender and make a fine dish either fried as chowder or a la newberg
+# then they started on again and two hours later came in sight of the house of doctor pipt
 
 **Prediction**:
 
-under ordinary circumstancesi the abl ony is tufgh and unpelitable but after the deftominiculation of hurbourt and they are tender and make a fine dish either fride as choder or alanuburg
+# then they started on again and two hours laytor came in sight of the house of doctor pipd
 
 
 **Label**:
 
-by degrees all his happiness all his brilliancy subsided into regret and uneasiness so that his limbs lost their power his arms hung heavily by his sides and his head drooped as though he was stupefied
+# what does he want
 
 **Prediction**:
 
-by degrees all his happiness ill his brilliancy subsited inter regret and aneasiness so that his limbs lost their power his arms hung heavily by his sides and his head druped as though he was stupified
+# whit daes he want
 
 
 **Label**:
 
-i am the one to go after walt if anyone has to i'll go down mister thomas
+# there just in front
 
 **Prediction**:
 
-i have the one to go after walt if ety wod hastu i'll go down mister thommas
+# there just infront
 
 
 **Label**:
 
-i had to read it over carefully as the text must be absolutely correct
+# under ordinary circumstances the abalone is tough and unpalatable but after the deft manipulation of herbert they are tender and make a fine dish either fried as chowder or a la newberg
 
 **Prediction**:
 
-i had to readit over carefully as the tex must be absolutely correct
+# under ordinary circumstancesi the abl ony is tufgh and unpelitable but after the deftominiculation of hurbourt and they are tender and make a fine dish either fride as choder or alanuburg
 
 
 **Label**:
 
-with a shout the boys dashed pell mell to meet the pack train and falling in behind the slow moving burros urged them on with derisive shouts and sundry resounding slaps on the animals flanks
+# by degrees all his happiness all his brilliancy subsided into regret and uneasiness so that his limbs lost their power his arms hung heavily by his sides and his head drooped as though he was stupefied
 
 **Prediction**:
 
-with a shok the boy stash pale mele to meek the pecktrait ane falling in behind the slow lelicg burs ersh tlan with deressive shouts and sudery resounding sleps on the animal slankes
+# by degrees all his happiness ill his brilliancy subsited inter regret and aneasiness so that his limbs lost their power his arms hung heavily by his sides and his head druped as though he was stupified
 
 
 **Label**:
 
-i suppose though it's too early for them then came the explosion
+# i am the one to go after walt if anyone has to i'll go down mister thomas
 
 **Prediction**:
 
-i suppouse gho waths two early for them then came the explosion
+# i have the one to go after walt if ety wod hastu i'll go down mister thommas
+
+
+**Label**:
+
+# i had to read it over carefully as the text must be absolutely correct
+
+**Prediction**:
+
+# i had to readit over carefully as the tex must be absolutely correct
+
+
+**Label**:
+
+# with a shout the boys dashed pell mell to meet the pack train and falling in behind the slow moving burros urged them on with derisive shouts and sundry resounding slaps on the animals flanks
+
+**Prediction**:
+
+# with a shok the boy stash pale mele to meek the pecktrait ane falling in behind the slow lelicg burs ersh tlan with deressive shouts and sudery resounding sleps on the animal slankes
+
+
+**Label**:
+
+# i suppose though it's too early for them then came the explosion
+
+**Prediction**:
+
+# i suppouse gho waths two early for them then came the explosion
 
 
 ## Content
