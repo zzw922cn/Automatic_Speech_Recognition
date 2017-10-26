@@ -117,6 +117,7 @@ class DeepSpeech2(object):
                 self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
             else:
                 raise Exception("rnncell type not supported: {}".format(args.rnncell))
+        self.build_graph(args, maxTimeSteps)
 
     @describe
     def build_graph(self, args, maxTimeSteps):
