@@ -35,7 +35,7 @@ def check_path_exists(path):
                 os.makedirs(p)
     else:
         if not os.path.exists(path):
-            os.makrdirs(path)
+            os.makedirs(path)
 
 class dotdict(dict):
     __getattr__ = dict.get
