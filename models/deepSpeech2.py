@@ -20,7 +20,6 @@ from functools import wraps
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.rnn.python.ops import rnn_cell
-from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from utils.utils import load_batched_data

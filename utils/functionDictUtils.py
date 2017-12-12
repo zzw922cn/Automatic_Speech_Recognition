@@ -16,8 +16,9 @@ import tensorflow as tf
 
 from models.dynamic_brnn import DBiRNN
 from models.deepSpeech2 import DeepSpeech2
+from models.speechCapsuleNetwork import CapsuleNetwork
 
-model_functions_dict = {'DBiRNN': DBiRNN, 'deepSpeech2': DeepSpeech2}
+model_functions_dict = {'DBiRNN': DBiRNN, 'deepSpeech2': DeepSpeech2, 'capsule': CapsuleNetwork}
 
 activation_functions_dict = {
     'sigmoid': tf.sigmoid, 'tanh': tf.tanh, 'relu': tf.nn.relu, 'relu6': tf.nn.relu6,

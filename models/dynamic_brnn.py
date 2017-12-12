@@ -31,7 +31,6 @@ from functools import wraps
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.rnn.python.ops import rnn_cell
-from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from utils.utils import load_batched_data
@@ -86,7 +85,7 @@ def build_multi_dynamic_brnn(args,
 
 
 class DBiRNN(object):
-    def __init__(self, args, maxTimeSteps):
+    def __init__(self, args):
         self.args = args
         self.maxTimeSteps = maxTimeSteps
         if args.layerNormalization is True:
@@ -100,11 +99,11 @@ class DBiRNN(object):
                 raise Exception("rnncell type not supported: {}".format(args.rnncell))
         else:
             if args.rnncell == 'rnn':
-                self.cell_fn = rnn_cell.BasicRNNCell
+                self.cell_fn = tf.contrib.rnn.BasicRNNCell
             elif args.rnncell == 'gru':
                 self.cell_fn = tf.contrib.rnn.GRUCell
             elif args.rnncell == 'lstm':
-                self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
+                self.cell_fn = tf.contrib.rnn.BasicLSTMCell
             else:
                 raise Exception("rnncell type not supported: {}".format(args.rnncell))
 
