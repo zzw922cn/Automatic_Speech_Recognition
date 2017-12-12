@@ -22,6 +22,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Fix some bugs** (2017-08-06)
 - [x] **Add Layer Normalization RNN for efficiency** (2017-08-06)
 - [x] **Add Madarian Speech Recognition support** (2017-08-06)
+- [x] **Adopt Capsule Network in Speech Recognition(first version)** (2017-12-12)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
