@@ -22,7 +22,8 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Fix some bugs** (2017-08-06)
 - [x] **Add Layer Normalization RNN for efficiency** (2017-08-06)
 - [x] **Add Madarian Speech Recognition support** (2017-08-06)
-- [x] **Adopt Capsule Network in Speech Recognition(first version)** (2017-12-12)
+- [x] **Add Capsule Network Model** (2017-12-12)
+- [x] **Release 1.0.0 version** (2017-12-12)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
@@ -32,13 +33,15 @@ If you want to look the history of speech recognition, I have collected the sign
 All my public repos will be updated in future, thanks for your stars!
 
 ## Install and Usage
-Currently only python 2.7 is supported.
+Currently only python 3.5 is supported.
 
 This project depends on scikit.audiolab, for which you need to have [libsndfile](http://www.mega-nerd.com/libsndfile/) installed in your system.
-Clone the repository to your preferred directory and install the dependencies using:
+Clone the repository to your preferred directory and install using:
 <pre>
-pip install -r requirements.txt
+sudo pip3 install -r requirements.txt
+sudo python3 setup.py install
 </pre>
+
 To use, simply run the following command:
 <pre>
 python main/timit_train.py [-h] [--mode MODE] [--keep [KEEP]] [--nokeep]
