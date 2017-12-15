@@ -18,7 +18,7 @@ import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
 
 from speechvalley.utils import describe, describe, getAttrs, output_to_sequence, load_batched_data, list_dirs, logging, count_params, target2phoneme, get_edit_distance, get_num_classes, check_path_exists, dotdict, activation_functions_dict, optimizer_functions_dict
-from speechvalley.models import DBiRNN, DeepSpeech2
+from speechvalley.models import DBiRNN, DeepSpeech2, CapsuleNetwork
 
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
@@ -34,8 +34,8 @@ flags.DEFINE_string('activation', 'tanh', 'set the activation to use, sigmoid, t
 flags.DEFINE_string('optimizer', 'adam', 'set the optimizer to use, sgd, adam...')
 flags.DEFINE_boolean('layerNormalization', False, 'set whether to apply layer normalization to rnn cell')
 
-flags.DEFINE_integer('batch_size', 32, 'set the batch size')
-flags.DEFINE_integer('num_hidden', 256, 'set the hidden size of rnn cell')
+flags.DEFINE_integer('batch_size', 16, 'set the batch size')
+flags.DEFINE_integer('num_hidden', 128, 'set the hidden size of rnn cell')
 flags.DEFINE_integer('num_feature', 39, 'set the size of input feature')
 flags.DEFINE_integer('num_classes', 30, 'set the number of output classes')
 flags.DEFINE_integer('num_epochs', 500, 'set the number of epochs')
@@ -50,7 +50,14 @@ FLAGS = flags.FLAGS
 
 task = FLAGS.task
 level = FLAGS.level
-model_fn = DBiRNN 
+if FLAGS.model == 'DBiRNN':
+    model_fn = DBiRNN
+elif FLAGS.model == 'DeepSpeech2':
+    model_fn = DBiRNN 
+elif FLAGS.model == 'CapsuleNetwork':
+    model_fn = CapsuleNetwork 
+else:
+    model_fn = None
 rnncell = FLAGS.rnncell
 num_layer = FLAGS.num_layer
 
