@@ -27,7 +27,7 @@ flags.DEFINE_string('task', 'timit', 'set task name of this program')
 flags.DEFINE_string('mode', 'train', 'set whether to train or test')
 flags.DEFINE_boolean('keep', False, 'set whether to restore a model, when test mode, keep should be set to True')
 flags.DEFINE_string('level', 'phn', 'set the task level, phn, cha, or seq2seq, seq2seq will be supported soon')
-flags.DEFINE_string('model', 'DBiRNN', 'set the model to use, DBiRNN, BiRNN, ResNet..')
+flags.DEFINE_string('model', 'CapsuleNetwork', 'set the model to use, DBiRNN, BiRNN, ResNet..')
 flags.DEFINE_string('rnncell', 'lstm', 'set the rnncell to use, rnn, gru, lstm...')
 flags.DEFINE_integer('num_layer', 2, 'set the layers for rnn')
 flags.DEFINE_string('activation', 'tanh', 'set the activation to use, sigmoid, tanh, relu, elu...')
@@ -39,6 +39,7 @@ flags.DEFINE_integer('num_hidden', 128, 'set the hidden size of rnn cell')
 flags.DEFINE_integer('num_feature', 39, 'set the size of input feature')
 flags.DEFINE_integer('num_classes', 30, 'set the number of output classes')
 flags.DEFINE_integer('num_epochs', 500, 'set the number of epochs')
+flags.DEFINE_integer('num_iter', 3, 'set the number of iterations in routing')
 flags.DEFINE_float('lr', 0.0001, 'set the learning rate')
 flags.DEFINE_float('dropout_prob', 0.1, 'set probability of dropout')
 flags.DEFINE_float('grad_clip', 1, 'set the threshold of gradient clipping, -1 denotes no clipping')
@@ -70,6 +71,7 @@ num_hidden = FLAGS.num_hidden
 num_feature = FLAGS.num_feature
 num_classes = get_num_classes(level)
 num_epochs = FLAGS.num_epochs
+num_iter = FLAGS.num_iter
 lr = FLAGS.lr
 grad_clip = FLAGS.grad_clip
 datadir = FLAGS.datadir
@@ -105,8 +107,9 @@ class Runner(object):
               'batch_size': batch_size,
               'num_hidden': num_hidden,
               'num_feature': num_feature,
-              'num_class': num_classes,
+              'num_classes': num_classes,
               'num_layer': num_layer,
+              'num_iter': num_iter,
               'activation': activation_fn,
               'optimizer': optimizer_fn,
               'learning_rate': lr,

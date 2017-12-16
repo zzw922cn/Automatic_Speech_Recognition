@@ -80,8 +80,7 @@ class CapsuleLayer(object):
 
     def __call__(self, inputX, kernel_size, strides, num_iter, with_routing=True, padding='VALID'):
         input_shape = inputX.get_shape()
-        capsule_output = None
-        with tf.variable_scope(self._vars_scope):
+        with tf.variable_scope(self._vars_scope) as scope:
             if self._layer_type=='conv':
                 # shape of conv1:  [batch, height, width, channels] 
                 kernel = tf.get_variable("conv_kernel", shape=[kernel_size[0], kernel_size[1], input_shape[-1], 
@@ -92,62 +91,64 @@ class CapsuleLayer(object):
                 if with_routing:
                     # routing(u, next_num_channels, next_num_capsules, next_output_vector_len, num_iter, scope=None):
                     # size of u: [batch_size, channels, num_capsules, output_vector_len]
-                    capsule_output = routing(capsule_output, self._num_channels, self._num_capsules, self._output_vector_len, num_iter)
+                    capsule_output = routing(capsule_output, self._num_channels, self._num_capsules, self._output_vector_len, num_iter, scope)
                 capsule_output = squashing(capsule_output)
                 # size of capsule_output: [batch_size, num_capsules, num_vector_len, output_vector_len]
                 capsule_output = tf.reshape(capsule_output, [input_shape[0], self._num_capsules, self._output_vector_len, self._num_channels])
             elif self._layer_type=='dnn':
                 # here, we set with_routing to be True defaultly
                 inputX = tf.reshape(inputX, [input_shape[0], 1, input_shape[1]*input_shape[3], input_shape[2], 1])
-                capsule_output = routing(inputX, self._num_channels, self._num_capsules, self._output_vector_len, num_iter)
+                capsule_output = routing(inputX, self._num_channels, self._num_capsules, self._output_vector_len, num_iter, scope)
                 # size of s: [batch_size, 1, num_channels*num_capsules, output_vector_len, 1]
                 capsule_output = squashing(capsule_output)
                 # size of capsule_output: [batch_size, num_channels*num_capsules, output_vector_len]
                 capsule_output = tf.squeeze(capsule_output, axis=[1, 4])
-                
+            else:
+                capsule_output = None
         return capsule_output
 
 class CapsuleNetwork(object):
-    def __init__(self, args):
-        self.build_graph(args)
+    def __init__(self, args, maxTimeSteps):
+        self.args = args
+        self.maxTimeSteps = maxTimeSteps
+        self.build_graph(self.args, self.maxTimeSteps)
 
-    def build_graph(self, args):
-        self.inputX = tf.placeholder(tf.float32,shape=[args.maxTimeSteps, args.batch_size, args.num_feature])
+    def build_graph(self, args, maxTimeSteps):
+        self.maxTimeSteps = maxTimeSteps
+        self.inputX = tf.placeholder(tf.float32,shape=[maxTimeSteps, args.batch_size, args.num_feature])
 
         # define tf.SparseTensor for ctc loss
-        self.targetIxs = tf.placeholder(tf.int32)
+        self.targetIxs = tf.placeholder(tf.int64)
         self.targetVals = tf.placeholder(tf.int32)
-        self.targetShape = tf.placeholder(tf.int32)
+        self.targetShape = tf.placeholder(tf.int64)
         self.targetY = tf.SparseTensor(self.targetIxs, self.targetVals, self.targetShape)
         self.seqLengths = tf.placeholder(tf.int32, shape=(args.batch_size))
 
-        self.is_training = tf.placeholder(tf.bool)
-        self.keep_prob = tf.placeholder(tf.float32)
-
-        initializer_fn=get_initializer_fn(args)
-        activation_fn=get_activation_fn(args)
-        optimizer_fn=get_optimizer_fn(args)
-
-        inputX = tf.reshape(self.inputX, [args.batch_size, args.maxTimeSteps, args.num_feature])
+        inputX = tf.reshape(self.inputX, [args.batch_size, maxTimeSteps, args.num_feature, 1])
+        print(inputX.get_shape())
         with tf.variable_scope("layer_conv1"):
-            kernel = tf.get_variable("kernel", shape=[11, 9, 1, 256], dtype=tf.float32) 
+            # shape of kernel: [batch, in_height, in_width, in_channels]
+            kernel = tf.get_variable("kernel", shape=[3, 3, 1, 32], dtype=tf.float32) 
             # shape of conv1:  [batch, height, width, channels] 
             conv1 = tf.nn.conv2d(inputX, kernel, (1,1,1,1), padding='VALID')
 
+        print(conv1.get_shape())
         output = conv1
         for layer_id in range(args.num_layer):
-            vars_scope = "capsule_layer_"+str(layer_id+1)
+            vars_scope = "capsule_cnn_layer_"+str(layer_id+1)
             # (self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None): 
-            capLayer = CapsuleLayer(2, 3, 4, layer_type='conv', vars_scope=vars_scope)
+            capLayer = CapsuleLayer(4, 8, 2, layer_type='conv', vars_scope=vars_scope)
             # (self, inputX, kernel_size, strides, routing=True, padding='VALID'):
-            output = capLayer(output, [3, 3], (1,1,1,1), args.num_iter)
+            output = capLayer(output, [2, 2], (1,1,1,1), args.num_iter)
+            print(output.get_shape())
 
         # last dnn layer for classification
-        capLayer = CapsuleLayer(2, 3, args.num_classes, layer_type='dnn', vars_scope=vars_scope)
+        vars_scope = "capsule_dnn_layer"
+        capLayer = CapsuleLayer(8, 64, args.num_classes, layer_type='dnn', vars_scope=vars_scope)
         logits3d = capLayer(output, [3, 3], (1,1,1,1), args.num_iter)
         self.loss = tf.reduce_mean(tf.nn.ctc_loss(self.targetY, logits3d, self.seqLengths, time_major=False))
         self.var_op = tf.global_variables()
-        self.var_trainable_op = tf.trainable_variable
+        self.var_trainable_op = tf.trainable_variables()
         if args.grad_clip == -1:
             # not apply gradient clipping
             self.optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(self.loss)
@@ -156,8 +157,7 @@ class CapsuleNetwork(object):
             grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, self.var_trainable_op), args.grad_clip)
             opti = tf.train.AdamOptimizer(args.learning_rate)
             self.optimizer = opti.apply_gradients(zip(grads, self.var_trainable_op))
-        self.predictions = tf.to_int32(
-            tf.nn.ctc_beam_search_decoder(logits3d, self.seqLengths, merge_repeated=False)[0][0])
+        self.predictions = tf.to_int32(tf.nn.ctc_beam_search_decoder(logits3d, self.seqLengths, merge_repeated=False)[0][0])
         if args.level == 'cha':
             self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=True))
         self.initial_op = tf.global_variables_initializer()
