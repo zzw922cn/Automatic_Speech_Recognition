@@ -140,7 +140,8 @@ class Runner(object):
         model.config['all params'] = all_num_params
         print(model.config)
 
-        with tf.Session(graph=model.graph) as sess:
+        #with tf.Session(graph=model.graph) as sess:
+        with tf.Session() as sess:
             # restore from stored model
             if keep == True:
                 ckpt = tf.train.get_checkpoint_state(savedir)

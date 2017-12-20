@@ -124,11 +124,22 @@ class CapsuleNetwork(object):
         self.targetY = tf.SparseTensor(self.targetIxs, self.targetVals, self.targetShape)
         self.seqLengths = tf.placeholder(tf.int32, shape=(args.batch_size))
 
+        self.config = {'name': args.model,
+                           'num_layer': args.num_layer,
+                           'num_hidden': args.num_hidden,
+                           'num_class': args.num_class,
+                           'activation': args.activation,
+                           'optimizer': args.optimizer,
+                           'learning rate': args.learning_rate,
+                           'keep prob': args.keep_prob,
+                           'batch size': args.batch_size}
+
+
         inputX = tf.reshape(self.inputX, [args.batch_size, maxTimeSteps, args.num_feature, 1])
         print(inputX.get_shape())
         with tf.variable_scope("layer_conv1"):
             # shape of kernel: [batch, in_height, in_width, in_channels]
-            kernel = tf.get_variable("kernel", shape=[3, 3, 1, 32], dtype=tf.float32) 
+            kernel = tf.get_variable("kernel", shape=[3, 3, 1, 16], dtype=tf.float32) 
             # shape of conv1:  [batch, height, width, channels] 
             conv1 = tf.nn.conv2d(inputX, kernel, (1,1,1,1), padding='VALID')
 
@@ -144,9 +155,10 @@ class CapsuleNetwork(object):
 
         # last dnn layer for classification
         vars_scope = "capsule_dnn_layer"
-        capLayer = CapsuleLayer(8, 64, args.num_classes, layer_type='dnn', vars_scope=vars_scope)
+        capLayer = CapsuleLayer(8, 16, args.num_classes, layer_type='dnn', vars_scope=vars_scope)
         logits3d = capLayer(output, [3, 3], (1,1,1,1), args.num_iter)
-        self.loss = tf.reduce_mean(tf.nn.ctc_loss(self.targetY, logits3d, self.seqLengths, time_major=False))
+        logits3d = tf.transpose(logits3d, perm=[1, 0, 2])
+        self.loss = tf.reduce_mean(tf.nn.ctc_loss(self.targetY, logits3d, self.seqLengths))
         self.var_op = tf.global_variables()
         self.var_trainable_op = tf.trainable_variables()
         if args.grad_clip == -1:
