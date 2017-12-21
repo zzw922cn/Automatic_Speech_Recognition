@@ -37,14 +37,14 @@ class CorpusGardener(object):
                         paras = HanziConv.toSimplified(''.join(p['paragraphs']).replace('\n', ''))
                         paras = filter_punctuation(paras)
                         for para in paras.split(' '):
-                            if len(para.strip())!=0:
+                            if len(para.strip())>1:
                                 pys = ' '.join(np.array(pinyin(para)).flatten())
                                 with open(os.path.join(save_dir, str(count//400000+1)+'.txt'), 'a') as f:
                                     f.write(para+','+pys+'\n')
                                 count += 1
         
     def process_dureader(self, data_dir='/media/pony/DLdigest/data/languageModel/dureader-raw/'): 
-        save_dir = os.path.join(self.save_dir, 'poem')
+        save_dir = os.path.join(self.save_dir, 'dureader')
         check_path_exists(save_dir)
         count = 0
         for entry in os.scandir(data_dir):
@@ -53,13 +53,27 @@ class CorpusGardener(object):
                 with open(entry.path, 'r') as f:
                     for line in f:
                         contents = json.loads(line)
-                        for doc in contents['documents']:
-                            paragraphs = filter_punctuation(''.join(doc['paragraphs']))
-                            title = doc['title']
-                            print(paragraphs)
-            
-    def process_sogou(self, data_dir): 
-        pass
+                        con = []
+                        try:
+                            answers = ''.join(contents['answers'])
+                            con.append(answers)
+                            questions = contents['question']
+                            con.append(questions)
+                            for doc in contents['documents']:
+                                paragraphs = ''.join(doc['paragraphs'])
+                                title = doc['title']
+                                con.append(paragraphs)
+                                con.append(title)
+                            con = HanziConv.toSimplified(''.join(con).replace('\n', ''))
+                            cons = filter_punctuation(con)
+                            for c in cons.split(' '):
+                                if len(c.strip())>1:
+                                    pys = ' '.join(np.array(pinyin(c)).flatten())
+                                    count += 1
+                                    with open(os.path.join(save_dir, str(count//400000+1)+'.txt'), 'a') as f:
+                                        f.write(c+','+pys+'\n')
+                        except KeyError:
+                            continue
 
 if __name__ == '__main__':
     cg = CorpusGardener()

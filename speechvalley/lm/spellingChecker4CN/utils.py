@@ -14,11 +14,15 @@ def filter_punctuation(input_str, remove_duplicate_space=True):
     all common punctuations in both Chinese and English, if any marker is 
     not included, welcome to pull issues in github repo.
     """
+    '''
     punctuation=string.punctuation + string.ascii_letters + \
                 '！？｡＂＃＄％＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀' + \
                 '｛｜｝～｟｠｢｣､、〃》「」『』【】〔〕〖〗〘〙〚〛〜〝〞' + \
                 '〟〰〾〿–—‘’‛“”„‟…‧﹏.·。《》'
     regex = re.compile('[%s]' % re.escape(punctuation))
+    '''
+
+    regex = re.compile(u'[^\u4E00-\u9FA5]')#非中文
     if remove_duplicate_space:
         result = re.sub(' +', ' ', regex.sub(' ', input_str))
     else:
@@ -42,5 +46,5 @@ def strQ2B(ustring):
     return rstring
 
 if __name__ == '__main__':
-    a = '我是，,,,...上升！!!!~[][][]·「·」「{}345'
+    a = 'abcd我是，,,,...上升！!!!~[][][]·「·」「{}345'
     print(filter_punctuation(a))
