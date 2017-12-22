@@ -26,6 +26,9 @@ class CorpusGardener(object):
         self.save_dir = '/home/pony/github/data/spellingChecker/raw'
 
     def process_poetry(self, data_dir='/media/pony/DLdigest/data/languageModel/chinese-poetry/json'):
+        """
+        Process Tang and Song poems dataset
+        """
         save_dir = os.path.join(self.save_dir, 'poem')
         check_path_exists(save_dir)
         count = 0
@@ -44,6 +47,9 @@ class CorpusGardener(object):
                                 count += 1
         
     def process_dureader(self, data_dir='/media/pony/DLdigest/data/languageModel/dureader-raw/'): 
+        """
+        Processing Baidu released QA Reader Dataset
+        """
         save_dir = os.path.join(self.save_dir, 'dureader')
         check_path_exists(save_dir)
         count = 0
@@ -75,6 +81,29 @@ class CorpusGardener(object):
                         except KeyError:
                             continue
 
+    def process_audioLabels(self, data_dir='/media/pony/DLdigest/data/ASR_zh/'): 
+        """
+        Processing label files in collected Chinese audio dataset
+        """
+        save_dir = os.path.join(self.save_dir, 'audioLabels')
+        check_path_exists(save_dir)
+        count = 0
+        for subdir, dirs, files in os.walk(data_dir):
+            print(subdir)
+            for f in files:
+                if f.endswith("label"):
+                    fullFilename = os.path.join(subdir, f)
+                    with open(fullFilename, 'r') as f:
+                        line = f.read()
+                        con = HanziConv.toSimplified(line)
+                        con = filter_punctuation(con)
+                        for c in con.split(' '):
+                            if len(c.strip())>1:
+                                pys = ' '.join(np.array(pinyin(c)).flatten())
+                                count += 1
+                                with open(os.path.join(save_dir, str(count//400000+1)+'.txt'), 'a') as f:
+                                    f.write(c+','+pys+'\n')
+
 if __name__ == '__main__':
     cg = CorpusGardener()
-    cg.process_dureader()
+    cg.process_audioLabels()
