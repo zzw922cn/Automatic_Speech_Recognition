@@ -395,11 +395,10 @@ TODO
 + TIMIT Phoneme Edit Distance(PER)
 
 ## Future Work
+- [ ] Release pretrained English ASR model
 - [ ] Add Attention Mechanism
-- [ ] Add more efficient dynamic computation graph without padding
-- [ ] List experimental results 
-- [ ] Implement more ASR models following newest investigations 
-- [ ] Provide fast TensorFlow Input Pipeline 
+- [ ] Add Speaker Verification
+- [ ] Add TTS
 
 ## License
 MIT
