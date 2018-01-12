@@ -7,4 +7,4 @@
 # Description  : Feature preprocessing for LibriSpeech dataset
 # ******************************************************
 
-from speechvalley.feature.libri.libri_proprecess import preprocess, wav2feature
+from speechvalley.feature.libri.libri_preprocess import preprocess, wav2feature
