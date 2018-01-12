@@ -45,6 +45,16 @@ def strQ2B(ustring):
         rstring += chr(inside_code)
     return rstring
 
+def digits2Chinese(string, mode='int'):
+    if mode == 'integer':
+    
+
+def reviseString(string):
+    re_int = re.compile('\d+')
+    re_float = re.compile('\d+\.\d+')
+
+
+
 if __name__ == '__main__':
     a = 'abcd我是，,,,...上升！!!!~[][][]·「·」「{}345'
     print(filter_punctuation(a))
