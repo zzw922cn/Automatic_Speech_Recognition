@@ -10,14 +10,22 @@
 
 import re
 import os
+import codecs
 
-def replaceDecimal(decimal_set, sub_str):
+def convertDigit2Character(string): 
+    '''
+    Main function to be called for converting digits
+    into characters in a sentence
+    '''
+    return _prepString(string)
+
+def _replaceDecimal(decimal_set, sub_str):
     ''' 
     Replacing decimal numbers with Chinese expression
     '''
     dec_str_set = []
     for dec in decimal_set:
-        dec_str=float2Chinese(float(dec))
+        dec_str=_float2Chinese(float(dec))
         dec_str_set.append(dec_str)
     newStr=''
     count=0
@@ -29,13 +37,13 @@ def replaceDecimal(decimal_set, sub_str):
             newStr+=c
     return newStr
     
-def replaceInteger(integer_set, sub_str):
+def _replaceInteger(integer_set, sub_str):
     ''' 
     Replacing integer numbers with Chinese expression
     '''
     int_str_set = []
     for inte in integer_set:
-        int_str=integer2Chinese(int(inte))
+        int_str=_integer2Chinese(int(inte))
         int_str_set.append(int_str)
     newStr=''
     count=0
@@ -47,7 +55,7 @@ def replaceInteger(integer_set, sub_str):
             newStr+=c
     return newStr
 
-def replaceSpecial(integer_set, sub_str):
+def _replaceSpecial(integer_set, sub_str):
     ''' 
     Replacing special numbers with Chinese expression, eg: 2018年 --> 二年一八年
     '''
@@ -72,26 +80,27 @@ def replaceSpecial(integer_set, sub_str):
             newStr+=c
     return newStr
 
-def prepString(string, lang='zh'):
+def _prepString(string):
     '''
     Preprocessing the sentence and splitting the decimal, integer or special
     '''
     decimal_set = re.findall(r'\d+\.\d+', string)
     sub_str = re.sub(r'\d+\.\d+', '_', string)
-    newStr=replaceDecimal(decimal_set, sub_str)
+    newStr=_replaceDecimal(decimal_set, sub_str)
 
     integer_set = re.findall(r'\d+年', newStr)
     sub_str = re.sub(r'\d+年', '_', newStr)
-    newStr=replaceSpecial(integer_set, sub_str)
+    newStr=_replaceSpecial(integer_set, sub_str)
 
     integer_set = re.findall(r'\d+', newStr)
     sub_str = re.sub(r'\d+', '_', newStr)
-    newStr=replaceInteger(integer_set, sub_str)
+    newStr=_replaceInteger(integer_set, sub_str)
     print('原句子:', string)
     print('新句子:', newStr)
     print('\n')
+    return newStr
 
-def section2Chinese(section):
+def _section2Chinese(section):
     '''
     Converting section to Chinese expression
     '''
@@ -118,7 +127,7 @@ def section2Chinese(section):
         section=section//10
     return result
 
-def integer2Chinese(number):
+def _integer2Chinese(number):
     '''
     Converting integer to Chinese expression
     '''
@@ -132,7 +141,7 @@ def integer2Chinese(number):
         section=number%10000
         if zero:
             result='零'+result
-        sec_result = section2Chinese(section)
+        sec_result = _section2Chinese(section)
         if section!=0:
             sec_result+=charSectionSet[unitPos]
         result=sec_result+result
@@ -142,25 +151,29 @@ def integer2Chinese(number):
         unitPos+=1
     return result
 
-def float2Chinese(number):
+def _float2Chinese(number):
     '''
     Converting floating number to Chinese expression
     '''
     charNumSet=['零', '一', '二', '三', '四', '五', '六',
              '七', '八', '九']
     integer_part, decimal_part=str(number).split('.')
-    int_result=integer2Chinese(int(integer_part))
+    int_result=_integer2Chinese(int(integer_part))
     dec_result=''
     for c in decimal_part:
         dec_result+=charNumSet[int(c)]
     return int_result+'点'+dec_result
 
+def convertDigit2Character(string): 
+    return _prepString(string)
+
 if __name__ == '__main__':
-    prepString('这些苹果的重量是105.23千克')
-    prepString('310岁')
-    prepString('中国面积9600000平方公里')
-    prepString('现在时间是12点15分')
-    prepString('现在是2012年11月')
+    with codecs.open('sample.txt','r','utf-8') as f:
+        content=f.readlines()
+    for string in content:
+        convertDigit2Character(string.strip())
+
+    '''
     rootdir='/media/pony/DLdigest/data/ASR_zh'
     r1 = re.compile(r'\d+')
     for subdir, dirs, files in os.walk(rootdir):
@@ -176,3 +189,4 @@ if __name__ == '__main__':
                             prepString(line)
                         except IndexError:
                             pass
+    '''

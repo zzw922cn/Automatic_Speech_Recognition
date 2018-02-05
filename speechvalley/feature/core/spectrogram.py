@@ -42,4 +42,4 @@ def spectrogramPower(audio, window_size=0.02, window_stride=0.01):
     
     
 if __name__ == '__main__':
-    print np.shape(spectrogramPower('test.wav'))
+    print(np.shape(spectrogramPower('test.wav')))
