@@ -103,6 +103,13 @@ def _convert_all(c_str):
         return _c2n(c_str)
     result=''
     flag=0
+    float_part=''
+    if u'点' in c_str:
+        flag1=1
+        i = c_str.split(u'点')[1]
+        c_str = c_str.split(u'点')[0]
+        float_part = '.'+_convert_section(i)
+
     if u'亿' in c_str:
         flag=8
         i = c_str.split(u'亿')[0]
@@ -120,11 +127,12 @@ def _convert_all(c_str):
             result += '0000'
             return result
     right = _get_complex(c_str)
-    return result + '0'*(flag-len(_get_complex(c_str))) + right
+    return result + '0'*(flag-len(_get_complex(c_str))) + right + float_part
 
 def convertCharacter2Digit(string):
-    chinese_numbers=re.findall(u'[点零一二三四五六七八九十百千万亿]{2,}', string, re.S)
-    sub_str = re.sub(u'[点零一二三四五六七八九十百千万亿]{2,}', '_', string)
+    chinese_numbers=re.findall(u'[点零一二三四五六七八九十百千万亿]{1,}', 
+        string, re.S)
+    sub_str = re.sub(u'[点零一二三四五六七八九十百千万亿]{1,}', '_', string)
     for chinese_number in chinese_numbers:
         digit = _convert_all(chinese_number)
         sub_str = sub_str.replace('_', digit, 1)
