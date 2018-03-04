@@ -12,17 +12,20 @@ import re
 
 def _c2n(c_str):
     '''
-    Converting character to number
+    将汉字转化成数字
     '''
     if c_str=='':
         return u'0'
     src=u'点零一二三四五六七八九'
     dst=u'.0123456789'
-    for i,c in enumerate(src):
+    for i, c in enumerate(src):
         c_str=c_str.replace(c,dst[i])
     return c_str
 
 def _get_gewei(c_str):
+    '''
+    分割出个位数字
+    '''
     if u'百零' in c_str:
         return _c2n(c_str.split(u'百零')[1])
     elif u'十' in c_str:
@@ -33,6 +36,9 @@ def _get_gewei(c_str):
         return '0'
 
 def _get_shiwei(c_str):
+    '''
+    分割出十位数字
+    '''
     if u'百零' in c_str:
         return u'0'
     elif u'百' in c_str:
@@ -47,6 +53,9 @@ def _get_shiwei(c_str):
         return u'0'
 
 def _get_baiwei(c_str):
+    '''
+    分割出百位数字
+    '''
     if u'千零' in c_str:
         return u'0'
     elif u'千' in c_str:
@@ -57,6 +66,9 @@ def _get_baiwei(c_str):
         return ''
 
 def _get_qianwei(c_str):
+    '''
+    分割出千位数字
+    '''
     if u'万零' in c_str:
         return u'0'
     elif u'万' in c_str:
@@ -67,48 +79,51 @@ def _get_qianwei(c_str):
         return ''
 
 def _get_complex(c_str):
-    gewei=_get_gewei(c_str)
-    shiwei=_get_shiwei(c_str)
-    baiwei=_get_baiwei(c_str)
-    qianwei=_get_qianwei(c_str)
-    c_str=qianwei+baiwei+shiwei+gewei
+    gewei = _get_gewei(c_str)
+    shiwei = _get_shiwei(c_str)
+    baiwei = _get_baiwei(c_str)
+    qianwei = _get_qianwei(c_str)
+    c_str = qianwei+baiwei+shiwei+gewei
     return c_str
 
-def _convert_to_num(c_str):
-    simple=True
+def _check_whether_special(c_str):
     for i in u'十百千万亿':
         if i in c_str:
-            simple=False
-    if simple:
+            return False
+    return True
+
+def _convert_section(c_str):
+    if _check_whether_special(c_str):
         return _c2n(c_str)
     else:
-        if not u'万' in c_str: #有‘万’的情况
+        if not u'万' in c_str:
             return _get_complex(c_str)
+
         else:
-            result='' #没‘万’的情况
+            result=''
             for i in c_str.split(u'万'):
-                result+=_get_complex(i)
+                result += _get_complex(i)
             return result
 
-def _convert_to_nums(c_str):
+def _convert_all(c_str):
         if u'亿' in c_str:
             result=''
             for i in c_str.split(u'亿'):
-                result+=_convert_to_num(i)
+                result+=_convert_section(i)
             return result
         elif u'点' in c_str:
             result=[]
             for i in c_str.split(u'点'):
-                result.append(_convert_to_num(i))
+                result.append(_convert_section(i))
             return u'.'.join(result)
         else:
-            return _convert_to_num(c_str)
+            return _convert_section(c_str)
 
 def convertCharacter2Digit(string):
     chinese_numbers=re.findall(u'[点零一二三四五六七八九十百千万亿]{2,}', string, re.S)
     sub_str = re.sub(u'[点零一二三四五六七八九十百千万亿]{2,}', '_', string)
     for chinese_number in chinese_numbers:
-        digit = _convert_to_nums(chinese_number)
+        digit = _convert_all(chinese_number)
         sub_str = sub_str.replace('_', digit, 1)
     print('原句子:', string)
     print('新句子:', sub_str)
