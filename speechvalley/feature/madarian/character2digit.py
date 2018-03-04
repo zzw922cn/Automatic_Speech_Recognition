@@ -96,28 +96,31 @@ def _convert_section(c_str):
     if _check_whether_special(c_str):
         return _c2n(c_str)
     else:
-        if not u'万' in c_str:
-            return _get_complex(c_str)
-
-        else:
-            result=''
-            for i in c_str.split(u'万'):
-                result += _get_complex(i)
-            return result
+        return _get_complex(c_str)
 
 def _convert_all(c_str):
-        if u'亿' in c_str:
-            result=''
-            for i in c_str.split(u'亿'):
-                result+=_convert_section(i)
+    if _check_whether_special(c_str):
+        return _c2n(c_str)
+    result=''
+    flag=0
+    if u'亿' in c_str:
+        flag=8
+        i = c_str.split(u'亿')[0]
+        c_str = c_str.split(u'亿')[1]
+        result += _convert_section(i)
+        if c_str=='':
+            result += '00000000'
             return result
-        elif u'点' in c_str:
-            result=[]
-            for i in c_str.split(u'点'):
-                result.append(_convert_section(i))
-            return u'.'.join(result)
-        else:
-            return _convert_section(c_str)
+    if u'万' in c_str: 
+        flag=4
+        i = c_str.split(u'万')[0]
+        c_str = c_str.split(u'万')[1]
+        result += _convert_section(i)
+        if c_str=='':
+            result += '0000'
+            return result
+    right = _get_complex(c_str)
+    return result + '0'*(flag-len(_get_complex(c_str))) + right
 
 def convertCharacter2Digit(string):
     chinese_numbers=re.findall(u'[点零一二三四五六七八九十百千万亿]{2,}', string, re.S)
