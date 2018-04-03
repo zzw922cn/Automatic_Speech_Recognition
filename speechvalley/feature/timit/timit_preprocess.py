@@ -27,7 +27,6 @@ import sklearn
 import numpy as np
 import scipy.io.wavfile as wav
 from sklearn import preprocessing
-from scikits.audiolab import wavread, Format, Sndfile
 from speechvalley.feature.core import calcfeat_delta_delta, spectrogramPower
 
 ## original phonemes
