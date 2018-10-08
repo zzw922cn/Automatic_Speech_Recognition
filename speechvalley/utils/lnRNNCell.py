@@ -11,10 +11,10 @@ import tensorflow as tf
 import numpy as np
 
 def ln(layer, gain, bias):
-    self.dims = layer.get_shape().as_list()
-    assert len(self.dims)==3, 'layer must be 3-D tensor'
-    miu, sigma = tf.nn.moments(self.layer, axes=[2], keep_dims=True)
-    ln_layer = tf.div(tf.subtract(self.layer, miu), tf.sqrt(sigma))
+    dims = layer.get_shape().as_list()
+    assert len(dims)==3, 'layer must be 3-D tensor'
+    miu, sigma = tf.nn.moments(layer, axes=[2], keep_dims=True)
+    ln_layer = tf.div(tf.subtract(layer, miu), tf.sqrt(sigma))
     ln_layer = ln_layer*gain + bias
     return ln_layer
 
