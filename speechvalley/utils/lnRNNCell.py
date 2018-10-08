@@ -9,6 +9,7 @@
 
 import tensorflow as tf
 import numpy as np
+from tensorflow.contrib.rnn.python.ops.core_rnn_cell import _linear
 
 def ln(layer, gain, bias):
     self.dims = layer.get_shape().as_list()
