@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File              : deepSpeech2.py
+# Author            : zewangzhang <zzw922cn@gmail.com>
+# Date              : 17.10.2019
+# Last Modified Date: 17.10.2019
+# Last Modified By  : zewangzhang <zzw922cn@gmail.com>
 # encoding: utf-8
 # ******************************************************
 # Author       : zzw922cn
@@ -32,7 +39,7 @@ def build_deepSpeech2(args,
           inputX: spectrogram power of audios, [batch, freq_bin, time_len, in_channels]
           seqLengths: lengths of samples in a mini-batch
     '''
-    
+
     # 3 2-D convolution layers
     layer1_filter = tf.get_variable('layer1_filter', shape=(41, 11, 1, 32), dtype=tf.float32)
     layer1_stride = [1, 2, 2, 1]
@@ -55,22 +62,22 @@ def build_deepSpeech2(args,
     # 4 recurrent layers
     # inputs must be [max_time, batch_size ,...]
     layer4_cell = cell_fn(args.num_hidden, activation=args.activation)
-    layer4 = tf.nn.dynamic_rnn(layer4_cell, layer3, sequence_length=seqLengths, time_major=True) 
+    layer4 = tf.nn.dynamic_rnn(layer4_cell, layer3, sequence_length=seqLengths, time_major=True)
     layer4 = tf.layers.batch_normalization(layer4, training=args.isTraining)
     layer4 = tf.contrib.layers.dropout(layer4, keep_prob=args.keep_prob[3], is_training=args.is_training)
 
     layer5_cell = cell_fn(args.num_hidden, activation=args.activation)
-    layer5 = tf.nn.dynamic_rnn(layer5_cell, layer4, sequence_length=seqLengths, time_major=True) 
+    layer5 = tf.nn.dynamic_rnn(layer5_cell, layer4, sequence_length=seqLengths, time_major=True)
     layer5 = tf.layers.batch_normalization(layer5, training=args.isTraining)
     layer5 = tf.contrib.layers.dropout(layer5, keep_prob=args.keep_prob[4], is_training=args.is_training)
 
     layer6_cell = cell_fn(args.num_hidden, activation=args.activation)
-    layer6 = tf.nn.dynamic_rnn(layer6_cell, layer5, sequence_length=seqLengths, time_major=True) 
+    layer6 = tf.nn.dynamic_rnn(layer6_cell, layer5, sequence_length=seqLengths, time_major=True)
     layer6 = tf.layers.batch_normalization(layer6, training=args.isTraining)
     layer6 = tf.contrib.layers.dropout(layer6, keep_prob=args.keep_prob[5], is_training=args.is_training)
 
     layer7_cell = cell_fn(args.num_hidden, activation=args.activation)
-    layer7 = tf.nn.dynamic_rnn(layer7_cell, layer6, sequence_length=seqLengths, time_major=True) 
+    layer7 = tf.nn.dynamic_rnn(layer7_cell, layer6, sequence_length=seqLengths, time_major=True)
     layer7 = tf.layers.batch_normalization(layer7, training=args.isTraining)
     layer7 = tf.contrib.layers.dropout(layer7, keep_prob=args.keep_prob[6], is_training=args.is_training)
 
@@ -111,7 +118,7 @@ class DeepSpeech2(object):
             # according to DeepSpeech2 paper, input is the spectrogram power of audio, but if you like,
             # you can also use mfcc feature as the input.
             self.inputX = tf.placeholder(tf.float32,
-                                         shape=(maxTimeSteps, args.batch_size, args.num_feature))  
+                                         shape=(maxTimeSteps, args.batch_size, args.num_feature))
             inputXrs = tf.reshape(self.inputX, [args.batch_size, args.num_feature, maxTimeSteps, 1])
             #self.inputList = tf.split(inputXrs, maxTimeSteps, 0)  # convert inputXrs from [32*maxL,39] to [32,maxL,39]
 

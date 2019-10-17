@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File              : capsuleNetwork.py
+# Author            : zewangzhang <zzw922cn@gmail.com>
+# Date              : 17.10.2019
+# Last Modified Date: 17.10.2019
+# Last Modified By  : zewangzhang <zzw922cn@gmail.com>
 # encoding: utf-8
 # ******************************************************
 # Author       : zzw922cn
@@ -33,12 +40,12 @@ def routing(u, next_num_channels, next_num_capsules, next_output_vector_len, num
     scope = scope or "routing"
     shape = u.get_shape()
     u = tf.reshape(u, [shape[0], shape[1], shape[2], 1, 1, shape[3], 1])
-    u_ij = tf.tile(u, [1, 1, 1, next_num_channels, next_num_capsules, 1, 1]) 
+    u_ij = tf.tile(u, [1, 1, 1, next_num_channels, next_num_capsules, 1, 1])
     with tf.variable_scope(scope):
         w_shape = [1, shape[1], shape[2], next_num_channels, next_num_capsules, shape[3], next_output_vector_len]
         w = tf.get_variable("w", shape=w_shape, dtype=tf.float32)
         w = tf.tile(w, [shape[0], 1, 1, 1, 1, 1, 1])
-        u_hat = tf.matmul(w, u_ij, transpose_a=True) 
+        u_hat = tf.matmul(w, u_ij, transpose_a=True)
         # size of u_hat: [batch_size, channels*num_capsules, next_channels*next_num_capsules, next_vec_len, 1]
         u_hat = tf.reshape(u_hat, [shape[0], shape[1]*shape[2], -1, next_output_vector_len, 1])
         u_hat_without_backprop = tf.stop_gradient(u_hat, "u_hat_without_backprop")
@@ -51,19 +58,19 @@ def routing(u, next_num_channels, next_num_capsules, next_output_vector_len, num
                 v_j = squashing(s_j)
                 v_j =tf.tile(v_j, [1, shape[1]*shape[2], 1, 1, 1])
                 # b_ij += u_hat * v_j
-                b_ij = b_ij + tf.matmul(u_hat, v_j, transpose_a=True) 
+                b_ij = b_ij + tf.matmul(u_hat, v_j, transpose_a=True)
             else:
                 s_j = tf.reduce_sum(tf.multiply(c_ij, u_hat), axis=1, keep_dims=True)
                 v_j = squashing(s_j)
     # size of v_j: [batch_size, 1, next_channels*next_num_capsules, next_output_vector_len, 1]
     return v_j
-        
-        
-   
+
+
+
 class CapsuleLayer(object):
     """ Capsule layer based on convolutional neural network
     """
-    def __init__(self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None): 
+    def __init__(self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None):
         self._num_capsules = num_capsules
         self._num_channels = num_channels
         self._output_vector_len = output_vector_len
@@ -82,12 +89,12 @@ class CapsuleLayer(object):
         input_shape = inputX.get_shape()
         with tf.variable_scope(self._vars_scope) as scope:
             if self._layer_type=='conv':
-                # shape of conv1:  [batch, height, width, channels] 
-                kernel = tf.get_variable("conv_kernel", shape=[kernel_size[0], kernel_size[1], input_shape[-1], 
+                # shape of conv1:  [batch, height, width, channels]
+                kernel = tf.get_variable("conv_kernel", shape=[kernel_size[0], kernel_size[1], input_shape[-1],
                        self._num_channels*self._num_capsules*self._output_vector_len], dtype=tf.float32)
                 conv_output = tf.nn.conv2d(inputX, kernel, strides, padding)
                 shape1 = conv_output.get_shape()
-                capsule_output = tf.reshape(conv_output, [shape1[0], 1, -1, self._output_vector_len, 1]) 
+                capsule_output = tf.reshape(conv_output, [shape1[0], 1, -1, self._output_vector_len, 1])
                 if with_routing:
                     # routing(u, next_num_channels, next_num_capsules, next_output_vector_len, num_iter, scope=None):
                     # size of u: [batch_size, channels, num_capsules, output_vector_len]
@@ -139,15 +146,15 @@ class CapsuleNetwork(object):
         print(inputX.get_shape())
         with tf.variable_scope("layer_conv1"):
             # shape of kernel: [batch, in_height, in_width, in_channels]
-            kernel = tf.get_variable("kernel", shape=[3, 3, 1, 16], dtype=tf.float32) 
-            # shape of conv1:  [batch, height, width, channels] 
+            kernel = tf.get_variable("kernel", shape=[3, 3, 1, 16], dtype=tf.float32)
+            # shape of conv1:  [batch, height, width, channels]
             conv1 = tf.nn.conv2d(inputX, kernel, (1,1,1,1), padding='VALID')
 
         print(conv1.get_shape())
         output = conv1
         for layer_id in range(args.num_layer):
             vars_scope = "capsule_cnn_layer_"+str(layer_id+1)
-            # (self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None): 
+            # (self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None):
             capLayer = CapsuleLayer(4, 8, 2, layer_type='conv', vars_scope=vars_scope)
             # (self, inputX, kernel_size, strides, routing=True, padding='VALID'):
             output = capLayer(output, [2, 2], (1,1,1,1), args.num_iter)
@@ -180,11 +187,11 @@ class CapsuleNetwork(object):
 if __name__ == '__main__':
     sess=tf.InteractiveSession()
     conv1 = tf.constant(np.random.rand(2,20,20,2), dtype=tf.float32)
-    # (self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None): 
+    # (self, num_capsules, num_channels, output_vector_len, layer_type='conv', vars_scope=None):
     # (self, inputX, kernel_size, strides, routing=True, padding='VALID'):
     capLayer1 = CapsuleLayer(2, 3, 10, layer_type='conv', vars_scope="testlayer1")
     output = capLayer1(conv1, [3, 3], (1,1,1,1), 3)
-    
+
     capLayer2 = CapsuleLayer(2, 3, 10, layer_type='dnn', vars_scope="testlayer2")
     output = capLayer2(output, [3, 3], (1,1,1,1), 3)
 
