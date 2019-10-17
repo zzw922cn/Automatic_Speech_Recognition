@@ -25,6 +25,7 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add Capsule Network Model** (2017-12-12)
 - [x] **Release 1.0.0 version** (2017-12-14)
 - [x] **Add Language Modeling Module** (2017-12-25)
+- [x] **Will support TF1.2 soon** (2019-10-17)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
