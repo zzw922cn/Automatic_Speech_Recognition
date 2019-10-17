@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File              : timit_train.py
+# Author            : zewangzhang <zzw922cn@gmail.com>
+# Date              : 17.10.2019
+# Last Modified Date: 17.10.2019
+# Last Modified By  : zewangzhang <zzw922cn@gmail.com>
 # encoding: utf-8
 # ******************************************************
 # Author       : zzw922cn
@@ -22,7 +29,7 @@ from speechvalley.models import DBiRNN, DeepSpeech2, CapsuleNetwork
 
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
-    
+
 flags.DEFINE_string('task', 'timit', 'set task name of this program')
 flags.DEFINE_string('mode', 'train', 'set whether to train or test')
 flags.DEFINE_boolean('keep', False, 'set whether to restore a model, when test mode, keep should be set to True')
@@ -43,8 +50,8 @@ flags.DEFINE_integer('num_iter', 3, 'set the number of iterations in routing')
 flags.DEFINE_float('lr', 0.0001, 'set the learning rate')
 flags.DEFINE_float('dropout_prob', 0.1, 'set probability of dropout')
 flags.DEFINE_float('grad_clip', 1, 'set the threshold of gradient clipping, -1 denotes no clipping')
-flags.DEFINE_string('datadir', '/home/pony/github/data/timit', 'set the data root directory')
-flags.DEFINE_string('logdir', '/home/pony/github/log/timit', 'set the log directory')
+flags.DEFINE_string('datadir', '/path/to/your/data/directory', 'set the data root directory')
+flags.DEFINE_string('logdir', '/path/to/your/log/directory', 'set the log directory')
 
 
 FLAGS = flags.FLAGS
@@ -55,9 +62,9 @@ level = FLAGS.level
 if FLAGS.model == 'DBiRNN':
     model_fn = DBiRNN
 elif FLAGS.model == 'DeepSpeech2':
-    model_fn = DBiRNN 
+    model_fn = DBiRNN
 elif FLAGS.model == 'CapsuleNetwork':
-    model_fn = CapsuleNetwork 
+    model_fn = CapsuleNetwork
 else:
     model_fn = None
 rnncell = FLAGS.rnncell
@@ -95,7 +102,7 @@ train_mfcc_dir = os.path.join(datadir, level, 'train', 'mfcc')
 train_label_dir = os.path.join(datadir, level, 'train', 'label')
 test_mfcc_dir = os.path.join(datadir, level, 'test', 'mfcc')
 test_label_dir = os.path.join(datadir, level, 'test', 'label')
-logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datetime.now(), 
+logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datetime.now(),
     '%Y-%m-%d %H:%M:%S') + '.txt').replace(' ', '').replace('/', ''))
 
 
@@ -178,7 +185,7 @@ class Runner(object):
                                 level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
 
                         elif mode == 'test':
-                            l, pre, y, er = sess.run([model.loss, model.predictions, 
+                            l, pre, y, er = sess.run([model.loss, model.predictions,
                                 model.targetY, model.errorRate], feed_dict=feedDict)
                             batchErrors[batch] = er
                             print('\n{} mode, total:{},batch:{}/{},test loss={:.3f},mean test CER={:.3f}\n'.format(
@@ -189,7 +196,7 @@ class Runner(object):
                             _, l, pre, y = sess.run([model.optimizer, model.loss,
                                 model.predictions, model.targetY],
                                 feed_dict=feedDict)
-                  
+
                             er = get_edit_distance([pre.values], [y.values], True, level)
                             print('\n{} mode, total:{},batch:{}/{},epoch:{}/{},train loss={:.3f},mean train PER={:.3f}\n'.format(
                                 level, totalN, batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er))
@@ -209,7 +216,7 @@ class Runner(object):
                         print('Truth:\n' + output_to_sequence(y, type=level))
                         print('Output:\n' + output_to_sequence(pre, type=level))
 
-                    
+
                     if mode=='train' and ((epoch * len(batchRandIxs) + batch + 1) % 20 == 0 or (
                            epoch == num_epochs - 1 and batch == len(batchRandIxs) - 1)):
                         checkpoint_path = os.path.join(savedir, 'model.ckpt')

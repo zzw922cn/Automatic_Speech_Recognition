@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File              : libri_train.py
+# Author            : zewangzhang <zzw922cn@gmail.com>
+# Date              : 17.10.2019
+# Last Modified Date: 17.10.2019
+# Last Modified By  : zewangzhang <zzw922cn@gmail.com>
 # encoding: utf-8
 # ******************************************************
 # Author       : zzw922cn
@@ -24,7 +31,7 @@ from speechvalley.models import DBiRNN, DeepSpeech2
 
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
-    
+
 flags.DEFINE_string('task', 'libri', 'set task name of this program')
 flags.DEFINE_string('train_dataset', 'train-clean-100', 'set the training dataset')
 flags.DEFINE_string('dev_dataset', 'dev-clean', 'set the development dataset')
@@ -95,30 +102,30 @@ if mode == 'test' or mode == 'dev':
 
 def get_data(datadir, level, train_dataset, dev_dataset, test_dataset, mode):
     if mode == 'train':
-        train_feature_dirs = [os.path.join(os.path.join(datadir, level, train_dataset), 
+        train_feature_dirs = [os.path.join(os.path.join(datadir, level, train_dataset),
             i, 'feature') for i in os.listdir(os.path.join(datadir, level, train_dataset))]
 
-        train_label_dirs = [os.path.join(os.path.join(datadir, level, train_dataset), 
+        train_label_dirs = [os.path.join(os.path.join(datadir, level, train_dataset),
             i, 'label') for i in os.listdir(os.path.join(datadir, level, train_dataset))]
         return train_feature_dirs, train_label_dirs
 
     if mode == 'dev':
-        dev_feature_dirs = [os.path.join(os.path.join(datadir, level, dev_dataset), 
+        dev_feature_dirs = [os.path.join(os.path.join(datadir, level, dev_dataset),
             i, 'feature') for i in os.listdir(os.path.join(datadir, level, dev_dataset))]
 
-        dev_label_dirs = [os.path.join(os.path.join(datadir, level, dev_dataset), 
+        dev_label_dirs = [os.path.join(os.path.join(datadir, level, dev_dataset),
             i, 'label') for i in os.listdir(os.path.join(datadir, level, dev_dataset))]
         return dev_feature_dirs, dev_label_dirs
 
     if mode == 'test':
-        test_feature_dirs = [os.path.join(os.path.join(datadir, level, test_dataset), 
+        test_feature_dirs = [os.path.join(os.path.join(datadir, level, test_dataset),
             i, 'feature') for i in os.listdir(os.path.join(datadir, level, test_dataset))]
 
-        test_label_dirs = [os.path.join(os.path.join(datadir, level, test_dataset), 
+        test_label_dirs = [os.path.join(os.path.join(datadir, level, test_dataset),
             i, 'label') for i in os.listdir(os.path.join(datadir, level, test_dataset))]
         return test_feature_dirs, test_label_dirs
 
-logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datetime.now(), 
+logfile = os.path.join(loggingdir, str(datetime.datetime.strftime(datetime.datetime.now(),
     '%Y-%m-%d %H:%M:%S') + '.txt').replace(' ', '').replace('/', ''))
 
 class Runner(object):
@@ -204,14 +211,14 @@ class Runner(object):
                                     level, totalN, id_dir+1, len(feature_dirs), batch+1, len(batchRandIxs), epoch+1, num_epochs, l, er/batch_size))
 
                             elif mode == 'dev':
-                                l, pre, y, er = sess.run([model.loss, model.predictions, 
+                                l, pre, y, er = sess.run([model.loss, model.predictions,
                                     model.targetY, model.errorRate], feed_dict=feedDict)
                                 batchErrors[batch] = er
                                 print('\n{} mode, total:{},subdir:{}/{},batch:{}/{},dev loss={:.3f},mean dev CER={:.3f}\n'.format(
                                     level, totalN, id_dir+1, len(feature_dirs), batch+1, len(batchRandIxs), l, er/batch_size))
 
                             elif mode == 'test':
-                                l, pre, y, er = sess.run([model.loss, model.predictions, 
+                                l, pre, y, er = sess.run([model.loss, model.predictions,
                                     model.targetY, model.errorRate], feed_dict=feedDict)
                                 batchErrors[batch] = er
                                 print('\n{} mode, total:{},subdir:{}/{},batch:{}/{},test loss={:.3f},mean test CER={:.3f}\n'.format(
@@ -228,7 +235,7 @@ class Runner(object):
                             print('Truth:\n' + output_to_sequence(y, type=level))
                             print('Output:\n' + output_to_sequence(pre, type=level))
 
-                    
+
                         if mode=='train' and ((epoch * len(batchRandIxs) + batch + 1) % 20 == 0 or (
                             epoch == num_epochs - 1 and batch == len(batchRandIxs) - 1)):
                             checkpoint_path = os.path.join(savedir, 'model.ckpt')
