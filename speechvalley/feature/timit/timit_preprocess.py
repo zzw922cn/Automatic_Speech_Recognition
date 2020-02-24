@@ -61,7 +61,7 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
                         if seq2seq is True:
                             phenome.append(len(phn)) # <start token>
                         for line in f.read().splitlines():
-                            s=line.split(' ')[2]
+                            s = line.split(' ')[2]
                             p_index = phn.index(s)
                             phenome.append(p_index)
                         if seq2seq is True:
@@ -92,14 +92,15 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
                     print(phenome)
                     print(sentence)
 
-                count+=1
+                count +=1
                 print('file index:',count)
                 if save:
-                    featureFilename = feat_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-                    np.save(featureFilename,feat)
-                    labelFilename = label_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-                    print(labelFilename)
-                    np.save(labelFilename,phenome)
+                    speaker, sentence_name = filenameNoSuffix.split('/')[-2:]
+                    feature_filename = "{}/{}-{}.npy".format(feat_dir, speaker, sentence_name)
+                    np.save(feature_filename,feat)
+                    label_filename = "{}/{}-{}.npy".format(label_dir, speaker, sentence_name)
+                    print(label_filename)
+                    np.save(label_filename,phenome)
 
 
 if __name__ == '__main__':
