@@ -1,4 +1,4 @@
-tensorflow==1.12
+tensorflow==2.5.0
 six==1.11.0
 numpy==1.14.0
 matplotlib==2.0.2
