@@ -21,7 +21,7 @@ def plotWaveform(audio):
     signal = np.fromstring(signal, 'Int16')
     fs = spf.getframerate()
     if spf.getnchannels() == 2:
-        print 'Just mono files'
+        print('Just mono files')
         sys.exit(0)
     Time=np.linspace(0, len(signal)/fs, num=len(signal))
     plt.figure(1)

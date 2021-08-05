@@ -48,15 +48,8 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
             fullFilename = os.path.join(subdir, file)
             filenameNoSuffix =  os.path.splitext(fullFilename)[0]
             if file.endswith('.WAV'):
-                rate = None
-                sig = None
-                try:
-                    (rate,sig)= wav.read(fullFilename)
-                except ValueError as e:
-                    if e.message == "File format 'NIST'... not understood.":
-                        print('You should use nist2wav.sh to convert NIST format files to WAV files first, nist2wav.sh is in core folder.')
-                        return
-                feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step,mode=mode,feature_len=feature_len)
+                rate, sig = 16000, np.fromfile(fullFilename, dtype=np.int16)[512:]
+                feat = calcfeat_delta_delta(sig, rate, win_length=win_len, win_step=win_step, mode=mode, feature_len=feature_len)
                 feat = preprocessing.scale(feat)
                 feat = np.transpose(feat)
                 print(feat.shape)
@@ -68,7 +61,7 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
                         if seq2seq is True:
                             phenome.append(len(phn)) # <start token>
                         for line in f.read().splitlines():
-                            s=line.split(' ')[2]
+                            s = line.split(' ')[2]
                             p_index = phn.index(s)
                             phenome.append(p_index)
                         if seq2seq is True:
@@ -99,14 +92,15 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
                     print(phenome)
                     print(sentence)
 
-                count+=1
+                count +=1
                 print('file index:',count)
                 if save:
-                    featureFilename = feat_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-                    np.save(featureFilename,feat)
-                    labelFilename = label_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-                    print(labelFilename)
-                    np.save(labelFilename,phenome)
+                    speaker, sentence_name = filenameNoSuffix.split('/')[-2:]
+                    feature_filename = "{}/{}-{}.npy".format(feat_dir, speaker, sentence_name)
+                    np.save(feature_filename,feat)
+                    label_filename = "{}/{}-{}.npy".format(label_dir, speaker, sentence_name)
+                    print(label_filename)
+                    np.save(label_filename,phenome)
 
 
 if __name__ == '__main__':
@@ -119,8 +113,8 @@ if __name__ == '__main__':
     parser.add_argument("save", help="Directory where preprocessed arrays are to be saved",
                         type=str)
     parser.add_argument("-n", "--name", help="Name of the dataset",
-                        choices=['train', 'test'],
-                        type=str, default='train')
+                        choices=['TRAIN', 'TEST'],
+                        type=str, default='TRAIN')
     parser.add_argument("-l", "--level", help="Level",
                         choices=['cha', 'phn'],
                         type=str, default='cha')

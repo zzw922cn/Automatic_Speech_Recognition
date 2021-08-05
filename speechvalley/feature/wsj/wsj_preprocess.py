@@ -9,7 +9,7 @@
 
 
 import os
-import cPickle
+import pickle
 import glob
 import sklearn
 import argparse

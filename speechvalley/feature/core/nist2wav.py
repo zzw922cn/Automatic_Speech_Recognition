@@ -22,4 +22,4 @@ def nist2wav(src_dir):
                 print(fullFilename)
 
 if __name__ == '__main__':
-    nist2wav('/home/pony/wsj/')
+    nist2wav('dataset')

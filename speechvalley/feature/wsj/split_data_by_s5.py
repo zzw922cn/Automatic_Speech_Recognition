@@ -17,7 +17,7 @@ test set: dev93
 
 import shutil
 import os
-from speechvalley.feature.core import check_path_exists
+from speechvalley.utils import check_path_exists
 
 def split_data_by_s5(src_dir, des_dir, keywords=['train_si284', 'test_eval92', 'test_dev93']):
   count = 0

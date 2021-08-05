@@ -17,5 +17,5 @@ def extract(rootdir):
       if f.endswith('.zip'):
         fullFilename = os.path.join(rootdir, f)
         subprocess.call(['atool', '-x', fullFilename])
-        print f
+        print(f)
 
