@@ -1,6 +1,6 @@
 tensorflow==1.12
 six==1.11.0
-numpy==1.14.0
+numpy==1.22.0
 matplotlib==2.0.2
 scikits.audiolab==0.11.0
 scipy==0.19.1
